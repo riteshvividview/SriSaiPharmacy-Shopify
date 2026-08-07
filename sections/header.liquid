@@ -1,1752 +1,790 @@
-{% liquid
-  assign order = 'logo,menu,localization,search,drawer_search,actions'
+{%- comment -%}
+  Section: Header (Sri Sai Pharmacy)
+  Self-contained desktop header with a hover mega-menu. Nav items are driven
+  by blocks: "Nav Link" for plain links, "Nav Dropdown" for a mega-menu
+  trigger (with an intro/context panel), followed by any number of
+  "Dropdown Tile" blocks (image + heading + text) that belong to it. A tile
+  block attaches to whichever Nav Dropdown precedes it in the block order.
+{%- endcomment -%}
 
-  if shop.customer_accounts_enabled
-    assign order = 'drawer_search,logo,menu,localization,search,actions'
-  endif
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
 
-  assign rows = 'top,bottom' | split: ','
-  assign search_style = 'none'
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign accent_color = s.accent_color | default: '#2E7D32'
+  assign cta_color = s.cta_color | default: '#F58220'
+-%}
 
-  if section.settings.show_search
-    assign search_style = 'modal'
-  endif
-
-  if section.settings.show_search
-    render 'slideshow-styles'
-  endif
-
-  if section.settings.enable_transparent_header_home and template.name == 'index'
-    assign transparent = 'always'
-    assign transparent_text_color_setting = section.settings.text_color_transparent_home
-  elsif section.settings.enable_transparent_header_product and template.name == 'product'
-    assign transparent = 'always'
-    assign transparent_text_color_setting = section.settings.text_color_transparent_product
-  elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
-    assign transparent = 'always'
-    assign transparent_text_color_setting = section.settings.text_color_transparent_collection
-  endif
-
-  if section.settings.enable_sticky_header == 'always'
-    assign sticky = 'always'
-  elsif section.settings.enable_sticky_header == 'scroll-up'
-    assign sticky = 'scroll-up'
-  endif
-
-  if transparent and sticky
-    assign transparent = 'not-sticky'
-  endif
-
-  assign text_color_transparent = transparent_text_color_setting | default: settings.page_text_color
-  assign transparent_text_brightness = text_color_transparent | color_brightness
-  if transparent_text_brightness > 128
-    assign transparent_text_contrast = 'var(--palette-darkest)'
-  else
-    assign transparent_text_contrast = 'var(--palette-lightest)'
-  endif
-
-  # Cart bubble colors: custom styles apply in every header state; default
-  # mirrors the top row's effective text color, with a contrasting text color.
-  if section.settings.bubble_style == 'custom' or section.settings.text_color_top != blank or section.settings.background_color_top != blank
-    assign cart_bubble_color_override = true
-  endif
-  if cart_bubble_color_override
-    if section.settings.bubble_style == 'custom'
-      assign cart_bubble_background = section.settings.bubble_background_color | default: section.settings.text_color_top | default: settings.page_text_color
-      assign cart_bubble_text = section.settings.bubble_text_color | default: section.settings.background_color_top | default: settings.page_background_color
-    elsif section.settings.text_color_top != blank
-      assign cart_bubble_background = section.settings.text_color_top
-      if section.settings.background_color_top != blank
-        assign cart_bubble_text = section.settings.background_color_top
-      else
-        assign cart_bubble_bg_brightness = cart_bubble_background | color_brightness
-        if cart_bubble_bg_brightness > 128
-          assign cart_bubble_text = 'var(--palette-darkest)'
-        else
-          assign cart_bubble_text = 'var(--palette-lightest)'
-        endif
-      endif
-    elsif section.settings.background_color_top != blank
-      assign bg_top = section.settings.background_color_top
-      assign bg_top_brightness = bg_top | color_brightness
-      assign cart_bubble_text = bg_top
-      if bg_top_brightness > 128
-        assign cart_bubble_background = 'var(--palette-darkest)'
-      else
-        assign cart_bubble_background = 'var(--palette-lightest)'
-      endif
-    endif
-  endif
-
-  capture logo
-    content_for 'block', type: '_header-logo', id: 'header-logo'
-  endcapture
-
-  capture menu
-    content_for 'block', type: '_header-menu', id: 'header-menu'
-  endcapture
-
-  capture drawer_menu
-    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile'
-  endcapture
-
-  capture navigation_bar
-    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar', transparent: transparent
-  endcapture
-
-  capture actions
-    render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
-  endcapture
-
-  if shop.customer_accounts_enabled
-    assign search_class = 'search-action--hidden-on-drawer'
-  endif
-
-  # Handle localization positioning
-  if section.settings.localization_position == 'left'
-    if section.settings.search_position == 'left'
-      if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,search,localization,menu,actions'
-      else
-        assign order = 'logo,search,localization,menu,drawer_search,actions'
-      endif
-    else
-      if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,localization,menu,search,actions'
-      else
-        assign order = 'logo,localization,menu,search,drawer_search,actions'
-      endif
-    endif
-  else
-    if section.settings.search_position == 'left'
-      if shop.customer_accounts_enabled
-        assign order = 'drawer_search,logo,search,menu,localization,actions'
-      else
-        assign order = 'logo,search,menu,localization,drawer_search,actions'
-      endif
-    endif
-  endif
-  capture search
-    render 'search', style: search_style, class: search_class, display_style: section.settings.actions_display_style
-  endcapture
-
-  # Skip drawer search under specific conditions:
-  # Always render if search_row is bottom
-  # Don't render when shop.customer_accounts_enabled is false and search_position is left and search_style is not none
-  assign skip_drawer_search = false
-  if shop.customer_accounts_enabled == false and section.settings.search_position == 'left' and search_style != 'none'
-    assign skip_drawer_search = true
-  endif
-
-  if section.settings.search_row == 'bottom' or search_style != 'none' and skip_drawer_search == false
-    # Mobile search duplicate for when search is not in the right order for mobile layout
-    capture drawer_search
-      render 'search', class: 'search-action--hidden-on-menu', style: search_style, display_style: section.settings.actions_display_style
-    endcapture
-  endif
-
-  assign show_language = section.settings.show_language
-  if localization.available_languages.size <= 1
-    assign show_language = false
-  endif
-
-  assign show_country = section.settings.show_country
-  if localization.available_countries.size <= 1
-    assign show_country = false
-  endif
-
-  assign bottom_row_blocks = ''
-
-  if section.settings.menu_row == 'bottom'
-    assign bottom_row_blocks = bottom_row_blocks | append: 'menu,'
-  endif
-
-  if section.settings.search_style != 'none'
-    if section.settings.search_row == 'bottom'
-      assign bottom_row_blocks = bottom_row_blocks | append: 'search,'
-    endif
-  endif
-
-  if section.settings.show_country or section.settings.show_language
-    if section.settings.localization_row == 'bottom'
-      assign bottom_row_blocks = bottom_row_blocks | append: 'localization,'
-    endif
-  endif
-
-  assign bottom_row_blocks = bottom_row_blocks | split: ',' | compact
-
-  if section.settings.section_height == 'compact'
-    assign header_height_class = ' header--compact'
-  endif
-
-  if bottom_row_blocks.size > 0 and section.settings.background_color_top == section.settings.background_color_bottom and section.settings.divider_width == 0
-    assign collapse_header_paddings_class = 'header--collapse-row-paddings'
-  endif
-
-  assign class = 'header'
-
-  if header_height_class
-    assign class = class | append: ' ' | append: header_height_class
-  endif
-
-  if collapse_header_paddings_class
-    assign class = class | append: ' ' | append: collapse_header_paddings_class
-  endif
-
-  # Determine transparent background value
-  assign top_transparent = false
-  assign bottom_transparent = false
-
-  if section.settings.background_color_top.alpha != 1
-    assign top_transparent = true
-  endif
-
-  if section.settings.background_color_bottom.alpha != 1
-    assign bottom_transparent = true
-  endif
-
-  if top_transparent and bottom_transparent
-    assign background_transparent_color_value = 'both'
-  elsif top_transparent
-    assign background_transparent_color_value = 'top'
-  elsif bottom_transparent
-    assign background_transparent_color_value = 'bottom'
-  endif
-%}
-
-{% capture localization_markup %}
-  {% liquid
-    assign localization_font = '--menu-localization-font: var(--font-[localization_font]--family); ' | replace: '[localization_font]', section.settings.localization_font
-    assign localization_font_size = '--menu-localization-font-size: [localization_font_size]; ' | replace: '[localization_font_size]', section.settings.localization_font_size
-    assign color_shadow = '--color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-10-25));'
-    assign form_style = localization_font | append: localization_font_size | append: color_shadow
-  %}
-  {% if show_language and show_country == false %}
-    <div class="dropdown-localization mobile:hidden">
-      {% render 'localization-form',
-        show_country: show_country,
-        show_language: show_language,
-        localization_style: 'dropdown',
-        form_style: form_style,
-        form_id: section.id
-      %}
-    </div>
-  {% elsif show_country %}
-    <dropdown-localization-component
-      class="dropdown-localization mobile:hidden"
-    >
-      <button
-        type="button"
-        class="button dropdown-localization__button localization-selector header-actions__action"
-        aria-expanded="false"
-        aria-controls="dropdown-localization-results"
-        ref="button"
-        on:click="/toggleSelector"
-        style="{{ localization_font }} {{ localization_font_size }}"
-      >
-        {% if show_country %}
-          {% if section.settings.country_selector_style == true %}
-            {% assign localization_background_color = 'background_color_[row]' | replace: '[row]', section.settings.localization_row %}
-            {% liquid
-              assign background_brightness = section.settings[localization_background_color] | color_brightness
-              if background_brightness < 64
-                assign shadow_size = 4
-              else
-                assign shadow_size = 2
-              endif
-            %}
-            <span
-              class="icon-flag"
-              style="
-                background-image: url({{- localization.country | image_url: width: 32 }});
-                --size-shadow: {{ shadow_size }}px;
-                --color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-30-60));
-              "
-            ></span>
-          {% endif %}
-          <span
-            class="currency-code"
-            data-testid="localization-currency-code"
-          >
-            {{- localization.country.currency.iso_code -}}
-          </span>
-        {% endif %}
-        <span
-          class="visually-hidden"
-          data-testid="localization-visually-hidden"
-        >
-          {{- 'accessibility.localization_region_and_language' | t -}}
-        </span>
-
-        {%- if show_country and show_language -%}
-          <span>/</span>
-        {%- endif -%}
-
-        {%- if show_language -%}
-          <span>
-            {{ localization.language.iso_code | upcase }}
-          </span>
-        {%- endif -%}
-        <span class="svg-wrapper icon-caret">
-          {{- 'icon-caret.svg' | inline_asset_content -}}
-        </span>
-      </button>
-
-      <div
-        class="localization-wrapper {{ section.settings.localization_position }}-bound color-custom-popover"
-        hidden
-        ref="panel"
-      >
-        {% render 'localization-form',
-          show_country: show_country,
-          show_language: show_language,
-          localization_style: 'dropdown',
-          form_style: form_style,
-          form_id: section.id
-        %}
-      </div>
-    </dropdown-localization-component>
-  {% endif %}
-{% endcapture %}
-
-<script type="application/ld+json">
-  {
-    "@context": "http://schema.org",
-    "@type": "Organization",
-    "name": {{ shop.name | json }},
-    {% if settings.logo %}
-      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
-    {% endif %}
-    "url": {{ request.origin | append: page.url | json }}
-  }
-</script>
-
-<header-component
-  id="header-component"
-  class="{{ class }}"
-  data-theme-color="rgb({{ section.settings.background_color_top.rgb | default: settings.page_background_color.rgb }})"
-  data-bubble-style="{{ section.settings.bubble_style }}"
-  {% if transparent %}
-    transparent="{{ transparent }}"
-  {% endif %}
-  {% if sticky %}
-    sticky="{{ sticky }}"
-  {% endif %}
-  data-skip-node-update
-  data-scroll-direction="none"
-  {% if section.settings.menu_row == 'top' and bottom_row_blocks.size > 0 %}
-    data-submenu-overlap-bottom-row
-  {% endif %}
-  {% if background_transparent_color_value %}
-    data-transparent-background="{{ background_transparent_color_value }}"
-  {% endif %}
+<header
+  class="ssh"
+  id="ssh-{{ section_id }}"
+  data-ssh-header
   style="
-    --color-background-top-row: rgba({{ section.settings.background_color_top.rgba | default: settings.page_background_color.rgba }});
-    --color-background-bottom-row: rgba({{ section.settings.background_color_bottom.rgba | default: settings.page_background_color.rgba }});
-    {% if transparent and text_color_transparent != blank %}
-      --color-transparent-text: {{ text_color_transparent }};
-      --color-transparent-text-rgb: {{ text_color_transparent.rgb }};
-      --color-transparent-text-contrast: {{ transparent_text_contrast }};
-    {% endif %}
-    {% if cart_bubble_color_override %}
-      --cart-bubble-background: {{ cart_bubble_background }};
-      --cart-bubble-text: {{ cart_bubble_text }};
-    {% endif %}
-    {% if section.settings.actions_display_style == 'text' %}
-      --header-actions-font-size: {{ section.settings.actions_font_size | default: '1rem' }};
-      --header-actions-font-family: var(--font-{{ section.settings.actions_font | default: 'heading' }}--family);
-      --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
-      --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
-    {% endif %}
+    --ssh-bg: {{ s.background_color | default: '#ffffff' }};
+    --ssh-text: {{ s.text_color | default: '#141414' }};
+    --ssh-accent: {{ accent_color }};
+    --ssh-cta: {{ cta_color }};
+    --ssh-border: {{ s.border_color | default: '#ECECEC' }};
   "
 >
-  <div class="header__underlay header__underlay-closed"></div>
-  <div
-    class="header__underlay header__underlay-open"
-  ></div>
-  {%- if request.page_type == 'index' -%}
-    <h1 class="visually-hidden">{{ shop.name }}</h1>
-  {%- endif -%}
-  {% for row in rows %}
-    {% liquid
-      assign background = 'background_color_' | append: row
-      assign row_setting = 'background_color_' | append: row
-      assign text_setting = 'text_color_' | append: row
-      assign row_class_id = row | append: '-' | append: section.id
-      assign row_class = ' color-custom-' | append: row_class_id
-      assign class = 'header__row header__row--[row] color-[row_background] section section--full-width-margin section--[section-width]' | replace: '[row]', row | replace: '[row_background]', section.settings[background] | replace: '[section-width]', section.settings.section_width
-
-      case row
-        when 'top'
-          assign first = drawer_menu
-
-          if bottom_row_blocks.size > 0 and section.settings.divider_size == 'page-width'
-            assign class = class | append: ' divider--page-width'
-          endif
-
-          if bottom_row_blocks.size > 0
-            assign border_bottom_setting_id = 'divider_width'
-            assign border_bottom_color_setting_id = 'divider_color'
-          else
-            assign border_bottom_setting_id = 'border_width'
-            assign border_bottom_color_setting_id = 'bottom_border_color'
-          endif
-        when 'bottom'
-          assign first = ''
-          assign class = class | append: ' mobile:hidden'
-
-          assign border_bottom_setting_id = 'border_width'
-          assign border_bottom_color_setting_id = 'bottom_border_color'
-      endcase
-
-      assign style = '--border-bottom-width: [width]px; ' | replace: '[width]', section.settings[border_bottom_setting_id]
-
-      assign border_bottom_color_value = section.settings[border_bottom_color_setting_id]
-      if border_bottom_color_value != blank
-        assign style = style | append: '--border-bottom-color: [color]; ' | replace: '[color]', border_bottom_color_value
-      endif
-
-      if row == 'top'
-        assign custom_color_styles = true
-        assign class = class | append: row_class
-        assign style = style | append: '--border-bottom-width-mobile: [width]px; ' | replace: '[width]', section.settings.border_width
-
-        assign mobile_border_color = section.settings.bottom_border_color | default: 'var(--color-border)'
-        assign style = style | append: '--border-bottom-color-mobile: [color]; ' | replace: '[color]', mobile_border_color
-      elsif bottom_row_blocks.size > 0
-        assign custom_color_styles = true
-        assign class = class | append: row_class
-      else
-        assign custom_color_styles = false
-      endif
-    %}
-
-    {% capture content %}
-      {% if custom_color_styles %}
-        {% render 'contrast-override', background_color: section.settings[row_setting], text_color: section.settings[text_setting], section_id: row_class_id %}
-      {% endif %}
-      {% render 'header-row',
-        row: row,
-        order: order,
-        settings: section.settings,
-        first: first,
-        logo: logo,
-        menu: menu,
-        actions: actions,
-        localization: localization_markup,
-        search: search,
-        drawer_search: drawer_search
-      %}
-    {% endcapture %}
-
-    {% assign content = content | strip %}
-    {% if content != blank %}
-      <div
-        class="{{ class | strip }}"
-        ref="headerRowTop"
-        {%- if style != blank -%}
-          style="{{ style | strip }}"
-        {%- endif -%}
-      >
-        <div class="header__columns spacing-style">
-          {{ content }}
+  {%- if s.show_utility_bar -%}
+    <div class="ssh__utility">
+      <div class="ssh__utility-inner">
+        <div class="ssh__utility-left">
+          {%- if s.utility_text != blank -%}<span>{{ s.utility_text }}</span>{%- endif -%}
+        </div>
+        <div class="ssh__utility-right">
+          {%- if s.utility_phone != blank -%}
+            <a href="tel:{{ s.utility_phone | remove: ' ' }}" class="ssh__utility-link">
+              <svg aria-hidden="true" width="13" height="13" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M4 3h3l2 4.5-2 1.5c.9 2.2 2.8 4.1 5 5l1.5-2 4.5 2v3c0 1-1 2-2 2C9.5 19 1 10.5 1 5c0-1 1-2 2-2z"/></svg>
+              {{ s.utility_phone }}
+            </a>
+          {%- endif -%}
+          {%- if s.utility_hours != blank -%}<span class="ssh__utility-divider"></span><span>{{ s.utility_hours }}</span>{%- endif -%}
         </div>
       </div>
-    {% endif %}
-  {% endfor %}
-
-  {% if navigation_bar != blank %}
-    <div class="header__row header__navigation-bar-row">
-      {{ navigation_bar }}
     </div>
-  {% endif %}
-</header-component>
+  {%- endif -%}
 
-<script
-  src="{{ 'header.js' | asset_url }}"
-  type="module"
-></script>
+  <div class="ssh__bar">
+    <div class="ssh__inner">
+      <a href="{{ routes.root_url }}" class="ssh__logo" aria-label="{{ shop.name }}">
+        {%- if s.logo != blank -%}
+          <img
+            src="{{ s.logo | image_url: width: 320 }}"
+            srcset="{{ s.logo | image_url: width: 160 }} 160w, {{ s.logo | image_url: width: 320 }} 320w"
+            alt="{{ shop.name }}"
+            width="{{ s.logo.width }}"
+            height="{{ s.logo.height }}"
+            loading="eager"
+          >
+        {%- else -%}
+          <span class="ssh__logo-mark" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="ssh__logo-text">{{ s.logo_text | default: shop.name }}</span>
+        {%- endif -%}
+      </a>
 
-{% stylesheet %}
-  body {
-    --header-height: 60px;
-    --header-group-height: var(--header-height);
-    --transparent-header-offset-boolean: 0; /* stylelint-disable-line declaration-property-value-disallowed-list */
+      <nav class="ssh__nav" aria-label="Primary">
+        <ul class="ssh__nav-list">
+          {%- for block in section.blocks -%}
+            {%- assign bs = block.settings -%}
+            {%- case block.type -%}
+              {%- when 'nav_link' -%}
+                <li class="ssh__nav-item" {{ block.shopify_attributes }}>
+                  <a href="{{ bs.url | default: '#' }}" class="ssh__nav-link">{{ bs.label }}</a>
+                </li>
+
+              {%- when 'nav_dropdown' -%}
+                <li class="ssh__nav-item ssh__nav-item--mega" {{ block.shopify_attributes }}>
+                  <button
+                    type="button"
+                    class="ssh__nav-link ssh__nav-trigger"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    data-ssh-trigger
+                  >
+                    {{ bs.label }}
+                    <svg class="ssh__caret" aria-hidden="true" width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M11 5.5L7 9.5L3 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+
+                  <div class="ssh__mega" style="--ssh-mega-columns: {{ bs.columns | default: 3 }};">
+                    <div class="ssh__mega-inner">
+                      <div
+                        class="ssh__mega-intro"
+                        {%- if bs.intro_image != blank %} style="background-image: url({{ bs.intro_image | image_url: width: 700 }});"{% endif -%}
+                      >
+                        <div class="ssh__mega-intro-scrim"></div>
+                        <div class="ssh__mega-intro-content">
+                          {%- if bs.intro_eyebrow != blank -%}<p class="ssh__mega-eyebrow">{{ bs.intro_eyebrow }}</p>{%- endif -%}
+                          {%- if bs.intro_heading != blank -%}<h3 class="ssh__mega-heading">{{ bs.intro_heading }}</h3>{%- endif -%}
+                          {%- if bs.intro_text != blank -%}<p class="ssh__mega-text">{{ bs.intro_text }}</p>{%- endif -%}
+                          {%- if bs.intro_link_text != blank -%}
+                            <a href="{{ bs.intro_link | default: '#' }}" class="ssh__mega-cta">
+                              {{ bs.intro_link_text }}
+                              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </a>
+                          {%- endif -%}
+                        </div>
+                      </div>
+
+                      <div class="ssh__mega-grid">
+                        {%- assign tiles_offset = forloop.index0 | plus: 1 -%}
+                        {%- for tile_block in section.blocks offset: tiles_offset -%}
+                          {%- if tile_block.type == 'dropdown_tile' -%}
+                            {%- assign ts = tile_block.settings -%}
+                            <a href="{{ ts.link | default: '#' }}" class="ssh__tile" {{ tile_block.shopify_attributes }}>
+                              <span class="ssh__tile-image">
+                                {%- if ts.image != blank -%}
+                                  <img
+                                    src="{{ ts.image | image_url: width: 400 }}"
+                                    srcset="{{ ts.image | image_url: width: 200 }} 200w, {{ ts.image | image_url: width: 400 }} 400w"
+                                    alt="{{ ts.heading | escape }}"
+                                    width="{{ ts.image.width }}"
+                                    height="{{ ts.image.height }}"
+                                    loading="lazy"
+                                  >
+                                {%- else -%}
+                                  <span class="ssh__tile-placeholder" aria-hidden="true">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                  </span>
+                                {%- endif -%}
+                              </span>
+                              <span class="ssh__tile-body">
+                                <span class="ssh__tile-heading">{{ ts.heading }}</span>
+                                {%- if ts.text != blank -%}<span class="ssh__tile-text">{{ ts.text }}</span>{%- endif -%}
+                              </span>
+                            </a>
+                          {%- else -%}
+                            {%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+              {%- when 'dropdown_tile' -%}
+                {%- comment -%} rendered inside the preceding nav_dropdown {%- endcomment -%}
+            {%- endcase -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+
+      <div class="ssh__actions">
+        <a href="{{ routes.search_url }}" class="ssh__icon-btn" aria-label="Search">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="4.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m12.5 12.5 3.25 3.25"/></svg>
+        </a>
+        <a href="{{ routes.account_url }}" class="ssh__icon-btn ssh__icon-btn--desktop" aria-label="Account">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="2.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.172 14.591-.437.786a.588.588 0 0 0 .514.873h9.502a.588.588 0 0 0 .514-.873l-.437-.786a5.523 5.523 0 0 0-9.656 0"/></svg>
+        </a>
+        <a href="{{ routes.cart_url }}" class="ssh__icon-btn ssh__cart" aria-label="Cart, {{ cart.item_count }} items">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.392 6.875h13.216v8.016c0 .567-.224 1.112-.624 1.513-.4.402-.941.627-1.506.627H5.522a2.13 2.13 0 0 1-1.506-.627 2.15 2.15 0 0 1-.624-1.513zM8.818 2.969h2.333c.618 0 1.211.247 1.649.686a2.35 2.35 0 0 1 .683 1.658v1.562H6.486V5.313c0-.622.246-1.218.683-1.658a2.33 2.33 0 0 1 1.65-.686"/></svg>
+          {%- if cart.item_count > 0 -%}<span class="ssh__cart-count">{{ cart.item_count }}</span>{%- endif -%}
+        </a>
+        <button type="button" class="ssh__icon-btn ssh__burger" data-ssh-burger aria-label="Menu" aria-expanded="false" aria-controls="ssh-mobile-{{ section_id }}">
+          <svg class="ssh__burger-open" aria-hidden="true" width="18" height="18" viewBox="0 0 14 14" fill="none"><path d="M1 3.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1 10.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <svg class="ssh__burger-close" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.1765 12.025C11.4108 12.2594 11.7907 12.2594 12.025 12.025C12.2594 11.7907 12.2594 11.4108 12.025 11.1765L8.84931 8.00078L12.025 4.82505C12.2594 4.59073 12.2594 4.21083 12.025 3.97652C11.7907 3.7422 11.4108 3.7422 11.1765 3.97652L8.00078 7.15225L4.82505 3.97652C4.59073 3.7422 4.21083 3.7422 3.97652 3.97652C3.7422 4.21083 3.7422 4.59073 3.97652 4.82505L7.15225 8.00078L3.97652 11.1765C3.7422 11.4108 3.7422 11.7907 3.97652 12.025C4.21083 12.2594 4.59073 12.2594 4.82505 12.025L8.00078 8.84931L11.1765 12.025Z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ssh__mobile" id="ssh-mobile-{{ section_id }}" data-ssh-mobile-panel hidden>
+    <ul class="ssh__mobile-list">
+      {%- for block in section.blocks -%}
+        {%- assign bs = block.settings -%}
+        {%- case block.type -%}
+          {%- when 'nav_link' -%}
+            <li><a href="{{ bs.url | default: '#' }}">{{ bs.label }}</a></li>
+          {%- when 'nav_dropdown' -%}
+            <li class="ssh__mobile-group">
+              <span class="ssh__mobile-group-label">{{ bs.label }}</span>
+              <ul>
+                {%- assign tiles_offset = forloop.index0 | plus: 1 -%}
+                {%- for tile_block in section.blocks offset: tiles_offset -%}
+                  {%- if tile_block.type == 'dropdown_tile' -%}
+                    <li><a href="{{ tile_block.settings.link | default: '#' }}">{{ tile_block.settings.heading }}</a></li>
+                  {%- else -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </li>
+        {%- endcase -%}
+      {%- endfor -%}
+      <li class="ssh__mobile-account"><a href="{{ routes.account_url }}">My Account</a></li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  #ssh-{{ section_id }} {
+    --ssh-height: 76px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--ssh-bg);
+    color: var(--ssh-text);
+    font-family: 'Poppins', sans-serif;
+    border-bottom: 1px solid var(--ssh-border);
   }
 
-  .header {
-    /* Set header paddings based on height setting */
-    --header-padding: var(--padding-sm);
-    --font-paragraph--line-height: 1;
-    --header-content-transition-timing: 0s;
+  #ssh-{{ section_id }} *,
+  #ssh-{{ section_id }} *::before,
+  #ssh-{{ section_id }} *::after {
+    box-sizing: border-box;
+  }
 
+  #ssh-{{ section_id }} a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* ---- Utility bar ---- */
+  #ssh-{{ section_id }} .ssh__utility {
+    background: var(--ssh-accent);
+    color: #fff;
+    font-size: 12.5px;
+  }
+
+  #ssh-{{ section_id }} .ssh__utility-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 7px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  #ssh-{{ section_id }} .ssh__utility-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  #ssh-{{ section_id }} .ssh__utility-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  #ssh-{{ section_id }} .ssh__utility-divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* ---- Bar ---- */
+  #ssh-{{ section_id }} .ssh__bar {
+    background: var(--ssh-bg);
+  }
+
+  #ssh-{{ section_id }} .ssh__inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: var(--ssh-height);
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  /* ---- Logo ---- */
+  #ssh-{{ section_id }} .ssh__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  #ssh-{{ section_id }} .ssh__logo img {
+    max-height: 44px;
+    width: auto;
     display: block;
-    contain: layout style;
-    background: transparent;
-
-    a,
-    .button,
-    .button-secondary,
-    .header-actions__action {
-      /* reset style from base.css */
-      transition: color var(--header-content-transition-timing), border-color var(--header-content-transition-timing);
-    }
   }
 
-  #header-component :is(.header-menu, .dropdown-localization) {
+  #ssh-{{ section_id }} .ssh__logo-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--ssh-accent);
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  #ssh-{{ section_id }} .ssh__logo-text {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--ssh-text);
+  }
+
+  /* ---- Nav ---- */
+  #ssh-{{ section_id }} .ssh__nav {
+    flex: 1;
+    min-width: 0;
     display: none;
   }
 
-  @media screen and (min-width: 750px) {
-    #header-component[data-menu-style='menu'] :is(.header-menu, .dropdown-localization) {
-      display: flex;
-    }
-  }
-
-  #header-component[data-menu-style='drawer'] .header__column {
-    display: contents;
-  }
-
-  @media screen and (min-width: 750px) {
-    #header-component[data-menu-style='menu'] .header__navigation-bar-row {
-      display: none;
-    }
-  }
-
-  .header[transparent] {
-    --language-button-background-color: transparent;
-    --language-button-border-color: transparent;
-    --header-content-transition-timing: calc(var(--submenu-animation-speed) - var(--animation-speed-fast))
-      var(--animation-speed-fast) var(--ease-out-cubic);
-
-    --closed-underlay-height: 0px;
-
-    /* used to display the appropriate logo based on transparency state */
-    --header-logo-display: none;
-    --header-logo-inverse-display: block;
-
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-
-    z-index: var(--layer-overlay);
-
-    &[transparent='not-sticky'][data-sticky-state='active'],
-    &:has(.menu-list__link:not([aria-haspopup]):hover) {
-      --header-logo-display: unset;
-      --header-logo-inverse-display: unset;
-      --color-foreground: inherit;
-      --color-foreground-rgb: inherit;
-      --color-background: inherit;
-      --color-background-rgb: inherit;
-      --color-border: inherit;
-      --color-border-rgb: inherit;
-      --closed-underlay-height: 100%;
-    }
-
-    /** For transparent header, apply transparent text color to rows when menu is not hovered */
-    &:not([data-sticky-state='active']):not(:has(.menu-list__link:is(:hover, [aria-expanded='true']))) .header__row {
-      --color-foreground: var(--color-transparent-text);
-      --color-foreground-rgb: var(--color-transparent-text-rgb);
-      --color-border: var(--color-transparent-text);
-      --color-border-rgb: var(--color-transparent-text-rgb);
-      --color-primary-button-background: var(--color-transparent-text);
-      --color-primary-button-text: var(--color-transparent-text-contrast);
-    }
-
-    /* Swap the cart bubble in transparent state only when using the default
-       style. Custom bubble colors apply unchanged across header states. */
-    &[data-bubble-style='default']:not([data-sticky-state='active']):not(
-        :has(.menu-list__link:is(:hover, [aria-expanded='true']))
-      )
-      .header__row {
-      --cart-bubble-background: var(--color-transparent-text, var(--cart-bubble-background-fallback));
-      --cart-bubble-text: var(--color-transparent-text-contrast, var(--cart-bubble-text-fallback));
-    }
-
-    /* Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
-    &:has(.mega-menu__list:hover),
-    &:has(.menu-list__link:is(:hover, [aria-expanded='true'])),
-    &:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'])) {
-      --header-logo-display: unset;
-      --header-logo-inverse-display: unset;
-      --color-foreground: inherit;
-      --color-foreground-rgb: inherit;
-      --color-background: inherit;
-      --color-background-rgb: inherit;
-      --color-border: inherit;
-      --color-border-rgb: inherit;
-      --header-content-transition-timing: var(--submenu-animation-speed) var(--ease-out-cubic);
-    }
-  }
-
-  /* When top row has transparent background, make it inherit colors from header component */
-  [data-transparent-background='top']:hover .header__row--top,
-  [data-transparent-background='top']:focus-within .header__row--top,
-  [data-transparent-background='both']:hover .header__row--top,
-  [data-transparent-background='both']:focus-within .header__row--top {
-    --color-foreground: inherit;
-    --color-foreground-rgb: inherit;
-    --color-border: inherit;
-    --color-border-rgb: inherit;
-    --color-primary-button-background: inherit;
-    --color-primary-button-text: inherit;
-  }
-
-  /* When bottom row has transparent background, make it inherit colors from header component */
-  [data-transparent-background='bottom']:hover .header__row--bottom,
-  [data-transparent-background='bottom']:focus-within .header__row--bottom,
-  [data-transparent-background='both']:hover .header__row--bottom,
-  [data-transparent-background='both']:focus-within .header__row--bottom {
-    --color-foreground: inherit;
-    --color-foreground-rgb: inherit;
-    --color-border: inherit;
-    --color-border-rgb: inherit;
-    --color-primary-button-background: inherit;
-    --color-primary-button-text: inherit;
-  }
-
-  .header-section {
-    position: relative;
-    z-index: var(--layer-menu-drawer);
-  }
-
-  /* need default values for non-flash transitions on first overflow menu open */
-  #header-component {
-    --submenu-height: 0px;
-    --full-open-header-height: 0px;
-  }
-
-  #header-group:has(#header-component[sticky]) {
-    display: contents;
-  }
-
-  .header-section:has(> #header-component[sticky='always']),
-  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
-    position: sticky;
-
-    /* Use -1 instead of 0 so intersection observer can track sticky state */
-    top: -1px;
-    z-index: var(--layer-menu-drawer);
-  }
-
-  .header[data-sticky-state] {
-    transition: opacity var(--animation-speed) var(--animation-easing);
-    opacity: 1;
-  }
-
-  .header[data-sticky-state='active'] {
-    view-transition-name: sticky-header;
-  }
-
-  :active-view-transition-type(empty-cart-drawer) {
-    .header[data-sticky-state='active'] {
-      view-transition-name: none;
-    }
-  }
-
-  .header[data-sticky-state='idle'] {
-    opacity: 0;
-  }
-
-  /* ================================
-     * Underlays
-     * ================================ */
-  .header__underlay {
-    position: absolute;
-    inset: 0;
-  }
-
-  .header__underlay-closed {
-    height: var(--closed-underlay-height, 100%);
-    z-index: var(--layer-lowest);
-    background: linear-gradient(
-      var(--color-background-top-row) 0 var(--top-row-height),
-      var(--color-background-bottom-row) var(--top-row-height) var(--header-height)
-    );
-    transition: height var(--animation-speed-slow) var(--ease-out-cubic);
-  }
-
-  .header__underlay-open {
-    height: var(--full-open-header-height);
-    background: linear-gradient(
-      var(--color-background-top-row) 0 var(--top-row-height),
-      var(--color-background-bottom-row) var(--top-row-height) var(--header-height),
-      var(--color-submenu) var(--header-height) 100%
-    );
-    /* header-height is updated via js, the transition works automagically */
-    transition: height var(--submenu-animation-speed) var(--ease-out-cubic);
-  }
-
-  .header__underlay-open::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    box-shadow: var(--shadow-popover);
-    clip-path: inset(var(--header-height) 0 -100px 0); /* stylelint-disable-line */
-    transition: height var(--submenu-animation-speed) var(--ease-out-cubic);
-  }
-
-  /* When top row has transparent background, swap underlay to merchant's chosen color at full opacity */
-  [data-transparent-background='top']:hover,
-  [data-transparent-background='top']:focus-within,
-  [data-transparent-background='both']:hover,
-  [data-transparent-background='both']:focus-within {
-    :is(.header__underlay-open, .header__underlay-closed) {
-      --color-background-top-row: var(--color-background);
-    }
-  }
-
-  /* When bottom row has transparent background, swap underlay to merchant's chosen color at full opacity */
-  [data-transparent-background='bottom']:hover,
-  [data-transparent-background='bottom']:focus-within,
-  [data-transparent-background='both']:hover,
-  [data-transparent-background='both']:focus-within {
-    :is(.header__underlay-open, .header__underlay-closed) {
-      --color-background-bottom-row: var(--color-background);
-    }
-  }
-
-  [data-submenu-overlap-bottom-row] {
-    .header__underlay-open {
-      background: linear-gradient(
-        var(--color-background-top-row) 0 var(--top-row-height),
-        var(--color-submenu) var(--top-row-height) 100%
-      );
-    }
-
-    .header__row--bottom {
-      z-index: var(--layer-lowest);
-    }
-  }
-
-  /* End Underlays ================ */
-
-  .header__row {
-    /* The account component uses a different background color, but we need to override it to inherit the color of the header row */
-    --color-account-icon: var(--color-foreground);
-
-    position: relative;
-
-    /* Overwrite color from section settings, background is controlled by the underlays */
-    /* stylelint-disable-next-line declaration-no-important */
-    background-color: transparent !important;
-
-    &:has(.mega-menu__list:hover),
-    &:has(.menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'])),
-    &:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'])) {
-      /* Only elevate the row when the submenu is open to avoid overlapping other elevated content */
-      z-index: var(--layer-heightened);
-    }
-  }
-
-  .header__row--top:not(.divider--page-width),
-  .header__row--top.divider--page-width .header__columns,
-  .header__row--bottom {
-    border-bottom: var(--border-bottom-width) solid var(--border-bottom-color, var(--color-border));
-  }
-
-  @media screen and (max-width: 749px) {
-    .header__row--top:not(.divider--page-width),
-    .header__row--top.divider--page-width .header__columns {
-      border-bottom-width: var(--border-bottom-width-mobile);
-      border-bottom-color: var(--border-bottom-color-mobile);
-    }
-  }
-
-  #header-component[data-menu-style='drawer'] .header__row--top:not(.divider--page-width),
-  #header-component[data-menu-style='drawer'] .header__row--top.divider--page-width .header__columns {
-    border-bottom-width: var(--border-bottom-width-mobile);
-    border-bottom-color: var(--border-bottom-color-mobile);
-  }
-
-  .header__row.divider--page-width:not(.section--page-width) .header__columns {
-    @media screen and (min-width: 750px) {
-      padding-inline-start: 0;
-      padding-inline-end: 0;
-      margin-inline-start: var(--page-margin);
-      margin-inline-end: var(--page-margin);
-    }
-  }
-
-  .header__column {
+  #ssh-{{ section_id }} .ssh__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     align-items: center;
-
-    /* on mobile, header__column nodes are ignored to create a new grid-template-area based on all visible content */
-    @media screen and (max-width: 749px) {
-      display: contents;
-    }
+    gap: 6px;
+    height: 100%;
   }
 
-  .header__column--left,
-  .header__column--center {
-    gap: var(--gap-xl);
-    grid-area: left;
-  }
-
-  .header__column--center {
-    justify-content: center;
-    grid-area: center;
-
-    header-menu:only-child .overflow-menu::part(list) {
-      justify-content: center;
-    }
-  }
-
-  .header__column--right {
-    gap: var(--gap-xl);
-    justify-content: flex-end;
-    grid-area: right;
-
-    .overflow-menu::part(list) {
-      justify-content: flex-end;
-    }
-  }
-
-  .header__columns {
-    /* Three column layout */
-    --header-left: 1fr;
-    --header-center: auto;
-    --header-right: 1fr;
-    --header-template-columns: var(--header-left) var(--header-center) var(--header-right);
-
-    /* Mobile layout */
-    --header-mobile-bookend: 44px;
-
-    display: grid;
-    grid-template-areas: 'left center right';
-    grid-gap: var(--gap-xl);
-    grid-template-columns: var(--header-template-columns);
-
-    /* If menu is in center column */
-    &:has(.header__column--center header-menu) {
-      --header-center: auto;
-      --header-left: minmax(max-content, 1fr);
-      --header-right: minmax(max-content, 1fr);
-    }
-
-    /* If there is no center column, make the column the menu is in grow eagerly */
-    &:where(:not(:has(.header__column--center))) {
-      @media screen and (min-width: 750px) {
-        --header-template-columns: var(--header-left) var(--header-right);
-
-        grid-template-areas: 'left right';
-      }
-
-      /* If the header-menu is in the right column */
-      &:has(.header__column--right header-menu) {
-        --header-right: auto;
-        --header-left: minmax(max-content, 1fr);
-      }
-
-      /* If the header-menu is in the left column */
-      &:has(.header__column--left header-menu) {
-        --header-left: auto;
-        --header-right: minmax(max-content, 1fr);
-      }
-    }
-
-    @media screen and (max-width: 749px) {
-      --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) 1fr
-        var(--header-mobile-bookend) var(--header-mobile-bookend);
-
-      grid-template-areas: 'leftA leftB center rightA rightB';
-      grid-column: span 3;
-      column-gap: 0;
-      align-items: center;
-      padding-block: 0;
-      padding-inline: 0 var(--padding-3xs);
-
-      .header-logo {
-        grid-area: center;
-      }
-
-      &:not(:has(header-actions)) .search-action {
-        grid-area: leftB;
-      }
-
-      &:not(:has(shopify-account)) .search-action {
-        grid-area: rightA;
-      }
-
-      .search-action {
-        grid-area: leftB;
-      }
-
-      header-actions {
-        grid-area: rightB;
-      }
-    }
-  }
-
-  /* not ideal but we need to duplicate these styles for when touch comes into play
-    We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
-  #header-component[data-menu-style='drawer'] .header__columns {
-    --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) 1fr
-      var(--header-mobile-bookend) var(--header-mobile-bookend);
-
-    grid-template-areas: 'leftA leftB center rightA rightB';
-    grid-column: span 3;
-    column-gap: 0;
+  #ssh-{{ section_id }} .ssh__nav-item {
+    position: relative;
+    height: 100%;
+    display: flex;
     align-items: center;
-    padding-block: 0;
-    padding-inline: 0 var(--padding-3xs);
-
-    .header-logo {
-      grid-area: center;
-    }
-
-    &:not(:has(header-actions)) .search-action {
-      grid-area: leftB;
-    }
-
-    &:not(:has(shopify-account)) .search-action {
-      grid-area: rightA;
-    }
-
-    .search-action {
-      grid-area: leftB;
-    }
-
-    header-actions {
-      grid-area: rightB;
-    }
   }
 
-  /* Single column layout if there are no columns within */
-  .header__columns:not(:has(.header__column)) {
-    grid-template-columns: 1fr;
-  }
-
-  /* Check for hover support to avoid unnecessary expensive recalculations when tapping on mobile */
-  @media (hover: hover) {
-    /* Column-specific dimming effect when any interactive element is hovered
-        Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
-    .header__column:has(header-menu:hover),
-    .header__column:has(.header-actions__action:hover),
-    .header__column:has(.header__icon--menu:hover) {
-      header-menu:not(:hover),
-      .header-actions__action:not(:hover),
-      .header__icon--menu:not(:hover) {
-        opacity: var(--opacity-subdued-text);
-        transition: opacity var(--animation-speed) var(--animation-easing);
-      }
-    }
-  }
-
-  /* Ensure smooth transitions for all interactive elements */
-  header-menu,
-  .header-actions__action,
-  .header__icon--menu {
-    transition: opacity var(--animation-speed) var(--animation-easing);
-  }
-
-  /* Header action button styles */
-  .header-actions__action {
-    --button-color: var(--color-foreground);
-    color: var(--button-color);
+  #ssh-{{ section_id }} .ssh__nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ssh-text);
+    background: none;
+    border: none;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-
-    &:hover {
-      --button-color: var(--color-foreground);
-    }
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
 
-  .header-actions__action:not(.account-button) .svg-wrapper {
-    height: var(--button-size);
-    width: var(--button-size);
+  #ssh-{{ section_id }} .ssh__nav-link:hover,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__nav-link,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__nav-link {
+    color: var(--ssh-accent);
+    background: rgba(46, 125, 50, 0.08);
   }
 
-  .header-actions__action:not(.account-button) svg {
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
+  #ssh-{{ section_id }} .ssh__caret {
+    transition: transform 0.25s ease;
   }
 
-  .header:has(#Details-menu-drawer-container[open]) {
-    contain: style;
-  }
-
-  .header.header--compact {
-    --header-padding: var(--padding-2xs);
-  }
-
-  .header__columns {
-    --padding-block-start: var(--header-padding);
-    --padding-block-end: var(--header-padding);
-  }
-
-  .header:not(.header--compact) .header__row--bottom {
-    --header-padding: var(--padding-xs);
-  }
-
-  .header--collapse-row-paddings {
-    .header__row--top .header__columns {
-      --padding-block-end: 0px;
-    }
-
-    .header__row--bottom .header__columns {
-      --padding-block-start: 0px;
-    }
-  }
-
-  /* When the header is transparent, add a margin to a potential header-section below it */
-  .header-section:has(.header[transparent]) + .shopify-section {
-    margin-top: var(--header-height);
-  }
-
-  /* Optimize layout performance for hidden menus */
-  .header-menu .menu-list__submenu {
-    content-visibility: auto;
-    contain-intrinsic-size: 0px 500px;
-  }
-
-  /* Force visibility when open/animating and in overflow submenu to prevent layout issues */
-  .header-menu details[open] .menu-list__submenu,
-  .header-menu .menu-list__submenu[data-active],
-  .header-menu .menu-list__list-item[slot='overflow'] .menu-list__submenu {
-    content-visibility: visible;
-  }
-
-  /* Dropdown Localization Styles */
-  .dropdown-localization__button {
-    display: flex;
-    position: relative;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--menu-localization-font);
-    font-size: var(--menu-localization-font-size);
-    font-weight: var(--menu-top-level-font-weight);
-    padding-inline: var(--padding-2xs);
-    margin-inline: calc(-1 * var(--padding-2xs));
-  }
-
-  .dropdown-localization__button .svg-wrapper.icon-caret {
-    height: var(--icon-size-xs);
-    width: var(--icon-size-xs);
-    right: var(--margin-xs);
-    top: calc(50% - var(--padding-2xs));
-    flex-shrink: 0;
-    transition: transform var(--animation-speed) var(--animation-easing);
-  }
-
-  .dropdown-localization__button .icon-flag {
-    width: var(--menu-localization-font-size, var(--icon-size-sm));
-    height: var(--menu-localization-font-size, var(--icon-size-sm));
-    clip-path: circle(50%); /* stylelint-disable-line */
-    background-position: center;
-    background-size: cover;
-    margin-inline-end: 4px;
-    position: relative;
-  }
-
-  .dropdown-localization__button .icon-flag::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    box-shadow: inset 0 0 var(--size-shadow) var(--color-shadow);
-    border-radius: 50%;
-  }
-
-  .dropdown-localization__button[aria-expanded='true'] .icon-caret svg {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__caret,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__caret {
     transform: rotate(180deg);
   }
 
-  .dropdown-localization__button,
-  .dropdown-localization__button:hover {
-    box-shadow: none;
-    background-color: transparent;
-    border-color: transparent;
-  }
-
-  dropdown-localization-component .localization-form__list {
-    max-height: 20.5rem;
-  }
-
-  .localization-wrapper {
-    position: fixed;
-    z-index: var(--layer-raised);
-    border-radius: var(--style-border-radius-popover);
-    transition-property: display, opacity, translate;
-    transition-duration: 0.3s;
-    transition-timing-function: var(--ease-out-quad);
-    transition-behavior: allow-discrete;
-    translate: 0 20px;
+  /* ---- Mega menu ---- */
+  #ssh-{{ section_id }} .ssh__mega {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 10px);
+    width: min(880px, 92vw);
+    background: #fff;
+    color: #141414;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
+    border: 1px solid var(--ssh-border);
     opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+    z-index: 20;
   }
 
-  .localization-wrapper:not([hidden]) {
-    translate: 0 0;
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega {
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
   }
 
-  @starting-style {
-    .localization-wrapper:not([hidden]) {
-      translate: 0 20px;
-      opacity: 0;
+  #ssh-{{ section_id }} .ssh__mega-inner {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 300px;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-intro {
+    position: relative;
+    border-radius: 18px 0 0 18px;
+    overflow: hidden;
+    background-color: var(--ssh-accent);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-intro-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0) 20%, rgba(10, 10, 10, 0.78) 100%), rgba(20, 20, 20, 0.12);
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-intro-content {
+    position: relative;
+    z-index: 1;
+    padding: 24px;
+    color: #fff;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--ssh-cta);
+    margin: 0 0 8px;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.3;
+    margin: 0 0 8px;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-text {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 16px;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--ssh-cta);
+    padding: 9px 14px;
+    border-radius: 999px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-cta svg {
+    transition: transform 0.2s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-cta:hover svg {
+    transform: translateX(2px);
+  }
+
+  #ssh-{{ section_id }} .ssh__mega-grid {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(var(--ssh-mega-columns, 3), 1fr);
+    gap: 12px;
+    align-content: start;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile:hover {
+    background: #f4f7f4;
+    transform: translateY(-2px);
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f0f3f0;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile:hover .ssh__tile-image img {
+    transform: scale(1.06);
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ssh-accent);
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-heading {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #141414;
+  }
+
+  #ssh-{{ section_id }} .ssh__tile-text {
+    font-size: 12px;
+    color: #7a7a7a;
+    line-height: 1.4;
+  }
+
+  /* ---- Actions ---- */
+  #ssh-{{ section_id }} .ssh__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  #ssh-{{ section_id }} .ssh__icon-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: var(--ssh-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__icon-btn:hover {
+    background: rgba(46, 125, 50, 0.08);
+    color: var(--ssh-accent);
+  }
+
+  #ssh-{{ section_id }} .ssh__cart-count {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: var(--ssh-cta);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  #ssh-{{ section_id }} .ssh__icon-btn--desktop {
+    display: none;
+  }
+
+  #ssh-{{ section_id }} .ssh__burger-close {
+    display: none;
+  }
+
+  #ssh-{{ section_id }}.is-mobile-open .ssh__burger-open {
+    display: none;
+  }
+
+  #ssh-{{ section_id }}.is-mobile-open .ssh__burger-close {
+    display: block;
+  }
+
+  /* ---- Mobile panel ---- */
+  #ssh-{{ section_id }} .ssh__mobile {
+    border-top: 1px solid var(--ssh-border);
+    background: var(--ssh-bg);
+  }
+
+  #ssh-{{ section_id }} .ssh__mobile-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 20px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #ssh-{{ section_id }} .ssh__mobile-list > li > a,
+  #ssh-{{ section_id }} .ssh__mobile-group-label {
+    display: block;
+    padding: 12px 4px;
+    font-weight: 600;
+    font-size: 15px;
+    border-bottom: 1px solid var(--ssh-border);
+  }
+
+  #ssh-{{ section_id }} .ssh__mobile-group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 6px 12px;
+  }
+
+  #ssh-{{ section_id }} .ssh__mobile-group ul a {
+    display: block;
+    padding: 8px 4px;
+    font-size: 14px;
+    color: #5a5a5a;
+  }
+
+  #ssh-{{ section_id }} .ssh__mobile-account a {
+    display: block;
+    padding: 12px 4px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ssh-accent);
+  }
+
+  /* ---- Desktop (mega menu enabled) ---- */
+  @media screen and (min-width: 990px) {
+    #ssh-{{ section_id }} .ssh__nav {
+      display: block;
+    }
+
+    #ssh-{{ section_id }} .ssh__icon-btn--desktop {
+      display: flex;
+    }
+
+    #ssh-{{ section_id }} .ssh__burger {
+      display: none;
+    }
+
+    #ssh-{{ section_id }} .ssh__mobile {
+      display: none !important;
     }
   }
 
-  dropdown-localization-component {
-    position: relative;
-    background-color: transparent;
-  }
+  @media screen and (max-width: 989px) {
+    #ssh-{{ section_id }} .ssh__inner {
+      padding: 0 20px;
+      gap: 16px;
+    }
 
-  dropdown-localization-component .country-filter {
-    position: relative;
-    padding: 8px;
-  }
+    #ssh-{{ section_id }} .ssh__mobile {
+      display: none;
+    }
 
-  dropdown-localization-component .country-filter__input {
-    border: none;
+    #ssh-{{ section_id }}.is-mobile-open .ssh__mobile {
+      display: block;
+    }
   }
+</style>
 
-  dropdown-localization-component .localization-form__list-item {
-    margin-inline: 8px;
-  }
+<script>
+  (function () {
+    var header = document.getElementById('ssh-{{ section_id }}');
+    if (!header) return;
 
-  dropdown-localization-component .localization-wrapper {
-    box-shadow: var(--shadow-popover);
-    border: var(--style-border-popover);
-    background-color: var(--color-background);
-    max-height: 27.5rem;
-    position: absolute;
-    top: calc(100% + 10px);
-    z-index: calc(var(--layer-header-menu) + 1);
-  }
+    var burger = header.querySelector('[data-ssh-burger]');
+    var panel = header.querySelector('[data-ssh-mobile-panel]');
+    if (!burger || !panel) return;
 
-  dropdown-localization-component .localization-wrapper.right-bound {
-    right: 0;
-    left: unset;
-  }
+    burger.addEventListener('click', function () {
+      var isOpen = header.classList.toggle('is-mobile-open');
+      burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      panel.hidden = !isOpen;
+    });
 
-  dropdown-localization-component .localization-wrapper.left-bound {
-    left: -8px;
-    right: unset;
-  }
-
-  /* Additional specificity due to dropdown-localization-component getting a low score */
-  dropdown-localization-component .language-selector.language-selector {
-    padding: 10px 8px 10px 16px;
-  }
-
-  dropdown-localization-component .localization-form__currency {
-    width: max-content;
-    opacity: 0;
-    visibility: hidden;
-    transition: none;
-  }
-
-  dropdown-localization-component .localization-form__select:hover {
-    background-color: rgb(var(--color-foreground-rgb) / var(--opacity-8));
-  }
-
-  dropdown-localization-component
-    :is(
-      .localization-form__list-item:hover,
-      .localization-form__list-item[aria-selected='true'],
-      .localization-form__list-item[aria-current='true']
-    )
-    .localization-form__currency {
-    opacity: 1;
-    color: var(--color-foreground-muted);
-    transition: opacity var(--animation-speed-slow) var(--animation-easing);
-    visibility: visible;
-  }
-
-  .dropdown-localization .language-selector:where(:not(.language-selector--top-shadow)) {
-    font-weight: var(--menu-top-level-font-weight);
-  }
-
-  .dropdown-localization:not(dropdown-localization-component) .language-selector {
-    font-family: var(--menu-localization-font);
-    font-size: var(--menu-localization-font-size);
-  }
-{% endstylesheet %}
-
-{% unless request.design_mode %}
-  <script type="module">
-    import { hydrate } from '@theme/section-hydration';
-    const url = new URL(window.location.href);
-    url.searchParams.delete('page');
-    hydrate('{{ section.id }}', url);
-  </script>
-{% endunless %}
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 990 && header.classList.contains('is-mobile-open')) {
+        header.classList.remove('is-mobile-open');
+        burger.setAttribute('aria-expanded', 'false');
+        panel.hidden = true;
+      }
+    });
+  })();
+</script>
 
 {% schema %}
 {
-  "name": "t:names.header",
+  "name": "Header",
   "tag": "header",
   "class": "header-section",
   "settings": [
+    { "type": "header", "content": "Logo" },
+    { "type": "image_picker", "id": "logo", "label": "Logo image" },
+    { "type": "text", "id": "logo_text", "label": "Logo text (used if no image)", "default": "Sri Sai Pharmacy" },
+
+    { "type": "header", "content": "Utility bar" },
+    { "type": "checkbox", "id": "show_utility_bar", "label": "Show top utility bar", "default": true },
+    { "type": "text", "id": "utility_text", "label": "Left text", "default": "Free delivery on orders above ₹499" },
+    { "type": "text", "id": "utility_phone", "label": "Phone number", "default": "+91 98765 43210" },
+    { "type": "text", "id": "utility_hours", "label": "Hours text", "default": "Open 8 AM – 10 PM, all days" },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "accent_color", "label": "Accent (nav hover, utility bar)", "default": "#2E7D32" },
+    { "type": "color", "id": "cta_color", "label": "CTA / badge color", "default": "#F58220" },
+    { "type": "color", "id": "border_color", "label": "Border", "default": "#ECECEC" }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "t:content.logo"
-    },
-    {
-      "type": "select",
-      "id": "logo_position",
-      "label": "t:settings.position",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:options.left"
-        },
-        {
-          "value": "center",
-          "label": "t:options.center"
-        },
-        {
-          "value": "right",
-          "label": "t:options.right"
-        }
-      ],
-      "default": "center"
-    },
-    {
-      "type": "header",
-      "content": "t:content.menu"
-    },
-    {
-      "type": "select",
-      "id": "menu_position",
-      "label": "t:settings.position",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:options.left"
-        },
-        {
-          "value": "center",
-          "label": "t:options.center"
-        },
-        {
-          "value": "right",
-          "label": "t:options.right"
-        }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "select",
-      "id": "menu_row",
-      "label": "t:settings.row",
-      "options": [
-        {
-          "value": "top",
-          "label": "t:options.top"
-        },
-        {
-          "value": "bottom",
-          "label": "t:options.bottom"
-        }
-      ],
-      "default": "top"
-    },
-    {
-      "type": "header",
-      "content": "t:content.customer_account"
-    },
-    {
-      "type": "paragraph",
-      "content": "t:content.manage_customer_accounts"
-    },
-    {
-      "type": "link_list",
-      "id": "customer_account_menu",
-      "label": "t:settings.menu",
-      "default": "customer-account-main-menu"
-    },
-    {
-      "type": "header",
-      "content": "t:content.search"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_search",
-      "label": "t:settings.search_icon",
-      "default": true
-    },
-    {
-      "type": "select",
-      "id": "search_position",
-      "label": "t:settings.search_position",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:options.left"
-        },
-        {
-          "value": "right",
-          "label": "t:options.right"
-        }
-      ],
-      "default": "right",
-      "visible_if": "{{ section.settings.show_search }}"
-    },
-    {
-      "type": "select",
-      "id": "search_row",
-      "label": "t:settings.search_row",
-      "options": [
-        {
-          "value": "top",
-          "label": "t:options.top"
-        },
-        {
-          "value": "bottom",
-          "label": "t:options.bottom"
-        }
-      ],
-      "default": "top",
-      "visible_if": "{{ section.settings.show_search }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.localization"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country",
-      "label": "t:settings.country_region",
-      "info": "t:info.manage_countries_regions",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "country_selector_style",
-      "label": "t:settings.flag",
-      "default": true,
-      "visible_if": "{{ section.settings.show_country }}"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_language",
-      "label": "t:settings.language_selector",
-      "info": "t:info.manage_languages",
-      "default": true
-    },
-    {
-      "type": "select",
-      "id": "localization_font",
-      "label": "t:settings.font",
-      "options": [
-        {
-          "value": "heading",
-          "label": "t:options.heading"
-        },
-        {
-          "value": "subheading",
-          "label": "t:options.subheading"
-        },
-        {
-          "value": "body",
-          "label": "t:options.body"
-        },
-        {
-          "value": "accent",
-          "label": "t:options.accent"
-        }
-      ],
-      "default": "heading",
-      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
-    },
-    {
-      "type": "select",
-      "id": "localization_font_size",
-      "label": "t:settings.size",
-      "options": [
-        {
-          "value": "0.625rem",
-          "label": "10px"
-        },
-        {
-          "value": "0.75rem",
-          "label": "12px"
-        },
-        {
-          "value": "0.875rem",
-          "label": "14px"
-        },
-        {
-          "value": "1rem",
-          "label": "16px"
-        },
-        {
-          "value": "1.125rem",
-          "label": "18px"
-        }
-      ],
-      "default": "1rem"
-    },
-    {
-      "type": "select",
-      "id": "localization_position",
-      "label": "t:settings.position",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:options.left"
-        },
-        {
-          "value": "right",
-          "label": "t:options.right"
-        }
-      ],
-      "default": "right",
-      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
-    },
-    {
-      "type": "select",
-      "id": "localization_row",
-      "label": "t:settings.row",
-      "options": [
-        {
-          "value": "top",
-          "label": "t:options.top"
-        },
-        {
-          "value": "bottom",
-          "label": "t:options.bottom"
-        }
-      ],
-      "default": "top",
-      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.appearance"
-    },
-    {
-      "type": "select",
-      "id": "section_width",
-      "label": "t:settings.width",
-      "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
+      "type": "nav_link",
+      "name": "Nav Link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Home" },
+        { "type": "url", "id": "url", "label": "Link" }
       ]
     },
     {
-      "type": "select",
-      "id": "section_height",
-      "label": "t:settings.height",
-      "options": [
-        {
-          "value": "compact",
-          "label": "t:options.compact"
-        },
-        {
-          "value": "standard",
-          "label": "t:options.standard"
-        }
-      ],
-      "default": "standard"
+      "type": "nav_dropdown",
+      "name": "Nav Dropdown",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop" },
+        { "type": "range", "id": "columns", "label": "Tile columns", "min": 2, "max": 4, "step": 1, "default": 3 },
+        { "type": "header", "content": "Context panel" },
+        { "type": "image_picker", "id": "intro_image", "label": "Background image" },
+        { "type": "text", "id": "intro_eyebrow", "label": "Eyebrow", "default": "Featured" },
+        { "type": "text", "id": "intro_heading", "label": "Heading", "default": "Your health, our priority" },
+        { "type": "textarea", "id": "intro_text", "label": "Description", "default": "Genuine medicines, wellness essentials and expert care — all in one place." },
+        { "type": "text", "id": "intro_link_text", "label": "Button text", "default": "Shop now" },
+        { "type": "url", "id": "intro_link", "label": "Button link" }
+      ]
     },
     {
-      "type": "select",
-      "id": "enable_sticky_header",
-      "label": "t:settings.sticky_header",
-      "options": [
-        {
-          "value": "always",
-          "label": "t:options.always"
-        },
-        {
-          "value": "scroll-up",
-          "label": "t:options.on_scroll_up"
-        },
-        {
-          "value": "never",
-          "label": "t:options.never"
-        }
-      ],
-      "default": "always"
-    },
-    {
-      "type": "range",
-      "id": "divider_width",
-      "label": "t:settings.divider_thickness",
-      "min": 0,
-      "max": 5,
-      "step": 0.5,
-      "unit": "px",
-      "default": 0,
-      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
-    },
-    {
-      "type": "select",
-      "id": "divider_size",
-      "label": "t:settings.divider_width",
-      "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
-      ],
-      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
-    },
-    {
-      "type": "color",
-      "id": "divider_color",
-      "label": "t:settings.divider_color",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
-    },
-    {
-      "type": "range",
-      "id": "border_width",
-      "label": "t:settings.border_width",
-      "min": 0,
-      "max": 5,
-      "step": 0.5,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "color",
-      "id": "bottom_border_color",
-      "label": "t:settings.bottom_border_color",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.border_width > 0 }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.utilities"
-    },
-    {
-      "type": "select",
-      "id": "actions_display_style",
-      "label": "t:settings.actions_display_style",
-      "info": "t:info.actions_display_style",
-      "options": [
-        {
-          "value": "icon",
-          "label": "t:options.icons"
-        },
-        {
-          "value": "text",
-          "label": "t:options.text"
-        }
-      ],
-      "default": "icon"
-    },
-    {
-      "type": "select",
-      "id": "actions_font_size",
-      "label": "t:settings.size",
-      "options": [
-        {
-          "value": "0.75rem",
-          "label": "12px"
-        },
-        {
-          "value": "0.875rem",
-          "label": "14px"
-        },
-        {
-          "value": "1rem",
-          "label": "16px"
-        },
-        {
-          "value": "1.125rem",
-          "label": "18px"
-        }
-      ],
-      "default": "0.875rem",
-      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
-    },
-    {
-      "type": "select",
-      "id": "actions_font",
-      "label": "t:settings.font",
-      "options": [
-        {
-          "value": "heading",
-          "label": "t:options.heading"
-        },
-        {
-          "value": "subheading",
-          "label": "t:options.subheading"
-        },
-        {
-          "value": "body",
-          "label": "t:options.body"
-        },
-        {
-          "value": "accent",
-          "label": "t:options.accent"
-        }
-      ],
-      "default": "body",
-      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
-    },
-    {
-      "type": "select",
-      "id": "actions_text_case",
-      "label": "t:settings.case",
-      "options": [
-        {
-          "value": "none",
-          "label": "t:options.default"
-        },
-        {
-          "value": "uppercase",
-          "label": "t:options.uppercase"
-        }
-      ],
-      "default": "none",
-      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color_top",
-      "label": "t:settings.top_row_background",
-      "placeholder": "t:settings.default"
-    },
-    {
-      "type": "color",
-      "id": "text_color_top",
-      "label": "t:settings.top_row_text",
-      "placeholder": "t:settings.default"
-    },
-    {
-      "type": "color",
-      "id": "background_color_bottom",
-      "label": "t:settings.bottom_row_background",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
-    },
-    {
-      "type": "color",
-      "id": "text_color_bottom",
-      "label": "t:settings.bottom_row_text",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.cart_bubble"
-    },
-    {
-      "type": "select",
-      "id": "bubble_style",
-      "label": "t:settings.bubble_style",
-      "options": [
-        {
-          "value": "default",
-          "label": "t:options.default"
-        },
-        {
-          "value": "custom",
-          "label": "t:options.custom"
-        }
-      ],
-      "default": "default"
-    },
-    {
-      "type": "color",
-      "id": "bubble_background_color",
-      "label": "t:settings.background",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.bubble_style == 'custom' }}"
-    },
-    {
-      "type": "color",
-      "id": "bubble_text_color",
-      "label": "t:settings.text",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.bubble_style == 'custom' }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.home_page"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_transparent_header_home",
-      "label": "t:settings.transparent_background",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "home_inverse_logo",
-      "label": "t:settings.inverse_logo",
-      "default": false,
-      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
-    },
-    {
-      "type": "color",
-      "id": "text_color_transparent_home",
-      "label": "t:settings.text_color_transparent",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.product_page"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_transparent_header_product",
-      "label": "t:settings.transparent_background",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "product_inverse_logo",
-      "label": "t:settings.inverse_logo",
-      "default": false,
-      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
-    },
-    {
-      "type": "color",
-      "id": "text_color_transparent_product",
-      "label": "t:settings.text_color_transparent",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.collection_page"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_transparent_header_collection",
-      "label": "t:settings.transparent_background",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "collection_inverse_logo",
-      "label": "t:settings.inverse_logo",
-      "default": false,
-      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
-    },
-    {
-      "type": "color",
-      "id": "text_color_transparent_collection",
-      "label": "t:settings.text_color_transparent",
-      "placeholder": "t:settings.default",
-      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+      "type": "dropdown_tile",
+      "name": "Dropdown Tile",
+      "settings": [
+        { "type": "paragraph", "content": "Place this block directly below the Nav Dropdown it belongs to." },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Vitamins & Supplements" },
+        { "type": "text", "id": "text", "label": "Short text", "default": "Daily wellness essentials" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
     }
   ],
-  "presets": []
+  "presets": [
+    {
+      "name": "Header",
+      "blocks": [
+        { "type": "nav_link", "settings": { "label": "Home" } },
+        {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Shop",
+            "intro_heading": "Your health, our priority",
+            "intro_text": "Genuine medicines, wellness essentials and expert care — all in one place.",
+            "intro_link_text": "Shop all"
+          }
+        },
+        { "type": "dropdown_tile", "settings": { "heading": "Vitamins & Supplements", "text": "Daily wellness essentials" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Skin & Personal Care", "text": "Dermat-recommended" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Baby & Mother Care", "text": "Gentle, trusted brands" } },
+        { "type": "nav_link", "settings": { "label": "About Us" } },
+        { "type": "nav_link", "settings": { "label": "Contact" } }
+      ]
+    }
+  ]
 }
 {% endschema %}

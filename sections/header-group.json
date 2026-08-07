@@ -47,84 +47,84 @@
     "header_section": {
       "type": "header",
       "blocks": {
-        "header-logo": {
-          "type": "_header-logo",
-          "static": true,
+        "nav_home": {
+          "type": "nav_link",
           "settings": {
-            "hide_logo_on_home_page": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0
-          },
-          "blocks": {}
+            "label": "Home",
+            "url": "/"
+          }
         },
-        "header-menu": {
-          "type": "_header-menu",
-          "static": true,
+        "nav_shop": {
+          "type": "nav_dropdown",
           "settings": {
-            "menu": "main-menu",
-            "background_color": "{{ settings.color_palette.background }}",
-            "text_color": "",
-            "type_font_primary_size": "0.875rem",
-            "menu_font_style": "inverse",
-            "type_font_primary_link": "body",
-            "type_case_primary_link": "none",
-            "menu_style": "featured_products",
-            "featured_products_aspect_ratio": "4 / 5",
-            "featured_collections_aspect_ratio": "16 / 9",
-            "image_border_radius": 0,
-            "navigation_bar": false,
-            "background_color_navigation_bar": "{{ settings.color_palette.background }}",
-            "text_color_navigation_bar": "",
-            "drawer_accordion": false,
-            "drawer_accordion_expand_first": false,
-            "drawer_dividers": false
-          },
-          "blocks": {}
+            "label": "Shop",
+            "columns": 3,
+            "intro_eyebrow": "Featured",
+            "intro_heading": "Your health, our priority",
+            "intro_text": "Genuine medicines, wellness essentials and expert care — all in one place.",
+            "intro_link_text": "Shop all",
+            "intro_link": "/collections/all"
+          }
+        },
+        "tile_vitamins": {
+          "type": "dropdown_tile",
+          "settings": {
+            "heading": "Vitamins & Supplements",
+            "text": "Daily wellness essentials",
+            "link": "/collections/all"
+          }
+        },
+        "tile_skincare": {
+          "type": "dropdown_tile",
+          "settings": {
+            "heading": "Skin & Personal Care",
+            "text": "Dermat-recommended",
+            "link": "/collections/all"
+          }
+        },
+        "tile_baby": {
+          "type": "dropdown_tile",
+          "settings": {
+            "heading": "Baby & Mother Care",
+            "text": "Gentle, trusted brands",
+            "link": "/collections/all"
+          }
+        },
+        "nav_about": {
+          "type": "nav_link",
+          "settings": {
+            "label": "About Us",
+            "url": "/pages/about-us"
+          }
+        },
+        "nav_contact": {
+          "type": "nav_link",
+          "settings": {
+            "label": "Contact",
+            "url": "/pages/contact"
+          }
         }
       },
+      "block_order": [
+        "nav_home",
+        "nav_shop",
+        "tile_vitamins",
+        "tile_skincare",
+        "tile_baby",
+        "nav_about",
+        "nav_contact"
+      ],
       "settings": {
-        "logo_position": "left",
-        "menu_position": "left",
-        "menu_row": "top",
-        "customer_account_menu": "customer-account-main-menu",
-        "show_search": true,
-        "search_position": "right",
-        "search_row": "top",
-        "show_country": true,
-        "country_selector_style": false,
-        "show_language": true,
-        "localization_font": "heading",
-        "localization_font_size": "0.875rem",
-        "localization_position": "right",
-        "localization_row": "top",
-        "section_width": "page-width",
-        "section_height": "standard",
-        "enable_sticky_header": "always",
-        "divider_width": 0,
-        "divider_size": "page-width",
-        "divider_color": "",
-        "border_width": 0,
-        "bottom_border_color": "",
-        "actions_display_style": "icon",
-        "actions_font_size": "0.875rem",
-        "actions_font": "body",
-        "actions_text_case": "none",
-        "background_color_top": "{{ settings.color_palette.background }}",
-        "text_color_top": "",
-        "background_color_bottom": "",
-        "text_color_bottom": "",
-        "bubble_style": "default",
-        "bubble_background_color": "",
-        "bubble_text_color": "",
-        "enable_transparent_header_home": false,
-        "home_inverse_logo": false,
-        "text_color_transparent_home": "",
-        "enable_transparent_header_product": false,
-        "product_inverse_logo": false,
-        "text_color_transparent_product": "",
-        "enable_transparent_header_collection": false,
-        "collection_inverse_logo": false,
-        "text_color_transparent_collection": ""
+        "logo_text": "Sri Sai Pharmacy",
+        "show_utility_bar": true,
+        "utility_text": "Free delivery on orders above ₹499",
+        "utility_phone": "+91 98765 43210",
+        "utility_hours": "Open 8 AM – 10 PM, all days",
+        "background_color": "#FFFFFF",
+        "text_color": "#141414",
+        "accent_color": "#2E7D32",
+        "cta_color": "#F58220",
+        "border_color": "#ECECEC"
       }
     }
   },
