@@ -1,0 +1,911 @@
+{%- comment -%}
+  Section: Nourish Hero
+  A two-column parallax hero with a fully configurable orange frame,
+  floating product image, and huge background words that fade in and
+  drift left/right in sync with scroll direction.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign bg_color = section.settings.bg_color | default: '#ffffff'
+  assign border_color = section.settings.border_color | default: '#F58220'
+  assign label_text = section.settings.label_text | default: 'NOURISHING LIFE'
+  assign heading = section.settings.heading
+  assign paragraph = section.settings.paragraph
+  assign button_text = section.settings.button_text | default: 'Explore more supplements'
+  assign button_url = section.settings.button_url | default: '#'
+  assign word_one = section.settings.word_one | default: 'NOURISH'
+  assign word_two = section.settings.word_two | default: 'THRIVE'
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+
+  assign content_align = section.settings.content_align | default: 'left'
+  assign content_margin = 'margin-left: 0; margin-right: 0;'
+  if content_align == 'center'
+    assign content_margin = 'margin-left: auto; margin-right: auto;'
+  elsif content_align == 'right'
+    assign content_margin = 'margin-left: auto; margin-right: 0;'
+  endif
+-%}
+
+<section
+  class="nourish-hero"
+  id="nourish-hero-{{ section_id }}"
+  style="
+    --nh-bg: {{ bg_color }};
+    --nh-border: {{ border_color }};
+    --nh-padding-top: {{ padding_top }}px;
+    --nh-padding-bottom: {{ padding_bottom }}px;
+
+    --nh-word-color: {{ section.settings.words_color | default: '#0a0a0a' }};
+    --nh-word1-top: {{ section.settings.word_one_top }}%;
+    --nh-word1-left: {{ section.settings.word_one_left }}%;
+    --nh-word1-size: {{ section.settings.word_one_font_size }}px;
+    --nh-word2-bottom: {{ section.settings.word_two_bottom }}%;
+    --nh-word2-right: {{ section.settings.word_two_right }}%;
+    --nh-word2-size: {{ section.settings.word_two_font_size }}px;
+    --nh-word-weight: {{ section.settings.words_font_weight | default: 400 }};
+
+    --nh-content-align: {{ section.settings.content_align }};
+    --nh-content-max-width: {{ section.settings.content_max_width }}px;
+    --nh-content-top-offset: {{ section.settings.content_top_offset }}px;
+    --nh-label-size: {{ section.settings.label_font_size }}px;
+    --nh-heading-size: {{ section.settings.heading_font_size }}px;
+    --nh-paragraph-size: {{ section.settings.paragraph_font_size }}px;
+    --nh-link-size: {{ section.settings.link_font_size }}px;
+
+    --nh-image-x: {{ section.settings.image_pos_x }}%;
+    --nh-image-y: {{ section.settings.image_pos_y }}%;
+    --nh-image-size: {{ section.settings.image_size }};
+
+    --nh-frame-border: {{ section.settings.frame_border_width }}px;
+    --nh-frame-radius-tl: {{ section.settings.frame_radius_tl }}px;
+    --nh-frame-radius-tr: {{ section.settings.frame_radius_tr }}px;
+    --nh-frame-radius-br: {{ section.settings.frame_radius_br }}px;
+    --nh-frame-radius-bl: {{ section.settings.frame_radius_bl }}px;
+  "
+>
+  <div class="nourish-hero__bg-words" aria-hidden="true">
+    <span class="nourish-hero__word-outer nourish-hero__word-outer--one{% if section.settings.hide_words_mobile %} nourish-hero__word-outer--hide-mobile{% endif %}{% if section.settings.hide_words_tablet %} nourish-hero__word-outer--hide-tablet{% endif %}" data-reveal>
+      <span class="nourish-hero__word nourish-hero__word--one" data-parallax data-speed="{{ section.settings.word_one_speed }}">{{ word_one }}</span>
+    </span>
+    <span class="nourish-hero__word-outer nourish-hero__word-outer--two{% if section.settings.hide_words_mobile %} nourish-hero__word-outer--hide-mobile{% endif %}{% if section.settings.hide_words_tablet %} nourish-hero__word-outer--hide-tablet{% endif %}" data-reveal>
+      <span class="nourish-hero__word nourish-hero__word--two" data-parallax data-speed="{{ section.settings.word_two_speed }}">{{ word_two }}</span>
+    </span>
+  </div>
+
+  <div class="nourish-hero__container">
+    <div class="nourish-hero__grid">
+
+      <div class="nourish-hero__content" style="{{ content_margin }}">
+        <p class="nourish-hero__label">{{ label_text }}</p>
+        <h1 class="nourish-hero__heading">{{ heading }}</h1>
+        <div class="nourish-hero__paragraph">{{ paragraph }}</div>
+        <a href="{{ button_url }}" class="nourish-hero__link">
+          <span>{{ button_text }}</span>
+        </a>
+      </div>
+
+      <div class="nourish-hero__visual">
+        <div class="nourish-hero__frame"></div>
+        {%- if section.settings.product_image != blank -%}
+          <div class="nourish-hero__image-wrap">
+            <img
+              class="nourish-hero__image"
+              src="{{ section.settings.product_image | image_url: width: 800 }}"
+              srcset="
+                {{ section.settings.product_image | image_url: width: 400 }} 400w,
+                {{ section.settings.product_image | image_url: width: 800 }} 800w,
+                {{ section.settings.product_image | image_url: width: 1200 }} 1200w
+              "
+              sizes="(max-width: 749px) 220px, (max-width: 999px) 320px, 420px"
+              alt="{{ section.settings.product_image.alt | default: heading | escape }}"
+              width="{{ section.settings.product_image.width }}"
+              height="{{ section.settings.product_image.height }}"
+              loading="eager"
+            >
+          </div>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #nourish-hero-{{ section_id }} {
+    --nh-orange: {{ border_color }};
+    position: relative;
+    background: var(--nh-bg);
+    overflow: hidden;
+    padding: var(--nh-padding-top) 20px var(--nh-padding-bottom);
+    isolation: isolate;
+  }
+
+  #nourish-hero-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 3;
+  }
+
+  /* ---- Background words ---- */
+  #nourish-hero-{{ section_id }} .nourish-hero__bg-words {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word-outer {
+    position: absolute;
+    max-width: 44vw;
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word-outer.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word-outer--one {
+    top: var(--nh-word1-top);
+    left: var(--nh-word1-left);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word-outer--two {
+    bottom: var(--nh-word2-bottom);
+    right: var(--nh-word2-right);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word {
+    display: inline-block;
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-weight: var(--nh-word-weight);
+    color: var(--nh-word-color);
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word--one {
+    font-size: min(var(--nh-word1-size), 32vw);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word--two {
+    font-size: min(var(--nh-word2-size), 32vw);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__word-outer--hide-tablet {
+    display: none;
+  }
+
+  /* ---- Layout grid ---- */
+  #nourish-hero-{{ section_id }} .nourish-hero__grid {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: 40px;
+    min-height: 560px;
+  }
+
+  /* ---- Left content ---- */
+  #nourish-hero-{{ section_id }} .nourish-hero__content {
+    position: relative;
+    z-index: 3;
+    max-width: var(--nh-content-max-width);
+    text-align: var(--nh-content-align);
+    transform: translate3d(0, var(--nh-content-top-offset), 0);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: var(--nh-label-size);
+    letter-spacing: 1.5px;
+    color: var(--nh-orange);
+    text-transform: uppercase;
+    margin: 0 0 12px;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--nh-heading-size);
+    line-height: 1.2;
+    color: #141414;
+    margin: 0 0 20px;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__paragraph {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: var(--nh-paragraph-size);
+    line-height: 1.7;
+    color: #4a4a4a;
+    margin: 0 0 28px;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__paragraph p {
+    margin: 0;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__link {
+    position: relative;
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: var(--nh-link-size);
+    color: #141414;
+    text-decoration: none;
+    padding-bottom: 4px;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__link span {
+    position: relative;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: #141414;
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 0.35s ease, background-color 0.35s ease;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__link:hover::after {
+    background: var(--nh-orange);
+    transform: scaleX(1.05);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__link:hover {
+    color: var(--nh-orange);
+  }
+
+  /* ---- Right visual: orange frame + product image ---- */
+  #nourish-hero-{{ section_id }} .nourish-hero__visual {
+    position: relative;
+    z-index: 2;
+    height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__frame {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 78%;
+    max-width: 460px;
+    aspect-ratio: 1 / 1;
+    border: var(--nh-frame-border) solid var(--nh-orange);
+    border-top-left-radius: var(--nh-frame-radius-tl);
+    border-top-right-radius: var(--nh-frame-radius-tr);
+    border-bottom-right-radius: var(--nh-frame-radius-br);
+    border-bottom-left-radius: var(--nh-frame-radius-bl);
+    background: transparent;
+    z-index: 1;
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__image-wrap {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    transform: translate3d(var(--nh-image-x), var(--nh-image-y), 0);
+  }
+
+  #nourish-hero-{{ section_id }} .nourish-hero__image {
+    max-width: calc(260px * (var(--nh-image-size) / 100));
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.25));
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 999px) {
+    #nourish-hero-{{ section_id }} .nourish-hero__grid {
+      gap: 24px;
+      min-height: 460px;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__content {
+      max-width: 100%;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__visual {
+      height: 380px;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__image {
+      max-width: calc(200px * (var(--nh-image-size) / 100));
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__word-outer {
+      max-width: 38vw;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__frame {
+      border-width: min(var(--nh-frame-border), 16px);
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #nourish-hero-{{ section_id }} .nourish-hero__container {
+      padding: 0 20px;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__grid {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__content {
+      order: 1;
+      text-align: center;
+      max-width: 100%;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__heading {
+      font-size: min(var(--nh-heading-size), 1.8rem);
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__visual {
+      order: 0;
+      height: 300px;
+      margin-bottom: 12px;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__frame {
+      width: 70%;
+      max-width: 260px;
+      border-width: min(var(--nh-frame-border), 12px);
+      right: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__image-wrap {
+      transform: translate3d(0, 0, 0);
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__image {
+      max-width: calc(160px * (var(--nh-image-size) / 100));
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__word-outer--hide-mobile {
+      display: none;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__word-outer {
+      max-width: 60vw;
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__word--one {
+      font-size: max(1.6rem, min(calc(var(--nh-word1-size) * 0.55), 22vw));
+    }
+
+    #nourish-hero-{{ section_id }} .nourish-hero__word--two {
+      font-size: max(1.8rem, min(calc(var(--nh-word2-size) * 0.55), 24vw));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #nourish-hero-{{ section_id }} .nourish-hero__word,
+    #nourish-hero-{{ section_id }} .nourish-hero__word-outer,
+    #nourish-hero-{{ section_id }} .nourish-hero__image-wrap {
+      transition: none !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('nourish-hero-{{ section_id }}');
+    if (!section) return;
+
+    /* ---- Fade-in reveal for background words ---- */
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+
+    if ('IntersectionObserver' in window && revealTargets.length) {
+      var revealObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      revealTargets.forEach(function (el) {
+        revealObserver.observe(el);
+      });
+    } else {
+      revealTargets.forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+    }
+
+    /* ---- Bi-directional scroll parallax ----
+       Driven by the section's actual on-screen position (getBoundingClientRect)
+       rather than a `scroll` event or window.scrollY. This keeps it working
+       even on themes that implement smooth/virtual scrolling by transforming
+       the page instead of firing native scroll events - getBoundingClientRect
+       always reflects the true rendered position, however scrolling works.
+
+       x is a pure function of that position, so scrolling down always
+       increases x (moves right) and scrolling back up always decreases x
+       (moves left) - including all the way back to 0. No accumulation,
+       no drift, fully reversible. */
+    var words = Array.prototype.slice.call(section.querySelectorAll('[data-parallax]'));
+    if (!words.length) return;
+
+    var maxShiftPerSpeed = 260; /* px, rightward drift when speed === 1 and the section has moved a full viewport height */
+    var baselineTop = null;
+    var rafId = null;
+
+    function tick() {
+      var rect = section.getBoundingClientRect();
+      var viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
+
+      if (baselineTop === null) {
+        baselineTop = rect.top;
+      }
+
+      var moved = baselineTop - rect.top; /* positive once the page has scrolled past the section's starting position */
+
+      words.forEach(function (word) {
+        var speed = parseFloat(word.getAttribute('data-speed'));
+        if (isNaN(speed)) speed = 0.4;
+
+        var x = (moved / viewportH) * maxShiftPerSpeed * speed;
+        if (x < 0) x = 0;
+
+        word.style.transform = 'translate3d(' + x.toFixed(2) + 'px, 0, 0)';
+      });
+
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    function handleResize() {
+      baselineTop = null;
+    }
+
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    var visibilityObserver = null;
+    if ('IntersectionObserver' in window) {
+      visibilityObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              if (rafId === null) {
+                rafId = window.requestAnimationFrame(tick);
+              }
+            } else if (rafId !== null) {
+              window.cancelAnimationFrame(rafId);
+              rafId = null;
+            }
+          });
+        },
+        { rootMargin: '200px 0px 200px 0px' }
+      );
+      visibilityObserver.observe(section);
+    } else {
+      rafId = window.requestAnimationFrame(tick);
+    }
+  })();
+</script>
+
+{%- comment -%} ---------------- Schema ---------------- {%- endcomment -%}
+{% schema %}
+{
+  "name": "Nourish Hero",
+  "tag": "section",
+  "class": "shopify-section--nourish-hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_image",
+      "label": "Product image"
+    },
+    {
+      "type": "range",
+      "id": "image_pos_x",
+      "label": "Image horizontal position",
+      "min": -50,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "image_pos_y",
+      "label": "Image vertical position",
+      "min": -50,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size",
+      "min": 50,
+      "max": 180,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+
+    {
+      "type": "header",
+      "content": "Text content"
+    },
+    {
+      "type": "text",
+      "id": "label_text",
+      "label": "Small label",
+      "default": "NOURISHING LIFE"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Nourish Your Body, Mind, and Daily Wellness"
+    },
+    {
+      "type": "richtext",
+      "id": "paragraph",
+      "label": "Paragraph",
+      "default": "<p>Experience holistic health with our clean, science-backed supplements crafted to support your energy, immunity, and mental clarity. Nourish your body, uplift your mind, and embrace wellness every single day.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Explore more supplements"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+
+    {
+      "type": "header",
+      "content": "Content position & typography"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 300,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 460
+    },
+    {
+      "type": "range",
+      "id": "content_top_offset",
+      "label": "Content Y position (vertical offset)",
+      "min": -200,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Label font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 22,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "paragraph_font_size",
+      "label": "Paragraph font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "link_font_size",
+      "label": "Link font size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+
+    {
+      "type": "header",
+      "content": "Background words"
+    },
+    {
+      "type": "color",
+      "id": "words_color",
+      "label": "Words color",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_words_mobile",
+      "label": "Hide background words on mobile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_words_tablet",
+      "label": "Hide background words on tablet",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "words_font_weight",
+      "label": "Words font weight",
+      "options": [
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semibold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extrabold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "text",
+      "id": "word_one",
+      "label": "Word 1 text",
+      "default": "NOURISH"
+    },
+    {
+      "type": "range",
+      "id": "word_one_top",
+      "label": "Word 1 top position",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "unit": "%",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "word_one_left",
+      "label": "Word 1 left position",
+      "min": 0,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "word_one_font_size",
+      "label": "Word 1 font size",
+      "min": 40,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "word_one_speed",
+      "label": "Word 1 parallax speed",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 0.4
+    },
+    {
+      "type": "text",
+      "id": "word_two",
+      "label": "Word 2 text",
+      "default": "THRIVE"
+    },
+    {
+      "type": "range",
+      "id": "word_two_bottom",
+      "label": "Word 2 bottom position",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "word_two_right",
+      "label": "Word 2 right position",
+      "min": 0,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "word_two_font_size",
+      "label": "Word 2 font size",
+      "min": 40,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 130
+    },
+    {
+      "type": "range",
+      "id": "word_two_speed",
+      "label": "Word 2 parallax speed",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 0.5
+    },
+
+    {
+      "type": "header",
+      "content": "Orange frame"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Orange border color",
+      "default": "#F58220"
+    },
+    {
+      "type": "range",
+      "id": "frame_border_width",
+      "label": "Frame border width",
+      "min": 4,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "frame_radius_tl",
+      "label": "Frame radius (top-left)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "frame_radius_tr",
+      "label": "Frame radius (top-right)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "frame_radius_br",
+      "label": "Frame radius (bottom-right)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "frame_radius_bl",
+      "label": "Frame radius (bottom-left)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nourish Hero"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,792 @@
+{%- comment -%}
+  Section: Energy Countdown Banner
+  A pinned countdown banner with a floating product image that slides,
+  straightens and rotates into place purely from scroll position, using
+  the standard "tall wrapper + position:sticky child" pin technique -
+  no scroll-jacking, no timed animation, fully reversible either direction.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+
+  assign shadow_opacity = s.image_shadow_intensity | divide: 200.0
+
+  assign target_iso = s.target_date | append: 'T' | append: s.target_time | append: ':00' | append: s.timezone_offset
+-%}
+
+<section
+  class="ecb"
+  id="ecb-{{ section_id }}"
+  data-ecb
+  data-enable-pin="{{ s.enable_pin }}"
+  data-mobile-disable-pin="{{ s.mobile_disable_pin }}"
+  data-pin-duration="{{ s.pin_duration }}"
+  data-scroll-distance="{{ s.scroll_distance }}"
+  data-start-offset="{{ s.start_trigger_offset }}"
+  data-end-offset="{{ s.end_trigger_offset }}"
+  data-smoothness="{{ s.animation_smoothness }}"
+  data-speed-multiplier="{{ s.animation_speed_multiplier }}"
+  data-easing-strength="{{ s.easing_strength }}"
+  data-translate-distance="{{ s.translate_distance_multiplier }}"
+  data-rotation-amount="{{ s.rotation_amount_multiplier }}"
+  data-scale-amount="{{ s.scale_amount_multiplier }}"
+  data-initial-y="{{ s.image_initial_offset }}"
+  data-final-y="{{ s.image_final_offset }}"
+  data-initial-rotate="{{ s.image_initial_rotation }}"
+  data-final-rotate="{{ s.image_final_rotation }}"
+  data-base-scale="{{ s.image_scale }}"
+  data-target-iso="{{ target_iso }}"
+  data-on-complete="{{ s.on_complete_action }}"
+  style="
+    --ecb-container-width: {{ s.container_width }}px;
+    --ecb-content-width: {{ s.content_width }}px;
+    --ecb-padding-top: {{ s.padding_top }}px;
+    --ecb-padding-bottom: {{ s.padding_bottom }}px;
+    --ecb-margin-top: {{ s.margin_top }}px;
+    --ecb-margin-bottom: {{ s.margin_bottom }}px;
+
+    --ecb-banner-width: {{ s.banner_width }}px;
+    --ecb-banner-height: {{ s.banner_height }}px;
+    --ecb-banner-radius: {{ s.banner_radius }}px;
+    --ecb-overlay-color: {{ s.overlay_color }};
+    --ecb-overlay-opacity: {{ s.overlay_opacity }};
+
+    --ecb-heading-size: {{ s.heading_font_size }}px;
+    --ecb-heading-weight: {{ s.heading_font_weight }};
+    --ecb-heading-spacing: {{ s.heading_letter_spacing }}px;
+    --ecb-heading-line-height: {{ s.heading_line_height }};
+    --ecb-heading-color: {{ s.heading_color }};
+    --ecb-heading-shadow: {{ s.heading_text_shadow }};
+
+    --ecb-box-bg: {{ s.box_color }};
+    --ecb-box-radius: {{ s.box_radius }}px;
+    --ecb-box-padding: {{ s.box_padding }}px;
+    --ecb-box-width: {{ s.box_width }}px;
+    --ecb-box-height: {{ s.box_height }}px;
+    --ecb-number-color: {{ s.number_color }};
+    --ecb-number-size: {{ s.number_font_size }}px;
+    --ecb-label-color: {{ s.label_color }};
+    --ecb-label-size: {{ s.label_font_size }}px;
+    --ecb-divider-color: {{ s.divider_color }};
+    --ecb-divider-width: {{ s.divider_width }}px;
+
+    --ecb-btn-bg: {{ s.button_bg }};
+    --ecb-btn-bg-hover: {{ s.button_bg_hover }};
+    --ecb-btn-text: {{ s.button_text_color }};
+    --ecb-btn-radius: {{ s.button_radius }}px;
+    --ecb-btn-padding-x: {{ s.button_padding_x }}px;
+    --ecb-btn-padding-y: {{ s.button_padding_y }}px;
+
+    --ecb-img-width: {{ s.image_width }}px;
+    --ecb-img-height: {{ s.image_height }}px;
+    --ecb-img-scale: {{ s.image_scale }};
+    --ecb-img-opacity: {{ s.image_opacity }};
+    --ecb-img-zindex: {{ s.image_zindex }};
+    --ecb-img-offset-x: {{ s.image_horizontal_offset }}px;
+    --ecb-img-shadow-blur: {{ s.image_shadow_blur }}px;
+    --ecb-img-shadow-opacity: {{ shadow_opacity }};
+    --ecb-img-initial-y: {{ s.image_initial_offset }}px;
+    --ecb-img-initial-rotate: {{ s.image_initial_rotation }}deg;
+
+    --ecb-desktop-img-offset: {{ s.desktop_image_offset }}px;
+    --ecb-tablet-img-offset: {{ s.tablet_image_offset }}px;
+    --ecb-mobile-img-offset: {{ s.mobile_image_offset }}px;
+  "
+>
+  <div class="ecb__pin-wrapper" data-pin-wrapper>
+    <div class="ecb__pin-inner" data-pin-inner>
+      <div class="ecb__stage">
+
+        {%- if s.product_image != blank -%}
+          <div class="ecb__product" data-product aria-hidden="true">
+            <img
+              class="ecb__product-image"
+              src="{{ s.product_image | image_url: width: 800 }}"
+              srcset="
+                {{ s.product_image | image_url: width: 400 }} 400w,
+                {{ s.product_image | image_url: width: 800 }} 800w,
+                {{ s.product_image | image_url: width: 1200 }} 1200w
+              "
+              sizes="(max-width: 749px) 200px, 340px"
+              alt="{{ s.product_image.alt | default: s.heading | escape }}"
+              width="{{ s.product_image.width }}"
+              height="{{ s.product_image.height }}"
+              loading="lazy"
+            >
+          </div>
+        {%- endif -%}
+
+        <div
+          class="ecb__banner"
+          {% if s.background_image != blank %}
+            style="background-image: url('{{ s.background_image | image_url: width: 1800 }}');"
+          {% endif %}
+        >
+          <div class="ecb__overlay"></div>
+
+          <div class="ecb__content">
+            <h2 class="ecb__heading">{{ s.heading }}</h2>
+
+            <div
+              class="ecb__countdown"
+              data-countdown
+              role="timer"
+              aria-live="polite"
+              aria-label="Countdown timer"
+            >
+              <div class="ecb__unit">
+                <div class="ecb__box"><span class="ecb__number" data-days>00</span></div>
+                <span class="ecb__label">{{ s.label_days | default: 'Days' }}</span>
+              </div>
+              <span class="ecb__divider" aria-hidden="true"></span>
+              <div class="ecb__unit">
+                <div class="ecb__box"><span class="ecb__number" data-hours>00</span></div>
+                <span class="ecb__label">{{ s.label_hours | default: 'Hours' }}</span>
+              </div>
+              <span class="ecb__divider" aria-hidden="true"></span>
+              <div class="ecb__unit">
+                <div class="ecb__box"><span class="ecb__number" data-minutes>00</span></div>
+                <span class="ecb__label">{{ s.label_minutes | default: 'Minutes' }}</span>
+              </div>
+              <span class="ecb__divider" aria-hidden="true"></span>
+              <div class="ecb__unit">
+                <div class="ecb__box"><span class="ecb__number" data-seconds>00</span></div>
+                <span class="ecb__label">{{ s.label_seconds | default: 'Seconds' }}</span>
+              </div>
+            </div>
+
+            <p class="ecb__complete-message" data-complete-message hidden>{{ s.complete_message }}</p>
+
+            {%- if s.button_text != blank -%}
+              <a href="{{ s.button_url | default: '#' }}" class="ecb__button">{{ s.button_text }}</a>
+            {%- endif -%}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #ecb-{{ section_id }} {
+    position: relative;
+    margin: var(--ecb-margin-top) 0 var(--ecb-margin-bottom);
+  }
+
+  #ecb-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #ecb-{{ section_id }} .ecb__pin-wrapper {
+    position: relative;
+  }
+
+  #ecb-{{ section_id }} .ecb__pin-inner {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #ecb-{{ section_id }} .ecb__stage {
+    position: relative;
+    width: 100%;
+    max-width: var(--ecb-container-width);
+    margin: 0 auto;
+    padding: var(--ecb-padding-top) 20px var(--ecb-padding-bottom);
+  }
+
+  /* ---- Banner ---- */
+  #ecb-{{ section_id }} .ecb__banner {
+    position: relative;
+    width: 100%;
+    max-width: var(--ecb-banner-width);
+    height: var(--ecb-banner-height);
+    margin: 0 auto;
+    border-radius: var(--ecb-banner-radius);
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  #ecb-{{ section_id }} .ecb__overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--ecb-overlay-color);
+    opacity: calc(var(--ecb-overlay-opacity) / 100);
+  }
+
+  #ecb-{{ section_id }} .ecb__content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: var(--ecb-content-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  #ecb-{{ section_id }} .ecb__heading {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-weight: var(--ecb-heading-weight);
+    font-size: var(--ecb-heading-size);
+    letter-spacing: var(--ecb-heading-spacing);
+    line-height: var(--ecb-heading-line-height);
+    color: var(--ecb-heading-color);
+    text-shadow: var(--ecb-heading-shadow);
+    text-transform: uppercase;
+    margin: 0 0 28px;
+  }
+
+  /* ---- Countdown ---- */
+  #ecb-{{ section_id }} .ecb__countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  #ecb-{{ section_id }} .ecb__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #ecb-{{ section_id }} .ecb__box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ecb-box-width);
+    height: var(--ecb-box-height);
+    padding: var(--ecb-box-padding);
+    background: var(--ecb-box-bg);
+    border-radius: var(--ecb-box-radius);
+  }
+
+  #ecb-{{ section_id }} .ecb__number {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--ecb-number-size);
+    color: var(--ecb-number-color);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #ecb-{{ section_id }} .ecb__label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: var(--ecb-label-size);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ecb-label-color);
+  }
+
+  #ecb-{{ section_id }} .ecb__divider {
+    width: var(--ecb-divider-width);
+    height: var(--ecb-box-height);
+    background: var(--ecb-divider-color);
+    opacity: 0.5;
+    align-self: flex-start;
+  }
+
+  #ecb-{{ section_id }} .ecb__complete-message {
+    font-family: 'Poppins', sans-serif;
+    color: var(--ecb-heading-color);
+    font-size: 18px;
+    margin: 0 0 24px;
+  }
+
+  /* ---- Button ---- */
+  #ecb-{{ section_id }} .ecb__button {
+    display: inline-block;
+    background: var(--ecb-btn-bg);
+    color: var(--ecb-btn-text);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    border-radius: var(--ecb-btn-radius);
+    padding: var(--ecb-btn-padding-y) var(--ecb-btn-padding-x);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  #ecb-{{ section_id }} .ecb__button:hover {
+    background: var(--ecb-btn-bg-hover);
+    transform: translateY(-2px);
+  }
+
+  #ecb-{{ section_id }} .ecb__button:focus-visible {
+    outline: 2px solid var(--ecb-btn-bg-hover);
+    outline-offset: 3px;
+  }
+
+  /* ---- Floating product image ---- */
+  #ecb-{{ section_id }} .ecb__product {
+    position: absolute;
+    left: calc(50% - (var(--ecb-banner-width) / 2) + var(--ecb-img-offset-x) + var(--ecb-desktop-img-offset));
+    bottom: 6%;
+    width: var(--ecb-img-width);
+    max-width: 40vw;
+    z-index: var(--ecb-img-zindex);
+    opacity: var(--ecb-img-opacity);
+    pointer-events: none;
+    transform: translate3d(0, var(--ecb-img-initial-y), 0) rotate(var(--ecb-img-initial-rotate)) scale(var(--ecb-img-scale));
+    will-change: transform;
+  }
+
+  #ecb-{{ section_id }} .ecb__product-image {
+    width: 100%;
+    height: auto;
+    max-height: var(--ecb-img-height);
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 30px var(--ecb-img-shadow-blur) rgba(0, 0, 0, var(--ecb-img-shadow-opacity)));
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 999px) {
+    #ecb-{{ section_id }} .ecb__product {
+      left: calc(50% - (var(--ecb-banner-width) / 2) + var(--ecb-img-offset-x) + var(--ecb-tablet-img-offset));
+      max-width: 34vw;
+    }
+
+    #ecb-{{ section_id }} .ecb__heading {
+      font-size: min(var(--ecb-heading-size), 2.4rem);
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #ecb-{{ section_id }} .ecb__pin-inner {
+      position: relative;
+      top: auto;
+      height: auto;
+      padding: 40px 0;
+    }
+
+    #ecb-{{ section_id }} .ecb__stage {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    #ecb-{{ section_id }} .ecb__product {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: min(var(--ecb-img-width), 60vw);
+      max-width: 60vw;
+      margin: 0 auto;
+      transform: translate3d(0, 0, 0) rotate(var(--ecb-img-initial-rotate)) scale(var(--ecb-img-scale));
+      order: 2;
+    }
+
+    #ecb-{{ section_id }} .ecb__banner {
+      order: 1;
+      height: auto;
+      min-height: 320px;
+      padding: 40px 0;
+    }
+
+    #ecb-{{ section_id }} .ecb__heading {
+      font-size: min(var(--ecb-heading-size), 1.7rem);
+    }
+
+    #ecb-{{ section_id }} .ecb__countdown {
+      gap: 10px;
+    }
+
+    #ecb-{{ section_id }} .ecb__divider {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #ecb-{{ section_id }} .ecb__pin-inner {
+      position: relative;
+      top: auto;
+      height: auto;
+    }
+
+    #ecb-{{ section_id }} .ecb__product {
+      transform: translate3d(0, 0, 0) rotate(var(--ecb-img-initial-rotate)) scale(var(--ecb-img-scale)) !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('ecb-{{ section_id }}');
+    if (!section) return;
+
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ================= Countdown ================= */
+    var countdownEl = section.querySelector('[data-countdown]');
+    var completeMessageEl = section.querySelector('[data-complete-message]');
+    var daysEl = section.querySelector('[data-days]');
+    var hoursEl = section.querySelector('[data-hours]');
+    var minutesEl = section.querySelector('[data-minutes]');
+    var secondsEl = section.querySelector('[data-seconds]');
+
+    var targetIso = section.getAttribute('data-target-iso');
+    var onComplete = section.getAttribute('data-on-complete') || 'hide';
+    var targetTime = new Date(targetIso).getTime();
+    var originalDuration = null;
+
+    function pad(n) {
+      return String(Math.max(0, Math.floor(n))).padStart(2, '0');
+    }
+
+    function renderCountdown() {
+      if (!countdownEl) return;
+      var now = Date.now();
+      var diff = targetTime - now;
+
+      if (originalDuration === null) {
+        originalDuration = Math.max(diff, 0);
+      }
+
+      if (diff <= 0) {
+        if (onComplete === 'hide') {
+          countdownEl.hidden = true;
+          return;
+        }
+        if (onComplete === 'message') {
+          countdownEl.hidden = true;
+          if (completeMessageEl) completeMessageEl.hidden = false;
+          return;
+        }
+        if (onComplete === 'restart' || onComplete === 'loop') {
+          targetTime = now + (originalDuration || 24 * 60 * 60 * 1000);
+          diff = targetTime - now;
+        }
+      }
+
+      var days = diff / (1000 * 60 * 60 * 24);
+      var hours = (diff / (1000 * 60 * 60)) % 24;
+      var minutes = (diff / (1000 * 60)) % 60;
+      var seconds = (diff / 1000) % 60;
+
+      if (daysEl) daysEl.textContent = pad(days);
+      if (hoursEl) hoursEl.textContent = pad(hours);
+      if (minutesEl) minutesEl.textContent = pad(minutes);
+      if (secondsEl) secondsEl.textContent = pad(seconds);
+    }
+
+    if (!isNaN(targetTime)) {
+      renderCountdown();
+      window.setInterval(renderCountdown, 1000);
+    }
+
+    /* ================= Scroll-driven pin & reveal ================= */
+    var pinWrapper = section.querySelector('[data-pin-wrapper]');
+    var pinInner = section.querySelector('[data-pin-inner]');
+    var product = section.querySelector('[data-product]');
+
+    var enablePin = section.getAttribute('data-enable-pin') === 'true';
+    var mobileDisablePin = section.getAttribute('data-mobile-disable-pin') === 'true';
+
+    function getNum(attr, fallback) {
+      var v = parseFloat(section.getAttribute(attr));
+      return isNaN(v) ? fallback : v;
+    }
+
+    var pinDuration = getNum('data-pin-duration', 800);
+    var scrollDistance = getNum('data-scroll-distance', 800);
+    var startOffset = getNum('data-start-offset', 0);
+    var endOffset = getNum('data-end-offset', 0);
+    var smoothness = getNum('data-smoothness', 0.15);
+    var speedMultiplier = getNum('data-speed-multiplier', 1);
+    var easingStrength = getNum('data-easing-strength', 1);
+    var translateMultiplier = getNum('data-translate-distance', 1);
+    var rotationMultiplier = getNum('data-rotation-amount', 1);
+    var scaleMultiplier = getNum('data-scale-amount', 1);
+    var initialY = getNum('data-initial-y', 220);
+    var finalY = getNum('data-final-y', 0);
+    var initialRotate = getNum('data-initial-rotate', -14);
+    var finalRotate = getNum('data-final-rotate', -6);
+    var baseScale = getNum('data-base-scale', 1);
+    /* subtle "grows into place" scale-in, intensity controlled by the
+       Scale Amount multiplier - at 0 the image doesn't scale at all */
+    var scaleStart = baseScale * (1 - 0.08 * scaleMultiplier);
+
+    function isMobile() {
+      return window.innerWidth <= 749;
+    }
+
+    function pinActive() {
+      if (prefersReducedMotion) return false;
+      if (!enablePin) return false;
+      if (isMobile() && mobileDisablePin) return false;
+      return true;
+    }
+
+    if (pinWrapper) {
+      pinWrapper.style.height = pinActive()
+        ? 'calc(100vh + ' + pinDuration + 'px)'
+        : 'auto';
+    }
+
+    var currentY = initialY;
+    var currentRotate = initialRotate;
+    var currentScale = scaleStart;
+    var targetY = initialY;
+    var targetRotate = initialRotate;
+    var targetScale = scaleStart;
+    var rafId = null;
+
+    function easeProgress(p) {
+      if (easingStrength <= 0) return p;
+      return Math.pow(p, 1 / easingStrength);
+    }
+
+    function computeTargets() {
+      if (!pinActive() || !pinWrapper) {
+        targetY = finalY;
+        targetRotate = finalRotate;
+        targetScale = baseScale;
+        return;
+      }
+
+      var rect = pinWrapper.getBoundingClientRect();
+      var viewportH = window.innerHeight || document.documentElement.clientHeight;
+      var scrollableHeight = rect.height - viewportH;
+      if (scrollableHeight <= 0) {
+        targetY = finalY;
+        targetRotate = finalRotate;
+        targetScale = baseScale;
+        return;
+      }
+
+      var raw = (-rect.top - startOffset) / (scrollableHeight - endOffset || 1);
+      raw *= speedMultiplier;
+      raw = Math.max(0, Math.min(1, raw));
+
+      /* image finishes its motion within `scrollDistance` px of the total
+         `pinDuration` scroll - once reached it holds at the final state
+         for the remainder of the pin, exactly like the reference. */
+      var animFraction = scrollDistance > 0 ? pinDuration / scrollDistance : 1;
+      var imageProgress = Math.max(0, Math.min(1, raw * animFraction));
+      var eased = easeProgress(imageProgress);
+
+      targetY = initialY + (finalY - initialY) * translateMultiplier * eased;
+      targetRotate = initialRotate + (finalRotate - initialRotate) * rotationMultiplier * eased;
+      targetScale = scaleStart + (baseScale - scaleStart) * eased;
+    }
+
+    function tick() {
+      computeTargets();
+
+      var lerp = prefersReducedMotion ? 1 : Math.max(0.01, Math.min(1, smoothness));
+      currentY += (targetY - currentY) * lerp;
+      currentRotate += (targetRotate - currentRotate) * lerp;
+      currentScale += (targetScale - currentScale) * lerp;
+
+      if (product) {
+        product.style.setProperty('--ecb-img-initial-y', currentY.toFixed(2) + 'px');
+        product.style.setProperty('--ecb-img-initial-rotate', currentRotate.toFixed(2) + 'deg');
+        product.style.setProperty('--ecb-img-scale', currentScale.toFixed(3));
+      }
+
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    var visibilityObserver = null;
+    if ('IntersectionObserver' in window) {
+      visibilityObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              if (rafId === null) rafId = window.requestAnimationFrame(tick);
+            } else if (rafId !== null) {
+              window.cancelAnimationFrame(rafId);
+              rafId = null;
+            }
+          });
+        },
+        { rootMargin: '200px 0px 200px 0px' }
+      );
+      visibilityObserver.observe(section);
+    } else {
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    var resizeRaf = null;
+    window.addEventListener(
+      'resize',
+      function () {
+        if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+        resizeRaf = window.requestAnimationFrame(function () {
+          if (pinWrapper) {
+            pinWrapper.style.height = pinActive()
+              ? 'calc(100vh + ' + pinDuration + 'px)'
+              : 'auto';
+          }
+        });
+      },
+      { passive: true }
+    );
+  })();
+</script>
+
+{%- comment -%} ---------------- Schema ---------------- {%- endcomment -%}
+{% schema %}
+{
+  "name": "Energy Countdown Banner",
+  "tag": "section",
+  "class": "shopify-section--energy-countdown-banner",
+  "settings": [
+    { "type": "header", "content": "Banner" },
+    { "type": "image_picker", "id": "background_image", "label": "Background image" },
+    { "type": "color", "id": "overlay_color", "label": "Overlay color", "default": "#000000" },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 55 },
+    { "type": "range", "id": "banner_width", "label": "Banner width", "min": 600, "max": 1600, "step": 20, "unit": "px", "default": 1100 },
+    { "type": "range", "id": "banner_height", "label": "Banner height", "min": 260, "max": 700, "step": 10, "unit": "px", "default": 400 },
+    { "type": "range", "id": "banner_radius", "label": "Banner border radius", "min": 0, "max": 60, "step": 2, "unit": "px", "default": 20 },
+
+    { "type": "header", "content": "Countdown target" },
+    { "type": "text", "id": "target_date", "label": "Target date (YYYY-MM-DD)", "default": "2026-12-31" },
+    { "type": "text", "id": "target_time", "label": "Target time (HH:MM, 24h)", "default": "23:59" },
+    {
+      "type": "select",
+      "id": "timezone_offset",
+      "label": "Timezone",
+      "options": [
+        { "value": "-12:00", "label": "UTC-12:00" },
+        { "value": "-08:00", "label": "UTC-08:00 (Pacific)" },
+        { "value": "-05:00", "label": "UTC-05:00 (Eastern)" },
+        { "value": "+00:00", "label": "UTC+00:00" },
+        { "value": "+01:00", "label": "UTC+01:00" },
+        { "value": "+05:30", "label": "UTC+05:30 (India)" },
+        { "value": "+08:00", "label": "UTC+08:00" },
+        { "value": "+09:00", "label": "UTC+09:00" },
+        { "value": "+10:00", "label": "UTC+10:00" }
+      ],
+      "default": "+00:00"
+    },
+    {
+      "type": "select",
+      "id": "on_complete_action",
+      "label": "When countdown reaches zero",
+      "options": [
+        { "value": "hide", "label": "Hide timer" },
+        { "value": "message", "label": "Show custom message" },
+        { "value": "restart", "label": "Restart countdown" },
+        { "value": "loop", "label": "Loop countdown" }
+      ],
+      "default": "hide"
+    },
+    { "type": "text", "id": "complete_message", "label": "Completion message", "default": "The offer has ended - check back soon!" },
+    { "type": "text", "id": "label_days", "label": "\"Days\" label", "default": "Days" },
+    { "type": "text", "id": "label_hours", "label": "\"Hours\" label", "default": "Hours" },
+    { "type": "text", "id": "label_minutes", "label": "\"Minutes\" label", "default": "Minutes" },
+    { "type": "text", "id": "label_seconds", "label": "\"Seconds\" label", "default": "Seconds" },
+
+    { "type": "header", "content": "Timer card style" },
+    { "type": "color", "id": "box_color", "label": "Box background color", "default": "#E8720C" },
+    { "type": "range", "id": "box_radius", "label": "Box border radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 10 },
+    { "type": "range", "id": "box_padding", "label": "Box padding", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "box_width", "label": "Box width", "min": 40, "max": 140, "step": 2, "unit": "px", "default": 74 },
+    { "type": "range", "id": "box_height", "label": "Box height", "min": 40, "max": 140, "step": 2, "unit": "px", "default": 60 },
+    { "type": "color", "id": "number_color", "label": "Number color", "default": "#FFFFFF" },
+    { "type": "range", "id": "number_font_size", "label": "Number font size", "min": 16, "max": 48, "step": 1, "unit": "px", "default": 28 },
+    { "type": "color", "id": "label_color", "label": "Label color", "default": "#FFFFFF" },
+    { "type": "range", "id": "label_font_size", "label": "Label font size", "min": 9, "max": 20, "step": 1, "unit": "px", "default": 12 },
+    { "type": "color", "id": "divider_color", "label": "Divider color", "default": "#FFFFFF" },
+    { "type": "range", "id": "divider_width", "label": "Divider width", "min": 1, "max": 6, "step": 1, "unit": "px", "default": 1 },
+
+    { "type": "header", "content": "Heading" },
+    { "type": "text", "id": "heading", "label": "Heading text", "default": "Hurry! Energize Your Day - Deals On Drinks End Soon!" },
+    { "type": "range", "id": "heading_font_size", "label": "Heading font size", "min": 20, "max": 64, "step": 2, "unit": "px", "default": 34 },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "700", "label": "Bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "400"
+    },
+    { "type": "range", "id": "heading_letter_spacing", "label": "Letter spacing", "min": -1, "max": 8, "step": 0.5, "unit": "px", "default": 1 },
+    { "type": "range", "id": "heading_line_height", "label": "Line height", "min": 0.9, "max": 1.6, "step": 0.1, "default": 1.2 },
+    { "type": "color", "id": "heading_color", "label": "Text color", "default": "#FFFFFF" },
+    { "type": "text", "id": "heading_text_shadow", "label": "Text shadow (CSS value)", "default": "0 2px 10px rgba(0,0,0,0.4)" },
+
+    { "type": "header", "content": "Button" },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Explore more" },
+    { "type": "url", "id": "button_url", "label": "Button link" },
+    { "type": "color", "id": "button_bg", "label": "Background color", "default": "#E8720C" },
+    { "type": "color", "id": "button_bg_hover", "label": "Hover background color", "default": "#C75F08" },
+    { "type": "color", "id": "button_text_color", "label": "Text color", "default": "#FFFFFF" },
+    { "type": "range", "id": "button_radius", "label": "Border radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 26 },
+    { "type": "range", "id": "button_padding_x", "label": "Horizontal padding", "min": 10, "max": 60, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "button_padding_y", "label": "Vertical padding", "min": 6, "max": 30, "step": 2, "unit": "px", "default": 14 },
+
+    { "type": "header", "content": "Floating product image" },
+    { "type": "image_picker", "id": "product_image", "label": "Product image" },
+    { "type": "range", "id": "image_width", "label": "Image width", "min": 100, "max": 500, "step": 10, "unit": "px", "default": 260 },
+    { "type": "range", "id": "image_height", "label": "Image max height", "min": 150, "max": 700, "step": 10, "unit": "px", "default": 460 },
+    { "type": "range", "id": "image_initial_rotation", "label": "Initial rotation", "min": -45, "max": 45, "step": 1, "unit": "deg", "default": -14 },
+    { "type": "range", "id": "image_final_rotation", "label": "Final rotation", "min": -45, "max": 45, "step": 1, "unit": "deg", "default": -6 },
+    { "type": "range", "id": "image_initial_offset", "label": "Initial vertical offset", "min": 0, "max": 500, "step": 10, "unit": "px", "default": 220 },
+    { "type": "range", "id": "image_final_offset", "label": "Final vertical offset", "min": -100, "max": 100, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "image_horizontal_offset", "label": "Horizontal offset", "min": -200, "max": 200, "step": 10, "unit": "px", "default": -40 },
+    { "type": "range", "id": "image_scale", "label": "Image scale", "min": 0.5, "max": 1.5, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "image_opacity", "label": "Image opacity", "min": 0.2, "max": 1, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "image_zindex", "label": "Image z-index", "min": 0, "max": 10, "step": 1, "default": 3 },
+    { "type": "range", "id": "image_shadow_intensity", "label": "Shadow intensity", "min": 0, "max": 100, "step": 5, "default": 40 },
+    { "type": "range", "id": "image_shadow_blur", "label": "Shadow blur", "min": 0, "max": 80, "step": 5, "unit": "px", "default": 30 },
+
+    { "type": "header", "content": "Scroll animation" },
+    { "type": "checkbox", "id": "enable_pin", "label": "Enable pin & scroll animation", "default": true },
+    { "type": "checkbox", "id": "mobile_disable_pin", "label": "Disable pin on mobile", "default": true },
+    { "type": "range", "id": "pin_duration", "label": "Pin duration (extra scroll px)", "min": 200, "max": 2000, "step": 50, "unit": "px", "default": 800 },
+    { "type": "range", "id": "scroll_distance", "label": "Scroll distance for image animation (px)", "min": 100, "max": 2000, "step": 50, "unit": "px", "default": 800 },
+    { "type": "range", "id": "start_trigger_offset", "label": "Start trigger offset", "min": -500, "max": 500, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "end_trigger_offset", "label": "End trigger offset", "min": -500, "max": 500, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "animation_smoothness", "label": "Animation smoothness", "min": 0.1, "max": 1, "step": 0.1, "default": 0.2 },
+    { "type": "range", "id": "animation_speed_multiplier", "label": "Animation speed multiplier", "min": 0.1, "max": 3, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "easing_strength", "label": "Easing strength", "min": 0.2, "max": 3, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "translate_distance_multiplier", "label": "Translate distance multiplier", "min": 0, "max": 2, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "rotation_amount_multiplier", "label": "Rotation amount multiplier", "min": 0, "max": 2, "step": 0.1, "default": 1 },
+    { "type": "range", "id": "scale_amount_multiplier", "label": "Scale amount multiplier", "min": 0, "max": 2, "step": 0.1, "default": 1 },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "container_width", "label": "Container width", "min": 800, "max": 1800, "step": 20, "unit": "px", "default": 1300 },
+    { "type": "range", "id": "content_width", "label": "Content width", "min": 300, "max": 900, "step": 20, "unit": "px", "default": 640 },
+    { "type": "range", "id": "desktop_image_offset", "label": "Desktop image offset", "min": -200, "max": 200, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "tablet_image_offset", "label": "Tablet image offset", "min": -200, "max": 200, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "mobile_image_offset", "label": "Mobile image offset", "min": -200, "max": 200, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 60 },
+    { "type": "range", "id": "margin_top", "label": "Margin top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 0 },
+    { "type": "range", "id": "margin_bottom", "label": "Margin bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    { "name": "Energy Countdown Banner" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1085 @@
+{%- comment -%}
+  Section: Core Vitality Collection
+  Two-column layout: fixed text content on the left, a native-scroll
+  drag/swipe/trackpad-friendly product slider on the right, with a
+  progress-bar as the only navigation indicator. Slides are Shopify
+  blocks, so the count is fully dynamic.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+  assign bg_color = section.settings.bg_color | default: '#F4F4F4'
+
+  assign intensity = section.settings.card_shadow | default: 40
+  assign shadow_alpha = intensity | times: 0.002
+  assign shadow_blur = intensity | times: 0.6
+  assign shadow_y = intensity | times: 0.2
+  assign shadow_alpha_hover = shadow_alpha | times: 1.3
+  assign shadow_blur_hover = shadow_blur | times: 1.15
+  assign shadow_y_hover = shadow_y | times: 1.3
+
+  assign slides = section.blocks | where: 'type', 'slide'
+  assign slides_count = slides.size
+-%}
+
+<section
+  class="cvc"
+  id="cvc-{{ section_id }}"
+  data-cvc
+  data-slides-count="{{ slides_count }}"
+  data-desktop-visible="{{ section.settings.desktop_slides_visible }}"
+  data-tablet-visible="{{ section.settings.tablet_slides_visible }}"
+  data-mobile-visible="{{ section.settings.mobile_slides_visible }}"
+  data-card-width="{{ section.settings.card_width }}"
+  data-card-gap="{{ section.settings.card_gap }}"
+  style="
+    --cvc-bg: {{ bg_color }};
+    --cvc-container-width: {{ section.settings.container_width }}px;
+    --cvc-content-width: {{ section.settings.content_width }}px;
+    --cvc-column-gap: {{ section.settings.column_gap }}px;
+    --cvc-padding-top: {{ section.settings.padding_top }}px;
+    --cvc-padding-bottom: {{ section.settings.padding_bottom }}px;
+
+    --cvc-heading-size: {{ section.settings.heading_font_size }}px;
+    --cvc-description-size: {{ section.settings.description_font_size }}px;
+    --cvc-heading-weight: {{ section.settings.heading_weight }};
+    --cvc-heading-line-height: {{ section.settings.heading_line_height }};
+    --cvc-letter-spacing: {{ section.settings.letter_spacing }}px;
+    --cvc-text-color: {{ section.settings.text_color }};
+
+    --cvc-progress-height: {{ section.settings.progress_height }}px;
+    --cvc-progress-active: {{ section.settings.progress_active_color }};
+    --cvc-progress-inactive: {{ section.settings.progress_inactive_color }};
+    --cvc-progress-radius: {{ section.settings.progress_radius }}px;
+
+    --cvc-card-width: {{ section.settings.card_width }}px;
+    --cvc-card-w: {{ section.settings.card_width }}px;
+    --cvc-card-height: {{ section.settings.card_height }}px;
+    --cvc-card-radius: {{ section.settings.card_radius }}px;
+    --cvc-card-gap: {{ section.settings.card_gap }}px;
+    --cvc-image-size: {{ section.settings.image_size }}px;
+    --cvc-hover-zoom: {{ section.settings.hover_zoom }};
+    --cvc-hover-lift: {{ section.settings.hover_lift }}px;
+    --cvc-hover-bg: {{ section.settings.hover_bg_color | default: '#2F5233' }};
+    --cvc-hover-text: {{ section.settings.hover_text_color | default: '#FFFFFF' }};
+    --cvc-anim-speed: {{ section.settings.slide_animation_speed }}ms;
+
+    --cvc-card-shadow: 0 {{ shadow_y }}px {{ shadow_blur }}px rgba(20, 20, 20, {{ shadow_alpha }});
+    --cvc-card-shadow-hover: 0 {{ shadow_y_hover }}px {{ shadow_blur_hover }}px rgba(20, 20, 20, {{ shadow_alpha_hover }});
+  "
+>
+  <div class="cvc__container">
+    <div class="cvc__grid">
+
+      <div class="cvc__content">
+        <h2 class="cvc__heading">{{ heading | newline_to_br }}</h2>
+        <div class="cvc__description">{{ description }}</div>
+
+        {%- if slides_count > 0 -%}
+          <div class="cvc__progress" role="presentation">
+            <div class="cvc__progress-track">
+              <div class="cvc__progress-fill" data-progress-fill></div>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="cvc__slider">
+        <div
+          class="cvc__track"
+          data-track
+          tabindex="0"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="{{ heading | strip_newlines | escape }} products"
+        >
+          {%- for block in slides -%}
+            {%- assign img_scale = block.settings.image_width | divide: 100.0 -%}
+            {%- assign card_hover_bg = block.settings.hover_bg_color | default: section.settings.hover_bg_color | default: '#2F5233' -%}
+            {%- assign card_hover_text = block.settings.hover_text_color | default: section.settings.hover_text_color | default: '#FFFFFF' -%}
+            {%- if block.settings.hover_effect == 'animated' -%}
+              {%- assign img_hover_rotate = block.settings.image_rotation | plus: block.settings.hover_rotate_deg -%}
+              {%- assign img_hover_zoom = block.settings.hover_zoom_scale -%}
+            {%- else -%}
+              {%- assign img_hover_rotate = block.settings.image_rotation -%}
+              {%- assign img_hover_zoom = section.settings.hover_zoom -%}
+            {%- endif -%}
+            <div
+              class="cvc__card"
+              data-card
+              style="
+                --i: {{ forloop.index0 }};
+                --title-align: {{ block.settings.title_alignment }};
+                --title-size: {{ block.settings.title_font_size }}px;
+                --title-weight: {{ block.settings.title_font_weight }};
+                --img-scale: {{ img_scale }};
+                --img-actual-w: calc(var(--cvc-image-size) * var(--img-scale));
+                --img-rotate: {{ block.settings.image_rotation }}deg;
+                --img-offset: {{ block.settings.image_vertical_offset }}px;
+                --cvc-hover-bg: {{ card_hover_bg }};
+                --cvc-hover-text: {{ card_hover_text }};
+                --img-hover-rotate: {{ img_hover_rotate }}deg;
+                --img-hover-zoom: {{ img_hover_zoom }};
+              "
+              role="group"
+              aria-roledescription="slide"
+              aria-label="{{ forloop.index }} of {{ slides_count }}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}" class="cvc__card-link" aria-label="{{ block.settings.title | escape }}">{%- endif -%}
+              <div class="cvc__card-inner" data-card-inner>
+                <div class="cvc__image-wrap">
+                  {%- if block.settings.image != blank -%}
+                    <img
+                      class="cvc__image"
+                      src="{{ block.settings.image | image_url: width: 600 }}"
+                      srcset="
+                        {{ block.settings.image | image_url: width: 300 }} 300w,
+                        {{ block.settings.image | image_url: width: 600 }} 600w,
+                        {{ block.settings.image | image_url: width: 900 }} 900w
+                      "
+                      sizes="(max-width: 749px) 240px, 320px"
+                      alt="{{ block.settings.alt_text | default: block.settings.title | escape }}"
+                      width="{{ block.settings.image.width }}"
+                      height="{{ block.settings.image.height }}"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                </div>
+                {%- if block.settings.title != blank -%}
+                  <p class="cvc__title">{{ block.settings.title }}</p>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.link != blank -%}</a>{%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #cvc-{{ section_id }} {
+    position: relative;
+    background: var(--cvc-bg);
+    padding: var(--cvc-padding-top) 20px var(--cvc-padding-bottom);
+  }
+
+  #cvc-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #cvc-{{ section_id }} .cvc__container {
+    max-width: var(--cvc-container-width);
+    margin: 0 auto;
+  }
+
+  #cvc-{{ section_id }} .cvc__grid {
+    display: grid;
+    grid-template-columns: minmax(0, var(--cvc-content-width)) 1fr;
+    align-items: center;
+    gap: var(--cvc-column-gap);
+  }
+
+  /* ---- Left content ---- */
+  #cvc-{{ section_id }} .cvc__content {
+    min-width: 0;
+  }
+
+  #cvc-{{ section_id }} .cvc__heading {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-weight: var(--cvc-heading-weight);
+    font-size: var(--cvc-heading-size);
+    line-height: var(--cvc-heading-line-height);
+    letter-spacing: var(--cvc-letter-spacing);
+    color: var(--cvc-text-color);
+    text-transform: uppercase;
+    margin: 0 0 20px;
+  }
+
+  #cvc-{{ section_id }} .cvc__description {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: var(--cvc-description-size);
+    line-height: 1.7;
+    color: #5b5b5b;
+    margin: 0 0 32px;
+    max-width: 46ch;
+  }
+
+  #cvc-{{ section_id }} .cvc__description p {
+    margin: 0;
+  }
+
+  #cvc-{{ section_id }} .cvc__progress {
+    max-width: 240px;
+  }
+
+  #cvc-{{ section_id }} .cvc__progress-track {
+    position: relative;
+    width: 100%;
+    height: var(--cvc-progress-height);
+    background: var(--cvc-progress-inactive);
+    border-radius: var(--cvc-progress-radius);
+    overflow: hidden;
+  }
+
+  #cvc-{{ section_id }} .cvc__progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: var(--cvc-progress-active);
+    border-radius: var(--cvc-progress-radius);
+    transition: width 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: width;
+  }
+
+  /* ---- Slider ---- */
+  #cvc-{{ section_id }} .cvc__slider {
+    min-width: 0;
+  }
+
+  /* Desktop only: break the slider out of the centered max-width container
+     so it bleeds to the actual browser edge instead of stopping short at
+     the container boundary (which read as an abrupt, "cut off" list). The
+     content column is untouched - only the slider's right edge extends. */
+  @media (min-width: 1000px) {
+    #cvc-{{ section_id }} .cvc__slider {
+      margin-right: calc(-1 * max(0px, (100vw - var(--cvc-container-width)) / 2));
+      padding-right: calc(max(0px, (100vw - var(--cvc-container-width)) / 2) + 20px);
+    }
+  }
+
+  #cvc-{{ section_id }} .cvc__track {
+    display: flex;
+    gap: var(--cvc-card-gap);
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    /* top padding reserves room for the product image floating above the
+       card so overflow-x:auto (which forces overflow-y to clip) doesn't
+       cut it off; the negative margin cancels the padding's layout effect */
+    padding: calc(var(--cvc-image-size) + 24px) 4px 12px;
+    margin: calc(-1 * (var(--cvc-image-size) + 24px)) -4px -12px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+  }
+
+  #cvc-{{ section_id }} .cvc__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  #cvc-{{ section_id }} .cvc__track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  #cvc-{{ section_id }} .cvc__card {
+    position: relative;
+    flex: 0 0 var(--cvc-card-w);
+    max-width: var(--cvc-card-w);
+    scroll-snap-align: start;
+  }
+
+  #cvc-{{ section_id }} .cvc__card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  #cvc-{{ section_id }} .cvc__card-inner {
+    position: relative;
+    height: 100%;
+    min-height: var(--cvc-card-height);
+    background: #ffffff;
+    border-radius: var(--cvc-card-radius);
+    box-shadow: var(--cvc-card-shadow);
+    /* Fixed padding-top (not tied to image size) so the "Image size" setting
+       only changes the image itself, never the card's height - card height
+       is controlled solely by the "Card height" setting. */
+    padding: 88px 20px 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    flex-direction: column;
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s ease,
+      background-color var(--cvc-anim-speed) ease,
+      box-shadow var(--cvc-anim-speed) cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition-delay: calc(var(--i) * 70ms);
+  }
+
+  #cvc-{{ section_id }} .cvc__card-inner.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #cvc-{{ section_id }} .cvc__card:hover .cvc__card-inner {
+    background: var(--cvc-hover-bg);
+    box-shadow: var(--cvc-card-shadow-hover);
+  }
+
+  #cvc-{{ section_id }} .cvc__image-wrap {
+    position: absolute;
+    top: var(--img-offset);
+    left: 50%;
+    /* capped to the card's own width so a large "Image size" setting can't
+       overflow sideways and hide behind the neighboring card */
+    width: min(var(--img-actual-w), calc(var(--cvc-card-w) * 0.92));
+    transform: translate3d(-50%, 0, 0) rotate(var(--img-rotate));
+    transition: transform var(--cvc-anim-speed) cubic-bezier(0.22, 0.61, 0.36, 1);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  #cvc-{{ section_id }} .cvc__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.18));
+  }
+
+  #cvc-{{ section_id }} .cvc__card:hover .cvc__image-wrap {
+    transform:
+      translate3d(-50%, calc(var(--cvc-hover-lift) * -1), 0)
+      rotate(var(--img-hover-rotate))
+      scale(var(--img-hover-zoom));
+  }
+
+  #cvc-{{ section_id }} .cvc__title {
+    width: 100%;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: var(--title-size);
+    font-weight: var(--title-weight);
+    text-align: var(--title-align);
+    line-height: 1.3;
+    color: #141414;
+    transition: color var(--cvc-anim-speed) ease;
+  }
+
+  #cvc-{{ section_id }} .cvc__card:hover .cvc__title {
+    color: var(--cvc-hover-text);
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 999px) {
+    #cvc-{{ section_id }} .cvc__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #cvc-{{ section_id }} .cvc__content {
+      max-width: 100%;
+      margin-bottom: 32px;
+    }
+
+    #cvc-{{ section_id }} .cvc__description {
+      max-width: 60ch;
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #cvc-{{ section_id }} .cvc__heading {
+      font-size: min(var(--cvc-heading-size), 2.4rem);
+    }
+
+    #cvc-{{ section_id }} .cvc__progress {
+      max-width: 100%;
+    }
+
+    #cvc-{{ section_id }} .cvc__card-inner {
+      padding: 68px 16px 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cvc-{{ section_id }} .cvc__card-inner,
+    #cvc-{{ section_id }} .cvc__image-wrap,
+    #cvc-{{ section_id }} .cvc__progress-fill {
+      transition: none !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('cvc-{{ section_id }}');
+    if (!section) return;
+
+    var track = section.querySelector('[data-track]');
+    var progressFill = section.querySelector('[data-progress-fill]');
+    var cards = Array.prototype.slice.call(section.querySelectorAll('[data-card]'));
+    var totalSlides = parseInt(section.getAttribute('data-slides-count'), 10) || cards.length;
+
+    if (!track || !cards.length) return;
+
+    /* Read settings fresh each time rather than caching once - the Shopify
+       theme editor can replace this section's markup with new attribute
+       values without re-running this script from scratch. */
+    function readSettings() {
+      return {
+        desktopVisible: parseFloat(section.getAttribute('data-desktop-visible')) || 3.2,
+        tabletVisible: parseFloat(section.getAttribute('data-tablet-visible')) || 2.2,
+        mobileVisible: parseFloat(section.getAttribute('data-mobile-visible')) || 1.2,
+        cardWidth: parseFloat(section.getAttribute('data-card-width')) || 240,
+        cardGap: parseFloat(section.getAttribute('data-card-gap')) || 16
+      };
+    }
+
+    /* ---- Card width ----
+       Desktop: the "Card Width" setting is applied directly - what you set
+       is what you get, no other calculation overrides it.
+       Tablet/Mobile: card width shrinks to fit the requested number of
+       visible slides, but never grows past the "Card Width" setting. */
+    function updateCardWidth() {
+      var settings = readSettings();
+      var w = window.innerWidth;
+      var width;
+
+      if (w > 999) {
+        width = settings.cardWidth;
+      } else {
+        var viewportWidth = track.clientWidth;
+        var visible = w <= 749 ? settings.mobileVisible : settings.tabletVisible;
+        var fitted = (viewportWidth - settings.cardGap * (visible - 1)) / visible;
+        width = Math.min(settings.cardWidth, fitted);
+      }
+
+      width = Math.max(120, width);
+      section.style.setProperty('--cvc-card-w', width.toFixed(2) + 'px');
+    }
+
+    /* ---- Progress bar: width = (currentSlideIndex + 1) / totalSlides ---- */
+    function updateProgress() {
+      if (!progressFill || totalSlides < 1) return;
+
+      var cardRect = cards[0].getBoundingClientRect();
+      var gap = cards.length > 1 ? cards[1].getBoundingClientRect().left - cardRect.right : 0;
+      var step = cardRect.width + Math.max(gap, 0);
+      var maxScroll = track.scrollWidth - track.clientWidth;
+
+      var index = 0;
+      if (step > 0) {
+        index = Math.round(track.scrollLeft / step);
+      }
+      if (maxScroll <= 0) {
+        index = totalSlides - 1;
+      } else if (track.scrollLeft >= maxScroll - 2) {
+        index = totalSlides - 1;
+      }
+      index = Math.max(0, Math.min(index, totalSlides - 1));
+
+      var pct = ((index + 1) / totalSlides) * 100;
+      progressFill.style.width = pct + '%';
+    }
+
+    var resizeRaf = null;
+    function handleResize() {
+      if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+      resizeRaf = window.requestAnimationFrame(function () {
+        updateCardWidth();
+        updateProgress();
+      });
+    }
+
+    var scrollTicking = false;
+    track.addEventListener(
+      'scroll',
+      function () {
+        if (!scrollTicking) {
+          window.requestAnimationFrame(function () {
+            updateProgress();
+            scrollTicking = false;
+          });
+          scrollTicking = true;
+        }
+      },
+      { passive: true }
+    );
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('load', handleResize);
+
+    /* Re-measure when the Shopify theme editor updates this section's
+       settings live (it can replace the section markup without this
+       script re-running from scratch). */
+    document.addEventListener('shopify:section:load', function (e) {
+      if (e.target === section || (e.target && e.target.contains && e.target.contains(section))) {
+        handleResize();
+      }
+    });
+
+    /* ---- Mouse drag-to-scroll (touch/trackpad already work natively) ---- */
+    var isDragging = false;
+    var dragMoved = false;
+    var startX = 0;
+    var startScrollLeft = 0;
+
+    track.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      isDragging = true;
+      dragMoved = false;
+      startX = e.clientX;
+      startScrollLeft = track.scrollLeft;
+      track.classList.add('is-dragging');
+    });
+
+    window.addEventListener('pointermove', function (e) {
+      if (!isDragging) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) dragMoved = true;
+      track.scrollLeft = startScrollLeft - dx;
+    });
+
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      track.classList.remove('is-dragging');
+    }
+
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    track.addEventListener(
+      'click',
+      function (e) {
+        if (dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        dragMoved = false;
+      },
+      true
+    );
+
+    /* ---- Fade-in on scroll into view ---- */
+    var cardInners = Array.prototype.slice.call(section.querySelectorAll('[data-card-inner]'));
+    if ('IntersectionObserver' in window && cardInners.length) {
+      var revealObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      cardInners.forEach(function (el) {
+        revealObserver.observe(el);
+      });
+    } else {
+      cardInners.forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+    }
+
+    updateCardWidth();
+    updateProgress();
+  })();
+</script>
+
+{%- comment -%} ---------------- Schema ---------------- {%- endcomment -%}
+{% schema %}
+{
+  "name": "Core Vitality Collection",
+  "tag": "section",
+  "class": "shopify-section--core-vitality-collection",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Core Vitality\nCollection"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Discover our thoughtfully crafted wellness essentials designed to support your everyday health journey. From protein powders and health gummies to nut butters and superfood blends, each product combines clean ingredients with real benefits.</p>"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#F4F4F4"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "label": "Container width",
+      "min": 1000,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1300
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content width",
+      "min": 280,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 380
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 20,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 90
+    },
+
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semibold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extrabold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "label": "Heading line height",
+      "min": 0.9,
+      "max": 1.4,
+      "step": 0.1,
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": -2,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0.5
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#141414"
+    },
+
+    {
+      "type": "header",
+      "content": "Progress bar"
+    },
+    {
+      "type": "range",
+      "id": "progress_height",
+      "label": "Height",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "progress_active_color",
+      "label": "Active color",
+      "default": "#141414"
+    },
+    {
+      "type": "color",
+      "id": "progress_inactive_color",
+      "label": "Inactive color",
+      "default": "#D8D8D8"
+    },
+    {
+      "type": "range",
+      "id": "progress_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width",
+      "min": 160,
+      "max": 420,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Card height",
+      "min": 180,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card radius",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "card_shadow",
+      "label": "Card shadow intensity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size (max)",
+      "min": 80,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "hover_zoom",
+      "label": "Hover zoom scale",
+      "min": 1,
+      "max": 1.3,
+      "step": 0.1,
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "hover_lift",
+      "label": "Hover lift distance",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "hover_bg_color",
+      "label": "Hover card background color",
+      "default": "#2F5233"
+    },
+    {
+      "type": "color",
+      "id": "hover_text_color",
+      "label": "Hover card text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "slide_animation_speed",
+      "label": "Slide animation speed",
+      "min": 100,
+      "max": 800,
+      "step": 20,
+      "unit": "ms",
+      "default": 400
+    },
+
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "range",
+      "id": "desktop_slides_visible",
+      "label": "Slides visible",
+      "min": 1,
+      "max": 6,
+      "step": 0.1,
+      "default": 3.2
+    },
+
+    {
+      "type": "header",
+      "content": "Tablet"
+    },
+    {
+      "type": "range",
+      "id": "tablet_slides_visible",
+      "label": "Slides visible",
+      "min": 1,
+      "max": 4,
+      "step": 0.1,
+      "default": 2.2
+    },
+
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "range",
+      "id": "mobile_slides_visible",
+      "label": "Slides visible",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Product Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Product title",
+          "default": "Product Title"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Product link (optional)"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Image alt text (optional)"
+        },
+        {
+          "type": "select",
+          "id": "title_alignment",
+          "label": "Title alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 12,
+          "max": 28,
+          "step": 1,
+          "unit": "px",
+          "default": 18
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semibold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extrabold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "Image width",
+          "min": 40,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 60
+        },
+        {
+          "type": "range",
+          "id": "image_rotation",
+          "label": "Image rotation",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "unit": "deg",
+          "default": -10
+        },
+        {
+          "type": "range",
+          "id": "image_vertical_offset",
+          "label": "Image vertical offset",
+          "min": -100,
+          "max": 20,
+          "step": 2,
+          "unit": "px",
+          "default": -64
+        },
+        {
+          "type": "header",
+          "content": "Hover colors"
+        },
+        {
+          "type": "color",
+          "id": "hover_bg_color",
+          "label": "Hover background color",
+          "info": "Leave blank to use the section's default hover background color."
+        },
+        {
+          "type": "color",
+          "id": "hover_text_color",
+          "label": "Hover text color",
+          "info": "Leave blank to use the section's default hover text color."
+        },
+        {
+          "type": "header",
+          "content": "Hover image animation"
+        },
+        {
+          "type": "select",
+          "id": "hover_effect",
+          "label": "Hover effect",
+          "options": [
+            { "value": "normal", "label": "Normal" },
+            { "value": "animated", "label": "Animated (rotate + zoom)" }
+          ],
+          "default": "normal"
+        },
+        {
+          "type": "range",
+          "id": "hover_rotate_deg",
+          "label": "Hover rotation (added, clockwise)",
+          "min": 0,
+          "max": 45,
+          "step": 1,
+          "unit": "deg",
+          "default": 25,
+          "info": "Only applies when Hover effect is set to Animated."
+        },
+        {
+          "type": "range",
+          "id": "hover_zoom_scale",
+          "label": "Hover zoom scale",
+          "min": 1,
+          "max": 1.5,
+          "step": 0.1,
+          "default": 1.2,
+          "info": "Only applies when Hover effect is set to Animated."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Core Vitality Collection",
+      "blocks": [
+        { "type": "slide", "settings": { "title": "Protein Powders", "image_rotation": -15 } },
+        { "type": "slide", "settings": { "title": "Health Gummies", "image_rotation": -10 } },
+        { "type": "slide", "settings": { "title": "Nut Butters", "image_rotation": 8 } },
+        { "type": "slide", "settings": { "title": "Syrups & Energy Drinks", "image_rotation": 12 } }
+      ]
+    }
+  ]
+}
+{% endschema %}
