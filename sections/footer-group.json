@@ -14,186 +14,183 @@
     "footer_m9NzUG": {
       "type": "footer",
       "blocks": {
-        "group_H6VpwJ": {
-          "type": "group",
+        "col_quick_links": {
+          "type": "link_column",
           "settings": {
-            "content_direction": "column",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "flex-start",
-            "vertical_alignment": "center",
-            "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "center",
-            "gap": 6,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "background_media": "none",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "toggle_overlay": false,
-            "overlay_color": "#00000026",
-            "overlay_style": "solid",
-            "gradient_direction": "to top",
-            "open_in_new_tab": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "text_LWt8Pz": {
-              "type": "text",
-              "settings": {
-                "text": "<h2>Join our email list</h2>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "h4",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "text_f9CFLH": {
-              "type": "text",
-              "settings": {
-                "text": "<p>Get exclusive deals and early access to new products.</p>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "text_LWt8Pz",
-            "text_f9CFLH"
-          ]
+            "heading": "Quick Links"
+          }
         },
-        "email_signup_crihX7": {
-          "type": "email-signup",
+        "link_home": {
+          "type": "footer_link",
           "settings": {
-            "width": "fill",
-            "custom_width": 100,
-            "heading_preset": "h3",
-            "border_style": "all",
-            "input_style": "custom",
-            "border_width": 1,
-            "border_radius": 100,
-            "input_background_color": "{{ settings.color_palette.background }}",
-            "input_text_color": "{{ settings.color_palette.color1 }}",
-            "input_border_color": "{{ settings.color_palette.color2 }}",
-            "input_type_preset": "paragraph",
-            "style_class": "button-unstyled",
-            "display_type": "arrow",
-            "label": "Sign up",
-            "integrated_button": true,
-            "button_type_preset": "paragraph",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
+            "label": "Home",
+            "url": "/"
+          }
+        },
+        "link_shop": {
+          "type": "footer_link",
+          "settings": {
+            "label": "Shop All",
+            "url": "/collections/all"
+          }
+        },
+        "link_about": {
+          "type": "footer_link",
+          "settings": {
+            "label": "About Us",
+            "url": "/pages/about-us"
+          }
+        },
+        "link_contact": {
+          "type": "footer_link",
+          "settings": {
+            "label": "Contact",
+            "url": "/pages/contact"
+          }
+        },
+        "col_customer_care": {
+          "type": "link_column",
+          "settings": {
+            "heading": "Customer Care"
+          }
+        },
+        "link_track_order": {
+          "type": "footer_link",
+          "settings": {
+            "label": "Track Order",
+            "url": "/pages/track-order"
+          }
+        },
+        "link_shipping": {
+          "type": "footer_link",
+          "settings": {
+            "label": "Shipping Policy",
+            "url": "/policies/shipping-policy"
+          }
+        },
+        "link_returns": {
+          "type": "footer_link",
+          "settings": {
+            "label": "Return Policy",
+            "url": "/policies/refund-policy"
+          }
+        },
+        "link_faq": {
+          "type": "footer_link",
+          "settings": {
+            "label": "FAQs",
+            "url": "/pages/faq"
+          }
+        },
+        "badge_shield": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "shield",
+            "text": "Licensed Pharmacy"
+          }
+        },
+        "badge_pill": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "pill",
+            "text": "100% Genuine Products"
+          }
+        },
+        "badge_truck": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "truck",
+            "text": "Fast, Reliable Delivery"
+          }
+        },
+        "badge_lock": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "lock",
+            "text": "Secure Checkout"
+          }
+        },
+        "social_facebook": {
+          "type": "social_link",
+          "settings": {
+            "platform": "facebook",
+            "url": "https://www.facebook.com/"
+          }
+        },
+        "social_instagram": {
+          "type": "social_link",
+          "settings": {
+            "platform": "instagram",
+            "url": "https://www.instagram.com/"
+          }
+        },
+        "social_whatsapp": {
+          "type": "social_link",
+          "settings": {
+            "platform": "whatsapp",
+            "url": "https://wa.me/"
+          }
+        },
+        "legal_privacy": {
+          "type": "legal_link",
+          "settings": {
+            "label": "Privacy Policy",
+            "url": "/policies/privacy-policy"
+          }
+        },
+        "legal_terms": {
+          "type": "legal_link",
+          "settings": {
+            "label": "Terms of Service",
+            "url": "/policies/terms-of-service"
+          }
         }
       },
       "block_order": [
-        "group_H6VpwJ",
-        "email_signup_crihX7"
+        "col_quick_links",
+        "link_home",
+        "link_shop",
+        "link_about",
+        "link_contact",
+        "col_customer_care",
+        "link_track_order",
+        "link_shipping",
+        "link_returns",
+        "link_faq",
+        "badge_shield",
+        "badge_pill",
+        "badge_truck",
+        "badge_lock",
+        "social_facebook",
+        "social_instagram",
+        "social_whatsapp",
+        "legal_privacy",
+        "legal_terms"
       ],
       "name": "t:names.footer",
       "settings": {
-        "section_width": "page-width",
-        "gap": 20,
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 30,
-        "padding-block-end": 30
-      }
-    },
-    "footer_utilities_jLGE8U": {
-      "type": "footer-utilities",
-      "blocks": {
-        "footer_copyright_jweRK8": {
-          "type": "footer-copyright",
-          "settings": {
-            "show_powered_by": true,
-            "font_size": "0.75rem",
-            "case": "none"
-          },
-          "blocks": {}
-        },
-        "footer_policy_list_VCdnpa": {
-          "type": "footer-policy-list",
-          "settings": {
-            "font_size": "0.75rem",
-            "case": "none"
-          },
-          "blocks": {}
-        },
-        "social_links_Ew63Kq": {
-          "type": "social-links",
-          "settings": {
-            "facebook_url": "https://www.facebook.com/",
-            "instagram_url": "https://www.instagram.com/",
-            "youtube_url": "https://www.youtube.com/",
-            "tiktok_url": "https://www.tiktok.com/",
-            "twitter_url": "https://x.com/"
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "footer_copyright_jweRK8",
-        "footer_policy_list_VCdnpa",
-        "social_links_Ew63Kq"
-      ],
-      "name": "t:names.utilities",
-      "settings": {
-        "section_width": "page-width",
-        "gap": 24,
-        "divider_thickness": 1,
-        "divider_color": "{{ settings.color_palette.color2 }}",
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 20,
-        "padding-block-end": 48
+        "logo_text": "Sri Sai Pharmacy",
+        "tagline": "Your trusted neighbourhood pharmacy for genuine medicines, wellness products and caring service.",
+        "show_contact": true,
+        "contact_address": "12 Gandhi Road, Chennai, Tamil Nadu 600001",
+        "contact_phone": "+91 98765 43210",
+        "contact_email": "care@srisaipharmacy.com",
+        "show_newsletter": true,
+        "newsletter_heading": "Stay in the loop",
+        "newsletter_text": "Get health tips, offers and restock alerts in your inbox.",
+        "newsletter_placeholder": "Enter your email",
+        "newsletter_button_text": "Subscribe",
+        "show_trust_badges": true,
+        "show_payment_icons": true,
+        "background_color": "#123321",
+        "text_color": "#C9D6CD",
+        "heading_color": "#FFFFFF",
+        "accent_color": "#6FCF97",
+        "border_color": "#2B4D37"
       }
     }
   },
   "order": [
-    "footer_m9NzUG",
-    "footer_utilities_jLGE8U"
+    "footer_m9NzUG"
   ]
 }

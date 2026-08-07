@@ -1,263 +1,715 @@
+{%- comment -%}
+  Section: Footer (Sri Sai Pharmacy)
+  Self-contained footer matching the header's design language. Fully
+  block/schema driven: logo, tagline, newsletter, link columns (grouped the
+  same way the header's mega-menu tiles are — a "Footer Link" block attaches
+  to whichever "Link Column" block precedes it), trust badges, social links,
+  payment icons and a bottom legal bar.
+{%- endcomment -%}
 
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
 
-{% liquid
-  if section.settings.background_color != blank
-    render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign accent_color = s.accent_color | default: '#6FCF97'
+  assign bg_color = s.background_color | default: '#123321'
+  assign copyright = s.copyright_text
+  if copyright == blank
+    assign year = 'now' | date: '%Y'
+    assign copyright = shop.name | append: ' © ' | append: year | append: '. All rights reserved.'
   endif
-%}
+-%}
 
-<div
-  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
-></div>
-<div
-  class="section section--{{ section.settings.section_width }}{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+<footer
+  class="ssf"
+  id="ssf-{{ section_id }}"
+  style="
+    --ssf-bg: {{ bg_color }};
+    --ssf-text: {{ s.text_color | default: 'rgba(255,255,255,0.75)' }};
+    --ssf-heading: {{ s.heading_color | default: '#ffffff' }};
+    --ssf-accent: {{ accent_color }};
+    --ssf-border: {{ s.border_color | default: 'rgba(255,255,255,0.12)' }};
+  "
 >
-  {% liquid
-    assign total_blocks = section.blocks.size
+  {%- if s.show_trust_badges and section.blocks.size > 0 -%}
+    {%- assign has_badge = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'trust_badge' -%}{%- assign has_badge = true -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if has_badge -%}
+      <div class="ssf__badges">
+        <div class="ssf__badges-inner">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'trust_badge' -%}
+              {%- assign bs = block.settings -%}
+              <div class="ssf__badge" {{ block.shopify_attributes }}>
+                <span class="ssf__badge-icon" aria-hidden="true">
+                  {%- case bs.icon -%}
+                    {%- when 'shield' -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {%- when 'truck' -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M2 6h11v10H2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M13 10h4l4 3.5V16h-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="1.6" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="18" r="1.6" stroke="currentColor" stroke-width="1.5"/></svg>
+                    {%- when 'lock' -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10.5" width="15" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                    {%- when 'leaf' -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 4C10 4 4 10 4 20c10 0 16-6 16-16Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 18C10 14 14 10 19 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    {%- when 'pill' -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="9.5" width="17" height="7" rx="3.5" transform="rotate(-35 12 12)" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5 16.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    {%- else -%}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  {%- endcase -%}
+                </span>
+                <span class="ssf__badge-text">{{ bs.text }}</span>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
 
-    # Grid layout calculations
-    assign grid_columns = total_blocks | at_most: 4
+  <div class="ssf__main">
+    <div class="ssf__main-inner">
+      <div class="ssf__brand">
+        <a href="{{ routes.root_url }}" class="ssf__logo" aria-label="{{ shop.name }}">
+          {%- if s.logo != blank -%}
+            <img
+              src="{{ s.logo | image_url: width: 320 }}"
+              srcset="{{ s.logo | image_url: width: 160 }} 160w, {{ s.logo | image_url: width: 320 }} 320w"
+              alt="{{ shop.name }}"
+              width="{{ s.logo.width }}"
+              height="{{ s.logo.height }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            <span class="ssf__logo-text">{{ s.logo_text | default: shop.name }}</span>
+          {%- endif -%}
+        </a>
 
-    # Calculate last row counts using modulo arithmetic
-    # last_row_count = (total_blocks - 1) % N + 1
-    assign last_row_count = total_blocks | minus: 1 | modulo: 4 | plus: 1
-    assign tablet_last_row_count = total_blocks | minus: 1 | modulo: 2 | plus: 1
+        {%- if s.tagline != blank -%}<p class="ssf__tagline">{{ s.tagline }}</p>{%- endif -%}
 
-    # Check if there are orphaned elements (single item in last row)
-    assign has_isolated_grid_item_desktop = false
-    assign has_isolated_grid_item_tablet = false
+        {%- if s.show_contact -%}
+          <ul class="ssf__contact">
+            {%- if s.contact_address != blank -%}
+              <li>
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" d="M10 18s6-5.5 6-10a6 6 0 1 0-12 0c0 4.5 6 10 6 10Z"/><circle cx="10" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/></svg>
+                <span>{{ s.contact_address }}</span>
+              </li>
+            {%- endif -%}
+            {%- if s.contact_phone != blank -%}
+              <li>
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M4 3h3l2 4.5-2 1.5c.9 2.2 2.8 4.1 5 5l1.5-2 4.5 2v3c0 1-1 2-2 2C9.5 19 1 10.5 1 5c0-1 1-2 2-2z"/></svg>
+                <a href="tel:{{ s.contact_phone | remove: ' ' }}">{{ s.contact_phone }}</a>
+              </li>
+            {%- endif -%}
+            {%- if s.contact_email != blank -%}
+              <li>
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4.5" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="m3.5 5.5 6.5 5 6.5-5"/></svg>
+                <a href="mailto:{{ s.contact_email }}">{{ s.contact_email }}</a>
+              </li>
+            {%- endif -%}
+          </ul>
+        {%- endif -%}
 
-    if total_blocks > 4 and last_row_count == 1
-      assign has_isolated_grid_item_desktop = true
-    endif
+        {%- assign has_social = false -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'social_link' -%}{%- assign has_social = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if has_social -%}
+          <ul class="ssf__social">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'social_link' -%}
+                {%- assign bs = block.settings -%}
+                {%- if bs.url != blank -%}
+                  <li {{ block.shopify_attributes }}>
+                    <a href="{{ bs.url }}" class="ssf__social-link" aria-label="{{ bs.platform }}" target="_blank" rel="noopener">
+                      {%- case bs.platform -%}
+                        {%- when 'facebook' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.2h-3.1V7.7c0-.9.25-1.5 1.6-1.5H17V3.3C16.6 3.2 15.5 3 14.3 3c-2.5 0-4.3 1.5-4.3 4.4v2.4H7.3v3.2H10V21h3.5Z"/></svg>
+                        {%- when 'instagram' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>
+                        {%- when 'twitter' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 5.9c-.7.3-1.4.5-2.2.6.8-.5 1.4-1.2 1.7-2.2-.7.5-1.6.8-2.4 1a3.8 3.8 0 0 0-6.5 3.5A10.9 10.9 0 0 1 3 4.9a3.9 3.9 0 0 0 1.2 5.2c-.6 0-1.2-.2-1.7-.5v.1c0 1.9 1.3 3.4 3.1 3.8-.5.1-1.1.2-1.6.1.5 1.5 1.9 2.6 3.6 2.7A7.6 7.6 0 0 1 2 17.6a10.8 10.8 0 0 0 5.9 1.7c7 0 10.9-5.9 10.9-11v-.5c.8-.5 1.4-1.2 1.9-1.9Z"/></svg>
+                        {%- when 'youtube' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="5.5" width="19" height="13" rx="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 9.5v5l4.3-2.5-4.3-2.5Z" fill="currentColor"/></svg>
+                        {%- when 'whatsapp' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.5.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3Z"/></svg>
+                        {%- when 'pinterest' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.6 19.3c0-.8 0-1.7.2-2.5l1.4-6s-.3-.7-.3-1.7c0-1.6.9-2.8 2.1-2.8 1 0 1.5.7 1.5 1.6 0 1-.6 2.4-1 3.8-.2.9.5 1.7 1.4 1.7 1.7 0 3-1.8 3-4.3 0-2.3-1.6-3.9-4-3.9-2.7 0-4.3 2-4.3 4.1 0 .8.3 1.6.7 2.1a.3.3 0 0 1 .1.3l-.3 1c0 .2-.2.3-.4.2-1.3-.6-2.1-2.4-2.1-3.9 0-3.2 2.3-6.1 6.7-6.1 3.5 0 6.2 2.5 6.2 5.8 0 3.5-2.2 6.3-5.2 6.3-1 0-2-.5-2.3-1.2l-.6 2.4c-.2.9-.8 2-1.2 2.6A10 10 0 1 0 12 2Z"/></svg>
+                        {%- when 'linkedin' -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.4H3.5V20h3.4V8.4ZM5.2 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM20.5 20h-3.4v-5.9c0-1.4 0-3.2-1.9-3.2s-2.3 1.5-2.3 3.1V20h-3.4V8.4h3.3v1.6h.1c.5-.9 1.6-1.9 3.3-1.9 3.6 0 4.3 2.4 4.3 5.4V20Z"/></svg>
+                        {%- else -%}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg>
+                      {%- endcase -%}
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
 
-    if total_blocks == 5
-      assign has_isolated_grid_item_tablet = true
-    endif
-  %}
-  <div
-    class="
-      footer-content
-      spacing-style
-      {% if has_isolated_grid_item_desktop %}footer-content--isolated-grid-item-desktop{% endif %}
-      {% if has_isolated_grid_item_tablet %}footer-content--isolated-grid-item-tablet{% endif %}
-    "
-    style="
-      {%  render 'spacing-style', settings: section.settings %}
-      --footer-gap: {{ section.settings.gap }}px;
-      --grid-columns: {{ grid_columns }};
-      --last-row-count: {{ last_row_count }};
-      --tablet-last-row-count: {{ tablet_last_row_count }};
-    "
-  >
-    {% content_for 'blocks' %}
+      {%- assign has_column = false -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'link_column' -%}{%- assign has_column = true -%}{%- endif -%}
+      {%- endfor -%}
+      {%- if has_column -%}
+        <div class="ssf__columns">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'link_column' -%}
+              {%- assign bs = block.settings -%}
+              <div class="ssf__column" {{ block.shopify_attributes }}>
+                {%- if bs.heading != blank -%}<h3 class="ssf__column-heading">{{ bs.heading }}</h3>{%- endif -%}
+                <ul class="ssf__column-list">
+                  {%- assign links_offset = forloop.index0 | plus: 1 -%}
+                  {%- for link_block in section.blocks offset: links_offset -%}
+                    {%- if link_block.type == 'footer_link' -%}
+                      <li>
+                        <a href="{{ link_block.settings.url | default: '#' }}" {{ link_block.shopify_attributes }}>{{ link_block.settings.label }}</a>
+                      </li>
+                    {%- else -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if s.show_newsletter -%}
+        <div class="ssf__newsletter">
+          {%- if s.newsletter_heading != blank -%}<h3 class="ssf__column-heading">{{ s.newsletter_heading }}</h3>{%- endif -%}
+          {%- if s.newsletter_text != blank -%}<p class="ssf__newsletter-text">{{ s.newsletter_text }}</p>{%- endif -%}
+
+          {%- form 'customer', class: 'ssf__newsletter-form' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <div class="ssf__newsletter-field">
+              <label class="visually-hidden" for="ssf-newsletter-email-{{ section_id }}">Email</label>
+              <input
+                type="email"
+                name="contact[email]"
+                id="ssf-newsletter-email-{{ section_id }}"
+                class="ssf__newsletter-input"
+                placeholder="{{ s.newsletter_placeholder | default: 'Enter your email' }}"
+                required
+              >
+              <button type="submit" class="ssf__newsletter-btn">{{ s.newsletter_button_text | default: 'Subscribe' }}</button>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <p class="ssf__newsletter-message ssf__newsletter-message--success">Thanks for subscribing!</p>
+            {%- elsif form.errors -%}
+              <p class="ssf__newsletter-message ssf__newsletter-message--error">{{ form.errors.messages.email }}</p>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      {%- endif -%}
+    </div>
   </div>
-</div>
 
-{% stylesheet %}
-  .footer-content {
-    contain: content;
-    content-visibility: auto;
+  <div class="ssf__bottom">
+    <div class="ssf__bottom-inner">
+      <p class="ssf__copyright">{{ copyright }}</p>
+
+      {%- assign has_legal = false -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'legal_link' -%}{%- assign has_legal = true -%}{%- endif -%}
+      {%- endfor -%}
+      {%- if has_legal -%}
+        <ul class="ssf__legal">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'legal_link' -%}
+              <li {{ block.shopify_attributes }}><a href="{{ block.settings.url | default: '#' }}">{{ block.settings.label }}</a></li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if s.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+        <ul class="ssf__payments">
+          {%- for type in shop.enabled_payment_types -%}
+            <li>{{ type | payment_type_svg_tag: class: 'ssf__payment-icon' }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+<style>
+  #ssf-{{ section_id }} {
+    background: var(--ssf-bg);
+    color: var(--ssf-text);
+    font-family: 'Poppins', sans-serif;
+  }
+
+  #ssf-{{ section_id }} *,
+  #ssf-{{ section_id }} *::before,
+  #ssf-{{ section_id }} *::after {
+    box-sizing: border-box;
+  }
+
+  #ssf-{{ section_id }} a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #ssf-{{ section_id }} ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ---- Trust badges ---- */
+  #ssf-{{ section_id }} .ssf__badges {
+    border-bottom: 1px solid var(--ssf-border);
+  }
+
+  #ssf-{{ section_id }} .ssf__badges-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 22px 32px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 28px 44px;
+  }
+
+  #ssf-{{ section_id }} .ssf__badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #ssf-{{ section_id }} .ssf__badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ssf-accent);
+    flex-shrink: 0;
+  }
+
+  #ssf-{{ section_id }} .ssf__badge-text {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ssf-heading);
+  }
+
+  /* ---- Main ---- */
+  #ssf-{{ section_id }} .ssf__main-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 56px 32px 40px;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--footer-gap);
-    align-items: start;
+    grid-template-columns: 1.2fr auto 1fr;
+    gap: 48px;
   }
 
-  .footer-content .menu__heading__default {
-    font-weight: var(--font-heading--weight);
+  #ssf-{{ section_id }} .ssf__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 320px;
   }
 
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .footer-content {
-      grid-template-columns: repeat(min(var(--grid-columns), 3), 1fr);
-      grid-auto-flow: row;
+  #ssf-{{ section_id }} .ssf__logo img {
+    max-height: 40px;
+    width: auto;
+    display: block;
+  }
+
+  #ssf-{{ section_id }} .ssf__logo-text {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--ssf-heading);
+  }
+
+  #ssf-{{ section_id }} .ssf__tagline {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ssf-text);
+    margin: 0;
+  }
+
+  #ssf-{{ section_id }} .ssf__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #ssf-{{ section_id }} .ssf__contact li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  #ssf-{{ section_id }} .ssf__contact svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--ssf-accent);
+  }
+
+  #ssf-{{ section_id }} .ssf__contact a:hover {
+    color: var(--ssf-accent);
+  }
+
+  #ssf-{{ section_id }} .ssf__social {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  #ssf-{{ section_id }} .ssf__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  #ssf-{{ section_id }} .ssf__social-link:hover {
+    background: var(--ssf-accent);
+    color: #123321;
+    transform: translateY(-2px);
+  }
+
+  #ssf-{{ section_id }} .ssf__columns {
+    display: flex;
+    gap: 40px;
+  }
+
+  #ssf-{{ section_id }} .ssf__column-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ssf-heading);
+    margin: 0 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  #ssf-{{ section_id }} .ssf__column-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  #ssf-{{ section_id }} .ssf__column-list a {
+    font-size: 13.5px;
+    color: var(--ssf-text);
+    transition: color 0.2s ease;
+  }
+
+  #ssf-{{ section_id }} .ssf__column-list a:hover {
+    color: var(--ssf-accent);
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter {
+    max-width: 320px;
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ssf-text);
+    margin: 0 0 16px;
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-field {
+    display: flex;
+    border: 1px solid var(--ssf-border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    color: var(--ssf-heading);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    padding: 12px 16px;
+    outline: none;
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-btn {
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    background: var(--ssf-accent);
+    color: #123321;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 0 20px;
+    transition: filter 0.2s ease;
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-btn:hover {
+    filter: brightness(1.08);
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-message {
+    font-size: 12.5px;
+    margin: 10px 0 0;
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-message--success {
+    color: var(--ssf-accent);
+  }
+
+  #ssf-{{ section_id }} .ssf__newsletter-message--error {
+    color: #ff8a8a;
+  }
+
+  /* ---- Bottom bar ---- */
+  #ssf-{{ section_id }} .ssf__bottom {
+    border-top: 1px solid var(--ssf-border);
+  }
+
+  #ssf-{{ section_id }} .ssf__bottom-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+  }
+
+  #ssf-{{ section_id }} .ssf__copyright {
+    font-size: 12.5px;
+    color: var(--ssf-text);
+    margin: 0;
+  }
+
+  #ssf-{{ section_id }} .ssf__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+  }
+
+  #ssf-{{ section_id }} .ssf__legal a {
+    font-size: 12.5px;
+    color: var(--ssf-text);
+    transition: color 0.2s ease;
+  }
+
+  #ssf-{{ section_id }} .ssf__legal a:hover {
+    color: var(--ssf-accent);
+  }
+
+  #ssf-{{ section_id }} .ssf__payments {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #ssf-{{ section_id }} .ssf__payment-icon {
+    height: 22px;
+    width: auto;
+    border-radius: 4px;
+  }
+
+  /* ---- Tablet ---- */
+  @media screen and (max-width: 989px) {
+    #ssf-{{ section_id }} .ssf__main-inner {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 40px;
     }
 
-    .footer-content[style*='--grid-columns: 4'] {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .footer-content--isolated-grid-item-tablet > :last-child {
+    #ssf-{{ section_id }} .ssf__brand {
       grid-column: 1 / -1;
+      max-width: none;
     }
   }
 
-  @media screen and (min-width: 990px) {
-    .footer-content {
-      grid-template-columns: repeat(var(--grid-columns), 1fr);
+  /* ---- Mobile ---- */
+  @media screen and (max-width: 749px) {
+    #ssf-{{ section_id }} .ssf__badges-inner {
+      padding: 18px 20px;
+      gap: 16px 28px;
     }
 
-    /* Single item centered */
-    .footer-content[style*='--grid-columns: 1'] {
-      justify-items: center;
+    #ssf-{{ section_id }} .ssf__main-inner {
+      grid-template-columns: 1fr;
+      padding: 40px 20px 32px;
+      gap: 32px;
     }
 
-    .footer-content--isolated-grid-item-desktop > :last-child {
-      grid-column: 1 / -1;
+    #ssf-{{ section_id }} .ssf__columns {
+      flex-wrap: wrap;
+      gap: 28px 40px;
+    }
+
+    #ssf-{{ section_id }} .ssf__newsletter {
+      max-width: none;
+    }
+
+    #ssf-{{ section_id }} .ssf__bottom-inner {
+      padding: 18px 20px 26px;
+      justify-content: center;
+      text-align: center;
     }
   }
-{% endstylesheet %}
+</style>
 
 {% schema %}
 {
-  "name": "t:names.footer",
+  "name": "Footer",
   "class": "section-wrapper",
+  "settings": [
+    { "type": "header", "content": "Logo & tagline" },
+    { "type": "image_picker", "id": "logo", "label": "Logo image" },
+    { "type": "text", "id": "logo_text", "label": "Logo text (used if no image)", "default": "Sri Sai Pharmacy" },
+    { "type": "textarea", "id": "tagline", "label": "Tagline", "default": "Your trusted neighbourhood pharmacy for genuine medicines, wellness products and caring service." },
+
+    { "type": "header", "content": "Contact info" },
+    { "type": "checkbox", "id": "show_contact", "label": "Show contact details", "default": true },
+    { "type": "textarea", "id": "contact_address", "label": "Address", "default": "12 Gandhi Road, Chennai, Tamil Nadu 600001" },
+    { "type": "text", "id": "contact_phone", "label": "Phone number", "default": "+91 98765 43210" },
+    { "type": "text", "id": "contact_email", "label": "Email", "default": "care@srisaipharmacy.com" },
+
+    { "type": "header", "content": "Newsletter" },
+    { "type": "checkbox", "id": "show_newsletter", "label": "Show newsletter signup", "default": true },
+    { "type": "text", "id": "newsletter_heading", "label": "Heading", "default": "Stay in the loop" },
+    { "type": "text", "id": "newsletter_text", "label": "Text", "default": "Get health tips, offers and restock alerts in your inbox." },
+    { "type": "text", "id": "newsletter_placeholder", "label": "Input placeholder", "default": "Enter your email" },
+    { "type": "text", "id": "newsletter_button_text", "label": "Button text", "default": "Subscribe" },
+
+    { "type": "header", "content": "Trust badges" },
+    { "type": "checkbox", "id": "show_trust_badges", "label": "Show trust badges row", "default": true },
+
+    { "type": "header", "content": "Bottom bar" },
+    { "type": "text", "id": "copyright_text", "label": "Copyright text", "info": "Leave blank to auto-generate from your store name and the current year." },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Show accepted payment icons", "default": true },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#123321" },
+    { "type": "color", "id": "text_color", "label": "Body text", "default": "#C9D6CD" },
+    { "type": "color", "id": "heading_color", "label": "Headings", "default": "#FFFFFF" },
+    { "type": "color", "id": "accent_color", "label": "Accent (links, icons, button)", "default": "#6FCF97" },
+    { "type": "color", "id": "border_color", "label": "Dividers", "default": "#2B4D37" }
+  ],
   "blocks": [
     {
-      "type": "_divider"
+      "type": "link_column",
+      "name": "Link Column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Column heading", "default": "Quick Links" }
+      ]
     },
     {
-      "type": "@app"
+      "type": "footer_link",
+      "name": "Footer Link",
+      "settings": [
+        { "type": "paragraph", "content": "Place this block directly below the Link Column it belongs to." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Home" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
     },
     {
-      "type": "button"
+      "type": "trust_badge",
+      "name": "Trust Badge",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "shield", "label": "Shield check" },
+            { "value": "truck", "label": "Delivery truck" },
+            { "value": "lock", "label": "Secure lock" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "pill", "label": "Pill" },
+            { "value": "check", "label": "Checkmark" }
+          ],
+          "default": "shield"
+        },
+        { "type": "text", "id": "text", "label": "Text", "default": "Licensed Pharmacy" }
+      ]
     },
     {
-      "type": "follow-on-shop"
+      "type": "social_link",
+      "name": "Social Link",
+      "settings": [
+        {
+          "type": "select",
+          "id": "platform",
+          "label": "Platform",
+          "options": [
+            { "value": "facebook", "label": "Facebook" },
+            { "value": "instagram", "label": "Instagram" },
+            { "value": "twitter", "label": "Twitter / X" },
+            { "value": "youtube", "label": "YouTube" },
+            { "value": "whatsapp", "label": "WhatsApp" },
+            { "value": "pinterest", "label": "Pinterest" },
+            { "value": "linkedin", "label": "LinkedIn" }
+          ],
+          "default": "facebook"
+        },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
     },
     {
-      "type": "group"
-    },
-    {
-      "type": "icon"
-    },
-    {
-      "type": "image"
-    },
-    {
-      "type": "menu"
-    },
-    {
-      "type": "payment-icons"
-    },
-    {
-      "type": "text"
-    },
-    {
-      "type": "logo"
-    },
-    {
-      "type": "jumbo-text"
-    },
-    {
-      "type": "social-links"
-    },
-    {
-      "type": "email-signup"
+      "type": "legal_link",
+      "name": "Legal Link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Privacy Policy" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
     }
   ],
   "enabled_on": {
     "groups": ["footer"]
   },
-  "settings": [
-    {
-      "type": "select",
-      "id": "section_width",
-      "label": "t:settings.width",
-      "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
-      ],
-      "default": "page-width"
-    },
-    {
-      "type": "range",
-      "id": "gap",
-      "label": "t:settings.gap",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "t:settings.background_color",
-      "default": "{{ settings.color_palette.foreground }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.padding"
-    },
-    {
-      "type": "range",
-      "id": "padding-block-start",
-      "label": "t:settings.top",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "padding-block-end",
-      "label": "t:settings.bottom",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 20
-    }
-  ],
   "presets": [
     {
-      "name": "t:names.footer",
-      "category": "t:categories.footer",
-      "settings": {
-        "gap": 20,
-        "padding-block-start": 36,
-        "padding-block-end": 36
-      },
-      "blocks": {
-        "newsletter-group": {
-          "type": "group",
-          "settings": {
-            "content_direction": "column",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "flex-start",
-            "vertical_alignment": "center",
-            "gap": 6,
-            "width": "fill"
-          },
-          "blocks": {
-            "newsletter-heading": {
-              "type": "text",
-              "settings": {
-                "text": "t:html_defaults.join_our_email_list",
-                "width": "100%",
-                "alignment": "left",
-                "type_preset": "h3"
-              }
-            },
-            "newsletter-text": {
-              "type": "text",
-              "settings": {
-                "text": "t:html_defaults.get_exclusive_deals_and_early_access_to_new_products",
-                "width": "100%",
-                "alignment": "left",
-                "type_preset": "rte"
-              }
-            }
-          },
-          "block_order": ["newsletter-heading", "newsletter-text"]
-        },
-        "newsletter-form": {
-          "type": "email-signup",
-          "settings": {
-            "width": "fill"
-          }
-        }
-      },
-      "block_order": ["newsletter-group", "newsletter-form"]
+      "name": "Footer",
+      "category": "Footer",
+      "blocks": [
+        { "type": "link_column", "settings": { "heading": "Quick Links" } },
+        { "type": "footer_link", "settings": { "label": "Home", "url": "/" } },
+        { "type": "footer_link", "settings": { "label": "Shop All", "url": "/collections/all" } },
+        { "type": "footer_link", "settings": { "label": "About Us", "url": "/pages/about-us" } },
+        { "type": "footer_link", "settings": { "label": "Contact", "url": "/pages/contact" } },
+        { "type": "link_column", "settings": { "heading": "Customer Care" } },
+        { "type": "footer_link", "settings": { "label": "Track Order", "url": "/pages/track-order" } },
+        { "type": "footer_link", "settings": { "label": "Shipping Policy", "url": "/policies/shipping-policy" } },
+        { "type": "footer_link", "settings": { "label": "Return Policy", "url": "/policies/refund-policy" } },
+        { "type": "footer_link", "settings": { "label": "FAQs", "url": "/pages/faq" } },
+        { "type": "trust_badge", "settings": { "icon": "shield", "text": "Licensed Pharmacy" } },
+        { "type": "trust_badge", "settings": { "icon": "pill", "text": "100% Genuine Products" } },
+        { "type": "trust_badge", "settings": { "icon": "truck", "text": "Fast, Reliable Delivery" } },
+        { "type": "trust_badge", "settings": { "icon": "lock", "text": "Secure Checkout" } },
+        { "type": "social_link", "settings": { "platform": "facebook", "url": "https://www.facebook.com/" } },
+        { "type": "social_link", "settings": { "platform": "instagram", "url": "https://www.instagram.com/" } },
+        { "type": "social_link", "settings": { "platform": "whatsapp", "url": "https://wa.me/" } },
+        { "type": "legal_link", "settings": { "label": "Privacy Policy", "url": "/policies/privacy-policy" } },
+        { "type": "legal_link", "settings": { "label": "Terms of Service", "url": "/policies/terms-of-service" } }
+      ]
     }
   ]
 }
