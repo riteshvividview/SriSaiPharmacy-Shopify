@@ -46,51 +46,67 @@
     {%- endif -%}
 
     {%- if badge_count > 0 -%}
+      {%- comment -%}
+        For the marquee to look truly infinite (no dead gap after the last
+        badge), the scrolling track must always be wider than the viewport
+        - not just duplicated once. With only a handful of badges, two
+        copies can be much narrower than a full-width section, leaving a
+        long stretch of empty background before the loop visibly repeats.
+        So each of the two halves is itself an adaptive number of repeats
+        of the full badge set (more repeats when there are fewer badges),
+        guaranteeing the track comfortably overflows any viewport width.
+      {%- endcomment -%}
+      {%- capture badge_set_markup -%}
+        {%- for block in badges -%}
+          {%- assign bs = block.settings -%}
+          {%- if bs.image != blank -%}
+            <span class="tb__badge">
+              <img
+                src="{{ bs.image | image_url: width: 400 }}"
+                srcset="{{ bs.image | image_url: width: 200 }} 200w, {{ bs.image | image_url: width: 400 }} 400w"
+                alt=""
+                width="{{ bs.image.width }}"
+                height="{{ bs.image.height }}"
+                loading="lazy"
+              >
+            </span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- assign inner_repeat = 1 -%}
+      {%- if s.enable_marquee -%}
+        {%- assign inner_repeat = 30 | divided_by: badge_count -%}
+        {%- if inner_repeat < 2 -%}
+          {%- assign inner_repeat = 2 -%}
+        {%- endif -%}
+        {%- if inner_repeat > 12 -%}
+          {%- assign inner_repeat = 12 -%}
+        {%- endif -%}
+      {%- endif -%}
+
       <div
         class="tb__row{% if s.enable_marquee %} tb__row--marquee{% endif %}{% if s.grayscale_until_hover %} tb__row--grayscale{% endif %}"
         data-tb-row
         data-tb-parallax
         data-speed="0.6"
+        {% if s.enable_marquee %}aria-hidden="true"{% endif %}
       >
         <div class="tb__track" data-tb-track>
           <div class="tb__set">
-            {%- for block in badges -%}
-              {%- assign bs = block.settings -%}
-              {%- if bs.image != blank -%}
-                <span class="tb__badge" {{ block.shopify_attributes }}>
-                  <img
-                    src="{{ bs.image | image_url: width: 400 }}"
-                    srcset="{{ bs.image | image_url: width: 200 }} 200w, {{ bs.image | image_url: width: 400 }} 400w"
-                    alt="{{ bs.image.alt | default: 'Certification badge' | escape }}"
-                    width="{{ bs.image.width }}"
-                    height="{{ bs.image.height }}"
-                    loading="lazy"
-                  >
-                </span>
-              {%- endif -%}
-            {%- endfor -%}
+            {%- for r in (1..inner_repeat) -%}{{ badge_set_markup }}{%- endfor -%}
           </div>
           {%- if s.enable_marquee -%}
-            <div class="tb__set" aria-hidden="true">
-              {%- for block in badges -%}
-                {%- assign bs = block.settings -%}
-                {%- if bs.image != blank -%}
-                  <span class="tb__badge">
-                    <img
-                      src="{{ bs.image | image_url: width: 400 }}"
-                      srcset="{{ bs.image | image_url: width: 200 }} 200w, {{ bs.image | image_url: width: 400 }} 400w"
-                      alt=""
-                      width="{{ bs.image.width }}"
-                      height="{{ bs.image.height }}"
-                      loading="lazy"
-                    >
-                  </span>
-                {%- endif -%}
-              {%- endfor -%}
+            <div class="tb__set">
+              {%- for r in (1..inner_repeat) -%}{{ badge_set_markup }}{%- endfor -%}
             </div>
           {%- endif -%}
         </div>
       </div>
+
+      {%- if s.enable_marquee -%}
+        <p class="visually-hidden">{{ s.heading | default: 'Certifications and trust badges' }}</p>
+      {%- endif -%}
     {%- endif -%}
   </div>
 
@@ -266,7 +282,7 @@
       animation: none;
     }
 
-    #tb-{{ section_id }} .tb__row--marquee .tb__set[aria-hidden='true'] {
+    #tb-{{ section_id }} .tb__row--marquee .tb__set:nth-child(2) {
       display: none;
     }
   }

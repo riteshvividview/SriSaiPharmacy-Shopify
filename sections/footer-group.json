@@ -169,6 +169,7 @@
       ],
       "name": "t:names.footer",
       "settings": {
+        "logo": "shopify://shop_images/ssp_logo.png",
         "logo_text": "Sri Sai Pharmacy",
         "tagline": "Your trusted neighbourhood pharmacy for genuine medicines, wellness products and caring service.",
         "show_contact": true,
@@ -181,12 +182,13 @@
         "newsletter_placeholder": "Enter your email",
         "newsletter_button_text": "Subscribe",
         "show_trust_badges": true,
+        "copyright_text": "",
         "show_payment_icons": true,
         "background_color": "#123321",
-        "text_color": "#C9D6CD",
-        "heading_color": "#FFFFFF",
-        "accent_color": "#6FCF97",
-        "border_color": "#2B4D37"
+        "text_color": "#c9d6cd",
+        "heading_color": "#ffffff",
+        "accent_color": "#6fcf97",
+        "border_color": "#2b4d37"
       }
     }
   },

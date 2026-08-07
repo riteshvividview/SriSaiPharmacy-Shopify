@@ -190,6 +190,12 @@
         "banner_width": 1100,
         "banner_height": 400,
         "banner_radius": 20,
+        "show_bg_decor": true,
+        "bg_decor_image_a": "shopify://shop_images/leaf-icon-design-free-png.webp",
+        "bg_decor_image_b": "shopify://shop_images/38-383647_royalty-laurel-comments-laurel-wreath-vector.png",
+        "bg_decor_count": 22,
+        "bg_decor_size": 170,
+        "bg_decor_opacity": 2,
         "target_date": "2026-12-31",
         "target_time": "23:59",
         "timezone_offset": "+05:30",
@@ -219,8 +225,8 @@
         "heading_text_shadow": "0 2px 10px rgba(0,0,0,0.4)",
         "button_text": "Explore more",
         "button_url": "",
-        "button_bg": "#9C7967",
-        "button_bg_hover": "#C69277",
+        "button_bg": "#9c7967",
+        "button_bg_hover": "#c69277",
         "button_text_color": "#ffffff",
         "button_radius": 26,
         "button_padding_x": 34,
@@ -396,19 +402,24 @@
     },
     "5th_trust_badges_QW3rTb": {
       "type": "5th-trust-badges",
-      "name": "Trust Badges",
       "blocks": {
         "badge_1": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/ayush-logo-png_360x_1bf8e606-544d-4577-bd01-43aed0b75195.webp"
+          }
         },
         "badge_2": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/gmp-logo-png_360x_bfab9add-5e12-4f7b-870a-c4aa2e8c0d7e.webp"
+          }
         },
         "badge_3": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/1971_360x_4dc84aa8-a401-488c-a0d6-f6a161e95c0d.webp"
+          }
         }
       },
       "block_order": [
@@ -416,23 +427,24 @@
         "badge_2",
         "badge_3"
       ],
+      "name": "Trust Badges",
       "settings": {
         "eyebrow": "Trusted & Certified",
         "heading": "Quality You Can Rely On",
         "subheading": "Every product we stock meets recognised standards for safety, purity and manufacturing practice.",
-        "badge_height": 84,
+        "badge_height": 112,
         "badge_gap": 64,
-        "grayscale_until_hover": true,
+        "grayscale_until_hover": false,
         "enable_marquee": true,
         "marquee_speed": 28,
         "parallax_amount": 16,
         "padding_block": 64,
         "show_top_border": true,
         "show_bottom_border": true,
-        "background_color": "#F7F5F0",
-        "accent_color": "#2E7D32",
+        "background_color": "#f7f5f0",
+        "accent_color": "#2e7d32",
         "heading_color": "#141414",
-        "subtext_color": "#5B5B5B"
+        "subtext_color": "#5b5b5b"
       }
     }
   },

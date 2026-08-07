@@ -59,6 +59,9 @@
           "settings": {
             "label": "Shop",
             "columns": 3,
+            "intro_image": "shopify://shop_images/istockphoto-1245094782-612x612.jpg",
+            "intro_overlay_color": "#000000",
+            "intro_overlay_opacity": 60,
             "intro_eyebrow": "Featured",
             "intro_heading": "Your health, our priority",
             "intro_text": "Genuine medicines, wellness essentials and expert care — all in one place.",
@@ -69,6 +72,9 @@
         "tile_vitamins": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
+            "image_orientation": "portrait",
+            "image_fit": "contain",
             "heading": "Vitamins & Supplements",
             "text": "Daily wellness essentials",
             "link": "/collections/all"
@@ -77,6 +83,9 @@
         "tile_skincare": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/pimple_lotion_2.png",
+            "image_orientation": "portrait",
+            "image_fit": "contain",
             "heading": "Skin & Personal Care",
             "text": "Dermat-recommended",
             "link": "/collections/all"
@@ -85,6 +94,9 @@
         "tile_baby": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/1_1.png",
+            "image_orientation": "portrait",
+            "image_fit": "contain",
             "heading": "Baby & Mother Care",
             "text": "Gentle, trusted brands",
             "link": "/collections/all"
@@ -115,16 +127,17 @@
         "nav_contact"
       ],
       "settings": {
+        "logo": "shopify://shop_images/SRI-SAI-LOGO_540x_2c6d6d20-2544-409e-8fb3-ed18dd99e790.avif",
         "logo_text": "Sri Sai Pharmacy",
         "show_utility_bar": true,
         "utility_text": "Free delivery on orders above ₹499",
         "utility_phone": "+91 98765 43210",
         "utility_hours": "Open 8 AM – 10 PM, all days",
-        "background_color": "#FFFFFF",
+        "background_color": "#ffffff",
         "text_color": "#141414",
-        "accent_color": "#2E7D32",
-        "cta_color": "#F58220",
-        "border_color": "#ECECEC"
+        "accent_color": "#2e7d32",
+        "cta_color": "#f58220",
+        "border_color": "#ececec"
       }
     }
   },
