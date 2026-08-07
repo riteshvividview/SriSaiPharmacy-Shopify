@@ -393,12 +393,54 @@
         "button_padding_x": 34,
         "button_padding_y": 14
       }
+    },
+    "5th_trust_badges_QW3rTb": {
+      "type": "5th-trust-badges",
+      "name": "Trust Badges",
+      "blocks": {
+        "badge_1": {
+          "type": "badge",
+          "settings": {}
+        },
+        "badge_2": {
+          "type": "badge",
+          "settings": {}
+        },
+        "badge_3": {
+          "type": "badge",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "badge_1",
+        "badge_2",
+        "badge_3"
+      ],
+      "settings": {
+        "eyebrow": "Trusted & Certified",
+        "heading": "Quality You Can Rely On",
+        "subheading": "Every product we stock meets recognised standards for safety, purity and manufacturing practice.",
+        "badge_height": 84,
+        "badge_gap": 64,
+        "grayscale_until_hover": true,
+        "enable_marquee": true,
+        "marquee_speed": 28,
+        "parallax_amount": 16,
+        "padding_block": 64,
+        "show_top_border": true,
+        "show_bottom_border": true,
+        "background_color": "#F7F5F0",
+        "accent_color": "#2E7D32",
+        "heading_color": "#141414",
+        "subtext_color": "#5B5B5B"
+      }
     }
   },
   "order": [
     "4th_nourish_hero_JN3KTG",
     "3rd_core_vitality_collection_rJq4hm",
     "2nd_energy_countdown_banner_zVCGxM",
-    "1st_featured_list_GBAW9T"
+    "1st_featured_list_GBAW9T",
+    "5th_trust_badges_QW3rTb"
   ]
 }
