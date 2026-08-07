@@ -377,41 +377,55 @@
   }
 
   /* ---- Mega menu ---- */
-  /* Anchored to the trigger's own <li> (zero-gap, flush under the button) so
-     hover can travel from trigger straight into the panel with no dead
-     zone. Horizontal viewport clipping is corrected separately via JS
-     (--ssh-mega-shift), not by re-anchoring to a wider container - doing
-     that broke hover continuity whenever the trigger sat off-center. */
+  /* Anchored to the trigger's own <li> (so hover can travel from trigger
+     into the panel), but split into two layers so there can be visible
+     breathing room WITHOUT a hover dead-zone:
+       .ssh__mega       - invisible hit-area, flush under the trigger,
+                           its own padding-top *is* the visual gap. It only
+                           becomes interactive (pointer-events) once hover
+                           starts, so it never blocks clicks on page content
+                           underneath while closed.
+       .ssh__mega-inner - the actual white card: all the visuals (bg,
+                           radius, shadow) and the fade/slide animation live
+                           here, floating below the gap inside the hit-area.
+     Horizontal viewport clipping is corrected via JS (--ssh-mega-shift). */
   #ssh-{{ section_id }} .ssh__mega {
     position: absolute;
     top: 100%;
     left: 50%;
-    transform: translate(-50%, 10px) translateX(var(--ssh-mega-shift, 0px));
-    width: min(820px, calc(100vw - 48px));
-    background: #fff;
-    color: #141414;
-    border-radius: 18px;
-    box-shadow: 0 24px 60px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
-    border: 1px solid var(--ssh-border);
-    opacity: 0;
-    visibility: hidden;
+    transform: translate(-50%, 0) translateX(var(--ssh-mega-shift, 0px));
+    width: min(820px, calc(100vw - 64px));
+    padding-top: 14px;
     pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
     z-index: 20;
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega {
-    opacity: 1;
-    visibility: visible;
     pointer-events: auto;
-    transform: translate(-50%, 0) translateX(var(--ssh-mega-shift, 0px));
   }
 
   #ssh-{{ section_id }} .ssh__mega-inner {
     display: grid;
     grid-template-columns: 260px 1fr;
     min-height: 300px;
+    background: #fff;
+    color: #141414;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
+    border: 1px solid var(--ssh-border);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+  }
+
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-inner,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-inner {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 
   #ssh-{{ section_id }} .ssh__mega-intro {
@@ -722,7 +736,7 @@
        with a CSS variable if that would let it clip past the viewport
        edge. Geometry only - open/close stays pure CSS hover/focus-within. */
     var megaTriggers = Array.prototype.slice.call(header.querySelectorAll('.ssh__nav-item--mega'));
-    var edgeMargin = 12;
+    var edgeMargin = 24;
 
     function clampMega(item) {
       var mega = item.querySelector('.ssh__mega');
