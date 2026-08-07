@@ -400,6 +400,289 @@
         "button_padding_y": 14
       }
     },
+    "6th_shop_by_category_Vk2Ptm": {
+      "type": "6th-shop-by-category",
+      "blocks": {
+        "tab_concern": {
+          "type": "tab",
+          "settings": {
+            "label": "Shop by Concern",
+            "view_all_text": "View all concerns",
+            "view_all_link": "/collections/all"
+          }
+        },
+        "product_concern_1": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
+            "alt_text": "",
+            "title": "Digestive Care Combo",
+            "vendor": "",
+            "price": "Rs. 549.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_concern_2": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.1.png",
+            "alt_text": "",
+            "title": "Immunity Booster Pack",
+            "vendor": "",
+            "price": "Rs. 699.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_concern_3": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.4.png",
+            "alt_text": "",
+            "title": "Joint Relief Balm",
+            "vendor": "",
+            "price": "Rs. 399.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "tab_mens": {
+          "type": "tab",
+          "settings": {
+            "label": "Men's Health",
+            "view_all_text": "View all",
+            "view_all_link": "/collections/mens-health"
+          }
+        },
+        "product_mens_1": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Men's Daily Multivitamin",
+            "vendor": "",
+            "price": "Rs. 599.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_mens_2": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Energy & Stamina Support",
+            "vendor": "",
+            "price": "Rs. 749.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_mens_3": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Hair & Scalp Tonic",
+            "vendor": "",
+            "price": "Rs. 449.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "tab_womens": {
+          "type": "tab",
+          "settings": {
+            "label": "Women's Health",
+            "view_all_text": "View all",
+            "view_all_link": "/collections/womens-health"
+          }
+        },
+        "product_womens_1": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Women's Wellness Formula",
+            "vendor": "",
+            "price": "Rs. 649.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_womens_2": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Iron & Folic Acid Tablets",
+            "vendor": "",
+            "price": "Rs. 299.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_womens_3": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Skin Glow Supplement",
+            "vendor": "",
+            "price": "Rs. 549.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "tab_wellness": {
+          "type": "tab",
+          "settings": {
+            "label": "Care & Wellness",
+            "view_all_text": "View all",
+            "view_all_link": "/collections/all"
+          }
+        },
+        "product_wellness_1": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Daily Personal Care Kit",
+            "vendor": "",
+            "price": "Rs. 799.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_wellness_2": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Herbal Wellness Tea",
+            "vendor": "",
+            "price": "Rs. 349.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "product_wellness_3": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Sleep & Calm Support",
+            "vendor": "",
+            "price": "Rs. 499.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
+        "tab_packs": {
+          "type": "tab",
+          "settings": {
+            "label": "Health Packs",
+            "view_all_text": "View all packs",
+            "view_all_link": "/collections/all"
+          }
+        },
+        "product_packs_1": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.4.png",
+            "alt_text": "",
+            "title": "Family Wellness Pack",
+            "vendor": "",
+            "price": "Rs. 1,299.00",
+            "compare_at_price": "Rs. 1,599.00",
+            "link": "",
+            "enable_badge": true,
+            "badge_text": "Save 19%"
+          }
+        },
+        "product_packs_2": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/Varun_Drops-2.png",
+            "alt_text": "",
+            "title": "Immunity Combo Pack",
+            "vendor": "",
+            "price": "Rs. 899.00",
+            "compare_at_price": "Rs. 1,099.00",
+            "link": "",
+            "enable_badge": true,
+            "badge_text": "Save 18%"
+          }
+        },
+        "product_packs_3": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/Mockup.png",
+            "alt_text": "",
+            "title": "Complete Skin Care Kit",
+            "vendor": "",
+            "price": "Rs. 999.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        }
+      },
+      "block_order": [
+        "tab_concern",
+        "product_concern_1",
+        "product_concern_2",
+        "product_concern_3",
+        "tab_mens",
+        "product_mens_1",
+        "product_mens_2",
+        "product_mens_3",
+        "tab_womens",
+        "product_womens_1",
+        "product_womens_2",
+        "product_womens_3",
+        "tab_wellness",
+        "product_wellness_1",
+        "product_wellness_2",
+        "product_wellness_3",
+        "tab_packs",
+        "product_packs_1",
+        "product_packs_2",
+        "product_packs_3"
+      ],
+      "name": "Shop By Category",
+      "settings": {
+        "eyebrow": "",
+        "heading": "Shop By Category",
+        "subheading": "Browse our range by concern, life stage or everyday need - every product, one tap away.",
+        "columns_desktop": 4,
+        "padding_block": 32,
+        "background_color": "#ffffff",
+        "card_color": "#f7f5f0",
+        "text_color": "#141414",
+        "muted_color": "#6b6b6b",
+        "accent_color": "#2e7d32",
+        "cta_color": "#f58220",
+        "border_color": "#ececec"
+      }
+    },
     "5th_trust_badges_QW3rTb": {
       "type": "5th-trust-badges",
       "blocks": {
@@ -447,158 +730,109 @@
         "subtext_color": "#5b5b5b"
       }
     },
-    "6th_shop_by_category_Vk2Ptm": {
-      "type": "6th-shop-by-category",
+    "7th_testimonials_Nx4Wqe": {
+      "type": "7th-testimonials",
       "blocks": {
-        "tab_concern": {
-          "type": "tab",
+        "review_1": {
+          "type": "review",
           "settings": {
-            "label": "Shop by Concern",
-            "view_all_text": "View all concerns",
-            "view_all_link": "/collections/all"
+            "reviewer_name": "Priya Ramesh",
+            "reviewer_location": "Chennai, TN",
+            "rating": 5,
+            "review_text": "Ordered my mother's diabetes medicines here for over a year now. Always genuine, always on time. Never had a single issue."
           }
         },
-        "product_concern_1": {
-          "type": "product",
-          "settings": { "title": "Digestive Care Combo", "price": "Rs. 549.00" }
-        },
-        "product_concern_2": {
-          "type": "product",
-          "settings": { "title": "Immunity Booster Pack", "price": "Rs. 699.00" }
-        },
-        "product_concern_3": {
-          "type": "product",
-          "settings": { "title": "Joint Relief Balm", "price": "Rs. 399.00" }
-        },
-        "tab_mens": {
-          "type": "tab",
+        "review_2": {
+          "type": "review",
           "settings": {
-            "label": "Men's Health",
-            "view_all_text": "View all",
-            "view_all_link": "/collections/mens-health"
+            "reviewer_name": "Arun Kumar",
+            "reviewer_location": "Coimbatore, TN",
+            "rating": 5,
+            "review_text": "The immunity combo pack actually works — fewer sick days this monsoon for the whole family. Fast delivery too."
           }
         },
-        "product_mens_1": {
-          "type": "product",
-          "settings": { "title": "Men's Daily Multivitamin", "price": "Rs. 599.00" }
-        },
-        "product_mens_2": {
-          "type": "product",
-          "settings": { "title": "Energy & Stamina Support", "price": "Rs. 749.00" }
-        },
-        "product_mens_3": {
-          "type": "product",
-          "settings": { "title": "Hair & Scalp Tonic", "price": "Rs. 449.00" }
-        },
-        "tab_womens": {
-          "type": "tab",
+        "review_3": {
+          "type": "review",
           "settings": {
-            "label": "Women's Health",
-            "view_all_text": "View all",
-            "view_all_link": "/collections/womens-health"
+            "reviewer_name": "Meena Sundaram",
+            "reviewer_location": "Madurai, TN",
+            "rating": 4,
+            "review_text": "Love that they have a whole section for women's health. Found exactly what my doctor recommended in two minutes."
           }
         },
-        "product_womens_1": {
-          "type": "product",
-          "settings": { "title": "Women's Wellness Formula", "price": "Rs. 649.00" }
-        },
-        "product_womens_2": {
-          "type": "product",
-          "settings": { "title": "Iron & Folic Acid Tablets", "price": "Rs. 299.00" }
-        },
-        "product_womens_3": {
-          "type": "product",
-          "settings": { "title": "Skin Glow Supplement", "price": "Rs. 549.00" }
-        },
-        "tab_wellness": {
-          "type": "tab",
+        "review_4": {
+          "type": "review",
           "settings": {
-            "label": "Care & Wellness",
-            "view_all_text": "View all",
-            "view_all_link": "/collections/all"
+            "reviewer_name": "Karthik Raja",
+            "reviewer_location": "Salem, TN",
+            "rating": 5,
+            "review_text": "Customer support actually picks up the phone and knows what they're talking about. Rare these days."
           }
         },
-        "product_wellness_1": {
-          "type": "product",
-          "settings": { "title": "Daily Personal Care Kit", "price": "Rs. 799.00" }
-        },
-        "product_wellness_2": {
-          "type": "product",
-          "settings": { "title": "Herbal Wellness Tea", "price": "Rs. 349.00" }
-        },
-        "product_wellness_3": {
-          "type": "product",
-          "settings": { "title": "Sleep & Calm Support", "price": "Rs. 499.00" }
-        },
-        "tab_packs": {
-          "type": "tab",
+        "review_5": {
+          "type": "review",
           "settings": {
-            "label": "Health Packs",
-            "view_all_text": "View all packs",
-            "view_all_link": "/collections/all"
+            "reviewer_name": "Divya Prakash",
+            "reviewer_location": "Trichy, TN",
+            "rating": 5,
+            "review_text": "The pain relief balm from the joint care range is now a permanent fixture in our house. Ordering my third bottle."
           }
         },
-        "product_packs_1": {
-          "type": "product",
+        "review_6": {
+          "type": "review",
           "settings": {
-            "title": "Family Wellness Pack",
-            "price": "Rs. 1,299.00",
-            "compare_at_price": "Rs. 1,599.00",
-            "enable_badge": true,
-            "badge_text": "Save 19%"
+            "reviewer_name": "Suresh Babu",
+            "reviewer_location": "Erode, TN",
+            "rating": 4,
+            "review_text": "Clean website, easy checkout, and the packaging keeps everything intact. Switched from my old pharmacy for good."
           }
         },
-        "product_packs_2": {
-          "type": "product",
+        "review_7": {
+          "type": "review",
           "settings": {
-            "title": "Immunity Combo Pack",
-            "price": "Rs. 899.00",
-            "compare_at_price": "Rs. 1,099.00",
-            "enable_badge": true,
-            "badge_text": "Save 18%"
+            "reviewer_name": "Lakshmi Narayanan",
+            "reviewer_location": "Vellore, TN",
+            "rating": 5,
+            "review_text": "Their digestive care combo sorted out my acidity issues within a week. Wish I'd found them sooner."
           }
         },
-        "product_packs_3": {
-          "type": "product",
-          "settings": { "title": "Complete Skin Care Kit", "price": "Rs. 999.00" }
+        "review_8": {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Vikram Anand",
+            "reviewer_location": "Chennai, TN",
+            "rating": 5,
+            "review_text": "Been buying my supplements here for months. Prices are fair and everything ships fast, even during festival season."
+          }
         }
       },
       "block_order": [
-        "tab_concern",
-        "product_concern_1",
-        "product_concern_2",
-        "product_concern_3",
-        "tab_mens",
-        "product_mens_1",
-        "product_mens_2",
-        "product_mens_3",
-        "tab_womens",
-        "product_womens_1",
-        "product_womens_2",
-        "product_womens_3",
-        "tab_wellness",
-        "product_wellness_1",
-        "product_wellness_2",
-        "product_wellness_3",
-        "tab_packs",
-        "product_packs_1",
-        "product_packs_2",
-        "product_packs_3"
+        "review_1",
+        "review_2",
+        "review_3",
+        "review_4",
+        "review_5",
+        "review_6",
+        "review_7",
+        "review_8"
       ],
-      "name": "Shop By Category",
+      "name": "Testimonials",
       "settings": {
-        "eyebrow": "Find What You Need",
-        "heading": "Shop By Category",
-        "subheading": "Browse our range by concern, life stage or everyday need — every product, one tap away.",
-        "columns_desktop": 4,
-        "padding_block": 72,
+        "eyebrow": "Loved By Our Customers",
+        "heading": "Real Stories, Real Relief",
+        "subheading": "Thousands of families trust us for genuine medicines and caring service — here's what a few of them had to say.",
+        "view_all_text": "View all reviews",
+        "view_all_link": "/pages/reviews",
+        "card_width": 340,
+        "card_gap": 20,
+        "padding_block": 88,
         "background_color": "#ffffff",
-        "card_color": "#f7f5f0",
+        "card_background": "#f7f5f0",
+        "card_border_color": "#ececec",
         "text_color": "#141414",
         "muted_color": "#6b6b6b",
-        "accent_color": "#2e7d32",
-        "cta_color": "#f58220",
-        "border_color": "#ececec"
+        "accent_color": "#f58220",
+        "eyebrow_color": "#2e7d32"
       }
     }
   },
@@ -608,6 +842,7 @@
     "2nd_energy_countdown_banner_zVCGxM",
     "1st_featured_list_GBAW9T",
     "6th_shop_by_category_Vk2Ptm",
-    "5th_trust_badges_QW3rTb"
+    "5th_trust_badges_QW3rTb",
+    "7th_testimonials_Nx4Wqe"
   ]
 }

@@ -72,6 +72,7 @@
         "tile_digestive": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/0.4.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
             "heading": "Digestive Care",
@@ -82,6 +83,7 @@
         "tile_immunity": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/0.1.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
             "heading": "Immunity Boosters",
@@ -92,6 +94,7 @@
         "tile_diabetic": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/0.3_6494e1dd-79e2-4b5c-86c6-34b1b24f61b8.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
             "heading": "Diabetic Care",
@@ -102,6 +105,7 @@
         "tile_pain_joint": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
             "heading": "Pain & Joint Relief",
@@ -112,8 +116,9 @@
         "tile_respiratory": {
           "type": "dropdown_tile",
           "settings": {
+            "image": "shopify://shop_images/Varun_Drops-2.png",
             "image_orientation": "portrait",
-            "image_fit": "contain",
+            "image_fit": "cover",
             "heading": "Respiratory & Sinus Care",
             "text": "Breathe easy again",
             "link": "/collections/respiratory-sinus-care"
@@ -138,8 +143,9 @@
           "settings": {
             "label": "Care & Wellness",
             "columns": 2,
+            "intro_image": "shopify://shop_images/istockphoto-1452925414-612x612.jpg",
             "intro_overlay_color": "#000000",
-            "intro_overlay_opacity": 45,
+            "intro_overlay_opacity": 60,
             "intro_eyebrow": "Care & Wellness",
             "intro_heading": "Everyday Self-Care",
             "intro_text": "Gentle personal care and wellness essentials to keep your daily routine on track.",
@@ -150,7 +156,8 @@
         "tile_personal_care": {
           "type": "dropdown_tile",
           "settings": {
-            "image_orientation": "portrait",
+            "image": "shopify://shop_images/pimple_lotion_2.png",
+            "image_orientation": "square",
             "image_fit": "contain",
             "heading": "Personal Care",
             "text": "Daily hygiene & grooming",
@@ -160,7 +167,8 @@
         "tile_health_wellness": {
           "type": "dropdown_tile",
           "settings": {
-            "image_orientation": "portrait",
+            "image": "shopify://shop_images/1_1.png",
+            "image_orientation": "square",
             "image_fit": "contain",
             "heading": "Health & Wellness",
             "text": "Vitamins, supplements & more",
@@ -172,8 +180,9 @@
           "settings": {
             "label": "Top Picks",
             "columns": 3,
+            "intro_image": "shopify://shop_images/Moringa.jpg",
             "intro_overlay_color": "#000000",
-            "intro_overlay_opacity": 45,
+            "intro_overlay_opacity": 60,
             "intro_eyebrow": "Limited-Time Offers",
             "intro_heading": "Top Picks & Health Packs",
             "intro_text": "Our best-selling combos and seasonal packs, bundled together to save you more.",
@@ -223,6 +232,7 @@
         },
         "nav_contact": {
           "type": "nav_link",
+          "disabled": true,
           "settings": {
             "label": "Contact",
             "url": "/pages/contact"
