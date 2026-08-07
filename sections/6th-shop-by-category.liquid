@@ -1,0 +1,663 @@
+{%- comment -%}
+  Section: Shop By Category (tabbed product showcase)
+  Tabs: Shop by Concern / Men's Health / Women's Health / Care & Wellness /
+  Health Packs. Each tab shows its own full product grid (nothing is
+  truncated - every product block under a tab renders). Switching tabs
+  animates a sliding pill indicator under the active tab plus a staggered
+  fade/slide-in of that tab's product cards.
+  Blocks: "Category Tab" defines a tab; any number of "Product" blocks
+  placed directly after it belong to that tab (same grouping pattern used
+  by the header's mega-menu dropdowns/tiles elsewhere in this theme).
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign accent_color = s.accent_color | default: '#2E7D32'
+  assign cta_color = s.cta_color | default: '#F58220'
+-%}
+
+<section
+  class="stc"
+  id="stc-{{ section_id }}"
+  style="
+    --stc-bg: {{ s.background_color | default: '#FFFFFF' }};
+    --stc-card-bg: {{ s.card_color | default: '#F7F5F0' }};
+    --stc-text: {{ s.text_color | default: '#141414' }};
+    --stc-muted: {{ s.muted_color | default: '#6B6B6B' }};
+    --stc-accent: {{ accent_color }};
+    --stc-cta: {{ cta_color }};
+    --stc-border: {{ s.border_color | default: '#ECECEC' }};
+    --stc-columns: {{ s.columns_desktop | default: 4 }};
+    --stc-padding-block: {{ s.padding_block | default: 72 }}px;
+  "
+>
+  <div class="stc__inner">
+    {%- if s.eyebrow != blank or s.heading != blank or s.subheading != blank -%}
+      <div class="stc__header">
+        {%- if s.eyebrow != blank -%}<p class="stc__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="stc__heading">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.subheading != blank -%}<p class="stc__subheading">{{ s.subheading }}</p>{%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="stc__tabbar-wrap">
+      <div class="stc__tabbar" role="tablist" aria-label="Shop by category" data-stc-tabs>
+        <span class="stc__tab-indicator" data-stc-indicator aria-hidden="true"></span>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tab' -%}
+            <button
+              type="button"
+              class="stc__tab{% if forloop.first %} is-active{% endif %}"
+              role="tab"
+              id="stc-tab-{{ section_id }}-{{ forloop.index0 }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-controls="stc-panel-{{ section_id }}-{{ forloop.index0 }}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              data-stc-tab
+              data-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.label }}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="stc__panels" data-stc-panels>
+      {%- assign tab_index = -1 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'tab' -%}
+          {%- assign tab_index = tab_index | plus: 1 -%}
+          {%- assign tb = block.settings -%}
+          <div
+            class="stc__panel{% if tab_index == 0 %} is-active{% endif %}"
+            role="tabpanel"
+            id="stc-panel-{{ section_id }}-{{ tab_index }}"
+            aria-labelledby="stc-tab-{{ section_id }}-{{ tab_index }}"
+            data-stc-panel
+            data-index="{{ tab_index }}"
+            {% unless tab_index == 0 %}hidden{% endunless %}
+          >
+            <div class="stc__grid">
+              {%- assign products_offset = forloop.index0 | plus: 1 -%}
+              {%- assign card_i = 0 -%}
+              {%- for product_block in section.blocks offset: products_offset -%}
+                {%- if product_block.type == 'product' -%}
+                  {%- assign pb = product_block.settings -%}
+                  <a
+                    href="{{ pb.link | default: '#' }}"
+                    class="stc__card"
+                    data-stc-card
+                    style="--stc-card-delay: {{ card_i | times: 60 }}ms;"
+                    {{ product_block.shopify_attributes }}
+                  >
+                    {%- if pb.enable_badge and pb.badge_text != blank -%}
+                      <span class="stc__badge">{{ pb.badge_text }}</span>
+                    {%- endif -%}
+                    <span class="stc__card-image">
+                      {%- if pb.image != blank -%}
+                        <img
+                          src="{{ pb.image | image_url: width: 500 }}"
+                          srcset="{{ pb.image | image_url: width: 250 }} 250w, {{ pb.image | image_url: width: 500 }} 500w"
+                          alt="{{ pb.alt_text | default: pb.title | escape }}"
+                          width="{{ pb.image.width }}"
+                          height="{{ pb.image.height }}"
+                          loading="lazy"
+                        >
+                      {%- else -%}
+                        <span class="stc__card-placeholder" aria-hidden="true">
+                          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                        </span>
+                      {%- endif -%}
+                    </span>
+                    <span class="stc__card-body">
+                      {%- if pb.vendor != blank -%}<span class="stc__card-vendor">{{ pb.vendor }}</span>{%- endif -%}
+                      <span class="stc__card-title">{{ pb.title }}</span>
+                      <span class="stc__card-price">
+                        <span class="stc__card-price-now">{{ pb.price }}</span>
+                        {%- if pb.compare_at_price != blank -%}
+                          <span class="stc__card-price-compare">{{ pb.compare_at_price }}</span>
+                        {%- endif -%}
+                      </span>
+                    </span>
+                  </a>
+                  {%- assign card_i = card_i | plus: 1 -%}
+                {%- else -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+
+            {%- if tb.view_all_link != blank and tb.view_all_text != blank -%}
+              <div class="stc__view-all-wrap">
+                <a href="{{ tb.view_all_link }}" class="stc__view-all">
+                  {{ tb.view_all_text }}
+                  <svg aria-hidden="true" width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #stc-{{ section_id }} {
+    position: relative;
+    background: var(--stc-bg);
+    color: var(--stc-text);
+    padding: var(--stc-padding-block) 0;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  #stc-{{ section_id }} *,
+  #stc-{{ section_id }} *::before,
+  #stc-{{ section_id }} *::after {
+    box-sizing: border-box;
+  }
+
+  #stc-{{ section_id }} a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #stc-{{ section_id }} .stc__inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---- Header ---- */
+  #stc-{{ section_id }} .stc__header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 36px;
+  }
+
+  #stc-{{ section_id }} .stc__eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--stc-cta);
+    margin: 0 0 10px;
+  }
+
+  #stc-{{ section_id }} .stc__heading {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(26px, 3.5vw, 38px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    color: var(--stc-text);
+    margin: 0 0 12px;
+  }
+
+  #stc-{{ section_id }} .stc__subheading {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--stc-muted);
+    margin: 0;
+  }
+
+  /* ---- Tab bar ---- */
+  #stc-{{ section_id }} .stc__tabbar-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 36px;
+  }
+
+  #stc-{{ section_id }} .stc__tabbar-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  #stc-{{ section_id }} .stc__tabbar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 auto;
+    padding: 6px;
+    background: var(--stc-card-bg);
+    border-radius: 999px;
+    min-width: 100%;
+    width: max-content;
+  }
+
+  #stc-{{ section_id }} .stc__tab-indicator {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    height: calc(100% - 12px);
+    width: 0;
+    background: var(--stc-accent);
+    border-radius: 999px;
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    z-index: 0;
+  }
+
+  #stc-{{ section_id }} .stc__tab {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    color: var(--stc-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 11px 20px;
+    border-radius: 999px;
+    transition: color 0.3s ease;
+  }
+
+  #stc-{{ section_id }} .stc__tab.is-active {
+    color: #fff;
+  }
+
+  #stc-{{ section_id }} .stc__tab:not(.is-active):hover {
+    color: var(--stc-accent);
+  }
+
+  /* ---- Panels ---- */
+  #stc-{{ section_id }} .stc__panel[hidden] {
+    display: none;
+  }
+
+  #stc-{{ section_id }} .stc__panel {
+    animation: stc-panel-in 0.4s ease both;
+  }
+
+  @keyframes stc-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #stc-{{ section_id }} .stc__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--stc-columns), 1fr);
+    gap: 20px;
+  }
+
+  #stc-{{ section_id }} .stc__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--stc-card-bg);
+    border-radius: 18px;
+    padding: 16px 16px 20px;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: stc-card-in 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    animation-delay: var(--stc-card-delay, 0ms);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #stc-{{ section_id }} .stc__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(20, 20, 20, 0.1);
+  }
+
+  @keyframes stc-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #stc-{{ section_id }} .stc__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    background: var(--stc-cta);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 999px;
+  }
+
+  #stc-{{ section_id }} .stc__card-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 5;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(20, 20, 20, 0.04);
+    margin-bottom: 14px;
+  }
+
+  #stc-{{ section_id }} .stc__card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  #stc-{{ section_id }} .stc__card:hover .stc__card-image img {
+    transform: scale(1.05);
+  }
+
+  #stc-{{ section_id }} .stc__card-placeholder {
+    color: var(--stc-accent);
+    opacity: 0.6;
+  }
+
+  #stc-{{ section_id }} .stc__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  #stc-{{ section_id }} .stc__card-vendor {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--stc-muted);
+  }
+
+  #stc-{{ section_id }} .stc__card-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--stc-text);
+    line-height: 1.35;
+  }
+
+  #stc-{{ section_id }} .stc__card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 4px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--stc-text);
+  }
+
+  #stc-{{ section_id }} .stc__card-price-compare {
+    font-weight: 400;
+    font-size: 0.82em;
+    color: var(--stc-muted);
+    text-decoration: line-through;
+  }
+
+  /* ---- View all ---- */
+  #stc-{{ section_id }} .stc__view-all-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 36px;
+  }
+
+  #stc-{{ section_id }} .stc__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--stc-text);
+    border: 1.5px solid var(--stc-border);
+    padding: 12px 26px;
+    border-radius: 999px;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  }
+
+  #stc-{{ section_id }} .stc__view-all:hover {
+    background: var(--stc-accent);
+    border-color: var(--stc-accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  #stc-{{ section_id }} .stc__view-all svg {
+    transition: transform 0.25s ease;
+  }
+
+  #stc-{{ section_id }} .stc__view-all:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 999px) {
+    #stc-{{ section_id }} .stc__inner {
+      padding: 0 24px;
+    }
+
+    #stc-{{ section_id }} .stc__grid {
+      grid-template-columns: repeat(min(3, var(--stc-columns)), 1fr);
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #stc-{{ section_id }} .stc__inner {
+      padding: 0 16px;
+    }
+
+    #stc-{{ section_id }} .stc__header {
+      margin-bottom: 24px;
+    }
+
+    #stc-{{ section_id }} .stc__tabbar-wrap {
+      margin: 0 -16px 24px;
+      padding: 0 16px;
+    }
+
+    #stc-{{ section_id }} .stc__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    #stc-{{ section_id }} .stc__card {
+      padding: 10px 10px 14px;
+      border-radius: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #stc-{{ section_id }} .stc__panel,
+    #stc-{{ section_id }} .stc__card {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    #stc-{{ section_id }} .stc__tab-indicator {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var section = document.getElementById('stc-{{ section_id }}');
+    if (!section) return;
+
+    var tabs = Array.prototype.slice.call(section.querySelectorAll('[data-stc-tab]'));
+    var panels = Array.prototype.slice.call(section.querySelectorAll('[data-stc-panel]'));
+    var indicator = section.querySelector('[data-stc-indicator]');
+    var tabbar = section.querySelector('[data-stc-tabs]');
+    if (!tabs.length || !panels.length) return;
+
+    function moveIndicator(tab) {
+      if (!indicator || !tab) return;
+      indicator.style.width = tab.offsetWidth + 'px';
+      indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+    }
+
+    function replayEntrance(panel) {
+      var cards = panel.querySelectorAll('[data-stc-card]');
+      panel.style.animation = 'none';
+      cards.forEach(function (card) {
+        card.style.animation = 'none';
+      });
+      /* eslint-disable-next-line no-unused-expressions */
+      panel.offsetHeight; /* force reflow so the animation can restart */
+      panel.style.animation = '';
+      cards.forEach(function (card) {
+        card.style.animation = '';
+      });
+    }
+
+    function activateTab(index) {
+      tabs.forEach(function (tab) {
+        var isActive = tab.getAttribute('data-index') === String(index);
+        tab.classList.toggle('is-active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        if (isActive) moveIndicator(tab);
+      });
+
+      panels.forEach(function (panel) {
+        var isActive = panel.getAttribute('data-index') === String(index);
+        panel.hidden = !isActive;
+        if (isActive) replayEntrance(panel);
+      });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        activateTab(tab.getAttribute('data-index'));
+      });
+    });
+
+    if (tabbar) {
+      tabbar.addEventListener('keydown', function (e) {
+        var currentIndex = tabs.findIndex(function (t) { return t.classList.contains('is-active'); });
+        var nextIndex = null;
+        if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') nextIndex = 0;
+        else if (e.key === 'End') nextIndex = tabs.length - 1;
+        if (nextIndex !== null) {
+          e.preventDefault();
+          tabs[nextIndex].focus();
+          activateTab(tabs[nextIndex].getAttribute('data-index'));
+        }
+      });
+    }
+
+    var activeTab = tabs.filter(function (t) { return t.classList.contains('is-active'); })[0] || tabs[0];
+    moveIndicator(activeTab);
+
+    var resizeRaf = null;
+    window.addEventListener(
+      'resize',
+      function () {
+        if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+        resizeRaf = window.requestAnimationFrame(function () {
+          var current = tabs.filter(function (t) { return t.classList.contains('is-active'); })[0];
+          moveIndicator(current);
+        });
+      },
+      { passive: true }
+    );
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Shop By Category",
+  "tag": "section",
+  "class": "shopify-section--shop-by-category",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Find What You Need" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop By Category" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Browse our range by concern, life stage or everyday need — every product, one tap away." },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "columns_desktop", "label": "Columns (desktop)", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "range", "id": "padding_block", "label": "Vertical padding", "min": 20, "max": 140, "step": 4, "unit": "px", "default": 72 },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Section background", "default": "#FFFFFF" },
+    { "type": "color", "id": "card_color", "label": "Card / tab-bar background", "default": "#F7F5F0" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#6B6B6B" },
+    { "type": "color", "id": "accent_color", "label": "Accent (active tab, hover)", "default": "#2E7D32" },
+    { "type": "color", "id": "cta_color", "label": "CTA / badge color", "default": "#F58220" },
+    { "type": "color", "id": "border_color", "label": "Border", "default": "#ECECEC" }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Category Tab",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Tab label", "default": "Shop by Concern" },
+        { "type": "text", "id": "view_all_text", "label": "\"View all\" button text", "default": "View all" },
+        { "type": "url", "id": "view_all_link", "label": "\"View all\" link" }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "paragraph", "content": "Place this block directly below the Category Tab it belongs to." },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "alt_text", "label": "Image alt text" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Product Title" },
+        { "type": "text", "id": "vendor", "label": "Vendor" },
+        { "type": "text", "id": "price", "label": "Price", "default": "Rs. 499.00" },
+        { "type": "text", "id": "compare_at_price", "label": "Compare at price" },
+        { "type": "url", "id": "link", "label": "Product link" },
+        { "type": "checkbox", "id": "enable_badge", "label": "Enable badge", "default": false },
+        { "type": "text", "id": "badge_text", "label": "Badge text", "default": "New" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop By Category",
+      "blocks": [
+        { "type": "tab", "settings": { "label": "Shop by Concern", "view_all_text": "View all concerns" } },
+        { "type": "product", "settings": { "title": "Digestive Care Combo", "price": "Rs. 549.00" } },
+        { "type": "product", "settings": { "title": "Immunity Booster Pack", "price": "Rs. 699.00" } },
+        { "type": "product", "settings": { "title": "Joint Relief Balm", "price": "Rs. 399.00" } },
+
+        { "type": "tab", "settings": { "label": "Men's Health", "view_all_text": "View all" } },
+        { "type": "product", "settings": { "title": "Men's Daily Multivitamin", "price": "Rs. 599.00" } },
+        { "type": "product", "settings": { "title": "Energy & Stamina Support", "price": "Rs. 749.00" } },
+        { "type": "product", "settings": { "title": "Hair & Scalp Tonic", "price": "Rs. 449.00" } },
+
+        { "type": "tab", "settings": { "label": "Women's Health", "view_all_text": "View all" } },
+        { "type": "product", "settings": { "title": "Women's Wellness Formula", "price": "Rs. 649.00" } },
+        { "type": "product", "settings": { "title": "Iron & Folic Acid Tablets", "price": "Rs. 299.00" } },
+        { "type": "product", "settings": { "title": "Skin Glow Supplement", "price": "Rs. 549.00" } },
+
+        { "type": "tab", "settings": { "label": "Care & Wellness", "view_all_text": "View all" } },
+        { "type": "product", "settings": { "title": "Daily Personal Care Kit", "price": "Rs. 799.00" } },
+        { "type": "product", "settings": { "title": "Herbal Wellness Tea", "price": "Rs. 349.00" } },
+        { "type": "product", "settings": { "title": "Sleep & Calm Support", "price": "Rs. 499.00" } },
+
+        { "type": "tab", "settings": { "label": "Health Packs", "view_all_text": "View all packs" } },
+        { "type": "product", "settings": { "title": "Family Wellness Pack", "price": "Rs. 1,299.00", "compare_at_price": "Rs. 1,599.00", "enable_badge": true, "badge_text": "Save 19%" } },
+        { "type": "product", "settings": { "title": "Immunity Combo Pack", "price": "Rs. 899.00", "compare_at_price": "Rs. 1,099.00", "enable_badge": true, "badge_text": "Save 18%" } },
+        { "type": "product", "settings": { "title": "Complete Skin Care Kit", "price": "Rs. 999.00" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

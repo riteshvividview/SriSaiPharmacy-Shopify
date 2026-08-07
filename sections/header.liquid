@@ -183,7 +183,7 @@
     </div>
   </div>
 
-  <div class="ssh__mobile" id="ssh-mobile-{{ section_id }}" data-ssh-mobile-panel hidden>
+  <div class="ssh__mobile" id="ssh-mobile-{{ section_id }}" data-ssh-mobile-panel>
     <ul class="ssh__mobile-list">
       {%- for block in section.blocks -%}
         {%- assign bs = block.settings -%}
@@ -283,7 +283,7 @@
     height: var(--ssh-height);
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 24px;
   }
 
   /* ---- Logo ---- */
@@ -333,7 +333,8 @@
     padding: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+    flex-wrap: nowrap;
+    gap: 2px;
     height: 100%;
   }
 
@@ -347,15 +348,16 @@
   #ssh-{{ section_id }} .ssh__nav-link {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
+    white-space: nowrap;
     color: var(--ssh-text);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px 14px;
+    padding: 9px 11px;
     border-radius: 8px;
     transition: color 0.2s ease, background-color 0.2s ease;
   }
@@ -394,7 +396,7 @@
     top: 100%;
     left: 50%;
     transform: translate(-50%, 0) translateX(var(--ssh-mega-shift, 0px));
-    width: min(820px, calc(100vw - 64px));
+    width: min(960px, calc(100vw - 64px));
     padding-top: 14px;
     pointer-events: none;
     z-index: 20;
@@ -409,10 +411,15 @@
     display: grid;
     grid-template-columns: 260px 1fr;
     min-height: 300px;
+    /* Safety valve: if a dropdown ever has enough tiles to be taller than
+       the viewport allows, it scrolls internally instead of being cut off
+       or pushed off-screen. */
+    max-height: calc(100vh - 140px);
+    overflow-x: hidden;
+    overflow-y: auto;
     background: #fff;
     color: #141414;
     border-radius: 18px;
-    overflow: hidden;
     box-shadow: 0 24px 60px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
     border: 1px solid var(--ssh-border);
     opacity: 0;
@@ -504,7 +511,13 @@
   #ssh-{{ section_id }} .ssh__mega-grid {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(var(--ssh-mega-columns, 3), 1fr);
+    /* Purely width-driven: each tile gets at least 110px, and auto-fit
+       packs as many as actually fit per row (extra space is shared out via
+       the 1fr max, so 2-3 tiles sit nicely wide and 5 tiles pack into one
+       row without needing a fixed column count). Naturally reflows to
+       fewer per row as the panel narrows on smaller viewports - never a
+       forced tall wrap, never squeezed. */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 12px;
     align-content: start;
   }
@@ -617,22 +630,49 @@
     display: none;
   }
 
+  /* Icon morphs from hamburger to X by cross-fading + rotating both icons
+     in place, rather than an instant display swap. */
+  #ssh-{{ section_id }} .ssh__burger-open,
   #ssh-{{ section_id }} .ssh__burger-close {
-    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__burger-close {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(0.5);
   }
 
   #ssh-{{ section_id }}.is-mobile-open .ssh__burger-open {
-    display: none;
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(90deg) scale(0.5);
   }
 
   #ssh-{{ section_id }}.is-mobile-open .ssh__burger-close {
-    display: block;
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
 
   /* ---- Mobile panel ---- */
+  /* Collapsed via max-height (JS sets it to the panel's real scrollHeight
+     on open, 0 on close) rather than display/hidden toggling, so it can
+     actually transition instead of snapping open/closed. */
   #ssh-{{ section_id }} .ssh__mobile {
     border-top: 1px solid var(--ssh-border);
     background: var(--ssh-bg);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, transform 0.3s ease;
+  }
+
+  #ssh-{{ section_id }}.is-mobile-open .ssh__mobile {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   #ssh-{{ section_id }} .ssh__mobile-list {
@@ -697,13 +737,13 @@
       padding: 0 20px;
       gap: 16px;
     }
+  }
 
-    #ssh-{{ section_id }} .ssh__mobile {
-      display: none;
-    }
-
-    #ssh-{{ section_id }}.is-mobile-open .ssh__mobile {
-      display: block;
+  @media (prefers-reduced-motion: reduce) {
+    #ssh-{{ section_id }} .ssh__mobile,
+    #ssh-{{ section_id }} .ssh__burger-open,
+    #ssh-{{ section_id }} .ssh__burger-close {
+      transition: none;
     }
   }
 </style>
@@ -717,17 +757,25 @@
     var panel = header.querySelector('[data-ssh-mobile-panel]');
     if (!burger || !panel) return;
 
-    burger.addEventListener('click', function () {
-      var isOpen = header.classList.toggle('is-mobile-open');
+    /* Animate open/close by setting max-height to the panel's actual
+       content height (rather than an arbitrary large value), so the CSS
+       transition tracks real content and works at any viewport size. */
+    function setMobilePanelOpen(isOpen) {
+      header.classList.toggle('is-mobile-open', isOpen);
       burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      panel.hidden = !isOpen;
+      panel.style.maxHeight = isOpen ? panel.scrollHeight + 'px' : '0px';
+    }
+
+    burger.addEventListener('click', function () {
+      setMobilePanelOpen(!header.classList.contains('is-mobile-open'));
     });
 
     window.addEventListener('resize', function () {
       if (window.innerWidth >= 990 && header.classList.contains('is-mobile-open')) {
-        header.classList.remove('is-mobile-open');
-        burger.setAttribute('aria-expanded', 'false');
-        panel.hidden = true;
+        setMobilePanelOpen(false);
+      } else if (header.classList.contains('is-mobile-open')) {
+        /* content height can change on resize (text reflow) - keep it in sync while open */
+        panel.style.maxHeight = panel.scrollHeight + 'px';
       }
     });
 
@@ -809,7 +857,7 @@
       "name": "Nav Dropdown",
       "settings": [
         { "type": "text", "id": "label", "label": "Label", "default": "Shop" },
-        { "type": "range", "id": "columns", "label": "Tile columns", "min": 2, "max": 4, "step": 1, "default": 3 },
+        { "type": "range", "id": "columns", "label": "Tile columns", "min": 2, "max": 4, "step": 1, "default": 3, "info": "A soft target on wide screens - the row still fits as many tiles as actually fit and reflows automatically." },
         { "type": "header", "content": "Context panel" },
         { "type": "image_picker", "id": "intro_image", "label": "Background image" },
         { "type": "color", "id": "intro_overlay_color", "label": "Overlay color", "default": "#000000" },
@@ -858,21 +906,57 @@
     {
       "name": "Header",
       "blocks": [
-        { "type": "nav_link", "settings": { "label": "Home" } },
+        { "type": "nav_link", "settings": { "label": "Home", "url": "/" } },
         {
           "type": "nav_dropdown",
           "settings": {
-            "label": "Shop",
-            "intro_heading": "Your health, our priority",
-            "intro_text": "Genuine medicines, wellness essentials and expert care — all in one place.",
-            "intro_link_text": "Shop all"
+            "label": "Shop by Concern",
+            "columns": 4,
+            "intro_eyebrow": "Shop By Concern",
+            "intro_heading": "Feel Better, Faster",
+            "intro_text": "Find the right relief quickly — browse trusted remedies organised by exactly what you're treating.",
+            "intro_link_text": "Browse all concerns",
+            "intro_link": "/collections/all"
           }
         },
-        { "type": "dropdown_tile", "settings": { "heading": "Vitamins & Supplements", "text": "Daily wellness essentials" } },
-        { "type": "dropdown_tile", "settings": { "heading": "Skin & Personal Care", "text": "Dermat-recommended" } },
-        { "type": "dropdown_tile", "settings": { "heading": "Baby & Mother Care", "text": "Gentle, trusted brands" } },
-        { "type": "nav_link", "settings": { "label": "About Us" } },
-        { "type": "nav_link", "settings": { "label": "Contact" } }
+        { "type": "dropdown_tile", "settings": { "heading": "Digestive Care", "text": "Relief for gas, acidity & more", "link": "/collections/digestive-care" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Immunity Boosters", "text": "Build natural resistance", "link": "/collections/immunity-boosters" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Diabetic Care", "text": "Sugar-friendly essentials", "link": "/collections/diabetic-care" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Pain & Joint Relief", "text": "Fast-acting comfort", "link": "/collections/pain-joint-relief" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Respiratory & Sinus Care", "text": "Breathe easy again", "link": "/collections/respiratory-sinus-care" } },
+        { "type": "nav_link", "settings": { "label": "Men's Health", "url": "/collections/mens-health" } },
+        { "type": "nav_link", "settings": { "label": "Women's Health", "url": "/collections/womens-health" } },
+        {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Care & Wellness",
+            "columns": 2,
+            "intro_eyebrow": "Care & Wellness",
+            "intro_heading": "Everyday Self-Care",
+            "intro_text": "Gentle personal care and wellness essentials to keep your daily routine on track.",
+            "intro_link_text": "Shop wellness",
+            "intro_link": "/collections/all"
+          }
+        },
+        { "type": "dropdown_tile", "settings": { "heading": "Personal Care", "text": "Daily hygiene & grooming", "link": "/collections/personal-care" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Health & Wellness", "text": "Vitamins, supplements & more", "link": "/collections/health-wellness" } },
+        {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Top Picks",
+            "columns": 3,
+            "intro_eyebrow": "Limited-Time Offers",
+            "intro_heading": "Top Picks & Health Packs",
+            "intro_text": "Our best-selling combos and seasonal packs, bundled together to save you more.",
+            "intro_link_text": "View all offers",
+            "intro_link": "/collections/all"
+          }
+        },
+        { "type": "dropdown_tile", "settings": { "heading": "Immunity Combo Pack", "text": "Save 15% on the bundle", "link": "/collections/all" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Complete Skin Care Kit", "text": "4 products, 1 routine", "link": "/collections/all" } },
+        { "type": "dropdown_tile", "settings": { "heading": "Family Wellness Pack", "text": "Everyday essentials for all ages", "link": "/collections/all" } },
+        { "type": "nav_link", "settings": { "label": "About Us", "url": "/pages/about-us" } },
+        { "type": "nav_link", "settings": { "label": "Contact", "url": "/pages/contact" } }
       ]
     }
   ]

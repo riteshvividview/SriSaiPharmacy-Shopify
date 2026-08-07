@@ -54,51 +54,163 @@
             "url": "/"
           }
         },
-        "nav_shop": {
+        "nav_shop_concern": {
           "type": "nav_dropdown",
           "settings": {
-            "label": "Shop",
-            "columns": 3,
+            "label": "Shop by Concern",
+            "columns": 4,
             "intro_image": "shopify://shop_images/istockphoto-1245094782-612x612.jpg",
             "intro_overlay_color": "#000000",
             "intro_overlay_opacity": 60,
-            "intro_eyebrow": "Featured",
-            "intro_heading": "Your health, our priority",
-            "intro_text": "Genuine medicines, wellness essentials and expert care — all in one place.",
-            "intro_link_text": "Shop all",
+            "intro_eyebrow": "Shop By Concern",
+            "intro_heading": "Feel Better, Faster",
+            "intro_text": "Find the right relief quickly — browse trusted remedies organised by exactly what you're treating.",
+            "intro_link_text": "Browse all concerns",
             "intro_link": "/collections/all"
           }
         },
-        "tile_vitamins": {
+        "tile_digestive": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Digestive Care",
+            "text": "Relief for gas, acidity & more",
+            "link": "/collections/digestive-care"
+          }
+        },
+        "tile_immunity": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Immunity Boosters",
+            "text": "Build natural resistance",
+            "link": "/collections/immunity-boosters"
+          }
+        },
+        "tile_diabetic": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Diabetic Care",
+            "text": "Sugar-friendly essentials",
+            "link": "/collections/diabetic-care"
+          }
+        },
+        "tile_pain_joint": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Pain & Joint Relief",
+            "text": "Fast-acting comfort",
+            "link": "/collections/pain-joint-relief"
+          }
+        },
+        "tile_respiratory": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Respiratory & Sinus Care",
+            "text": "Breathe easy again",
+            "link": "/collections/respiratory-sinus-care"
+          }
+        },
+        "nav_mens_health": {
+          "type": "nav_link",
+          "settings": {
+            "label": "Men's Health",
+            "url": "/collections/mens-health"
+          }
+        },
+        "nav_womens_health": {
+          "type": "nav_link",
+          "settings": {
+            "label": "Women's Health",
+            "url": "/collections/womens-health"
+          }
+        },
+        "nav_care_wellness": {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Care & Wellness",
+            "columns": 2,
+            "intro_overlay_color": "#000000",
+            "intro_overlay_opacity": 45,
+            "intro_eyebrow": "Care & Wellness",
+            "intro_heading": "Everyday Self-Care",
+            "intro_text": "Gentle personal care and wellness essentials to keep your daily routine on track.",
+            "intro_link_text": "Shop wellness",
+            "intro_link": "/collections/all"
+          }
+        },
+        "tile_personal_care": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Personal Care",
+            "text": "Daily hygiene & grooming",
+            "link": "/collections/personal-care"
+          }
+        },
+        "tile_health_wellness": {
+          "type": "dropdown_tile",
+          "settings": {
+            "image_orientation": "portrait",
+            "image_fit": "contain",
+            "heading": "Health & Wellness",
+            "text": "Vitamins, supplements & more",
+            "link": "/collections/health-wellness"
+          }
+        },
+        "nav_top_picks": {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Top Picks",
+            "columns": 3,
+            "intro_overlay_color": "#000000",
+            "intro_overlay_opacity": 45,
+            "intro_eyebrow": "Limited-Time Offers",
+            "intro_heading": "Top Picks & Health Packs",
+            "intro_text": "Our best-selling combos and seasonal packs, bundled together to save you more.",
+            "intro_link_text": "View all offers",
+            "intro_link": "/collections/all"
+          }
+        },
+        "tile_immunity_combo": {
           "type": "dropdown_tile",
           "settings": {
             "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
-            "heading": "Vitamins & Supplements",
-            "text": "Daily wellness essentials",
+            "heading": "Immunity Combo Pack",
+            "text": "Save 15% on the bundle",
             "link": "/collections/all"
           }
         },
-        "tile_skincare": {
+        "tile_skincare_kit": {
           "type": "dropdown_tile",
           "settings": {
             "image": "shopify://shop_images/pimple_lotion_2.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
-            "heading": "Skin & Personal Care",
-            "text": "Dermat-recommended",
+            "heading": "Complete Skin Care Kit",
+            "text": "4 products, 1 routine",
             "link": "/collections/all"
           }
         },
-        "tile_baby": {
+        "tile_family_pack": {
           "type": "dropdown_tile",
           "settings": {
             "image": "shopify://shop_images/1_1.png",
             "image_orientation": "portrait",
             "image_fit": "contain",
-            "heading": "Baby & Mother Care",
-            "text": "Gentle, trusted brands",
+            "heading": "Family Wellness Pack",
+            "text": "Everyday essentials for all ages",
             "link": "/collections/all"
           }
         },
@@ -119,10 +231,21 @@
       },
       "block_order": [
         "nav_home",
-        "nav_shop",
-        "tile_vitamins",
-        "tile_skincare",
-        "tile_baby",
+        "nav_shop_concern",
+        "tile_digestive",
+        "tile_immunity",
+        "tile_diabetic",
+        "tile_pain_joint",
+        "tile_respiratory",
+        "nav_mens_health",
+        "nav_womens_health",
+        "nav_care_wellness",
+        "tile_personal_care",
+        "tile_health_wellness",
+        "nav_top_picks",
+        "tile_immunity_combo",
+        "tile_skincare_kit",
+        "tile_family_pack",
         "nav_about",
         "nav_contact"
       ],
