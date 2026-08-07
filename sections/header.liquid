@@ -90,13 +90,15 @@
                     <svg class="ssh__caret" aria-hidden="true" width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M11 5.5L7 9.5L3 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </button>
 
+                  {%- assign intro_overlay_opacity = bs.intro_overlay_opacity | default: 45 | divided_by: 100.0 -%}
+                  {%- assign intro_overlay_color = bs.intro_overlay_color | default: '#000000' | color_modify: 'alpha', intro_overlay_opacity -%}
                   <div class="ssh__mega" style="--ssh-mega-columns: {{ bs.columns | default: 3 }};">
                     <div class="ssh__mega-inner">
                       <div
                         class="ssh__mega-intro"
                         {%- if bs.intro_image != blank %} style="background-image: url({{ bs.intro_image | image_url: width: 700 }});"{% endif -%}
                       >
-                        <div class="ssh__mega-intro-scrim"></div>
+                        <div class="ssh__mega-intro-scrim" style="background: {{ intro_overlay_color }};"></div>
                         <div class="ssh__mega-intro-content">
                           {%- if bs.intro_eyebrow != blank -%}<p class="ssh__mega-eyebrow">{{ bs.intro_eyebrow }}</p>{%- endif -%}
                           {%- if bs.intro_heading != blank -%}<h3 class="ssh__mega-heading">{{ bs.intro_heading }}</h3>{%- endif -%}
@@ -115,8 +117,16 @@
                         {%- for tile_block in section.blocks offset: tiles_offset -%}
                           {%- if tile_block.type == 'dropdown_tile' -%}
                             {%- assign ts = tile_block.settings -%}
+                            {%- case ts.image_orientation -%}
+                              {%- when 'portrait' -%}
+                                {%- assign tile_aspect_ratio = '3 / 4' -%}
+                              {%- when 'square' -%}
+                                {%- assign tile_aspect_ratio = '1 / 1' -%}
+                              {%- else -%}
+                                {%- assign tile_aspect_ratio = '4 / 3' -%}
+                            {%- endcase -%}
                             <a href="{{ ts.link | default: '#' }}" class="ssh__tile" {{ tile_block.shopify_attributes }}>
-                              <span class="ssh__tile-image">
+                              <span class="ssh__tile-image" style="aspect-ratio: {{ tile_aspect_ratio }};">
                                 {%- if ts.image != blank -%}
                                   <img
                                     src="{{ ts.image | image_url: width: 400 }}"
@@ -125,6 +135,7 @@
                                     width="{{ ts.image.width }}"
                                     height="{{ ts.image.height }}"
                                     loading="lazy"
+                                    style="object-fit: {{ ts.image_fit | default: 'cover' }};"
                                   >
                                 {%- else -%}
                                   <span class="ssh__tile-placeholder" aria-hidden="true">
@@ -265,6 +276,7 @@
   }
 
   #ssh-{{ section_id }} .ssh__inner {
+    position: relative;
     max-width: 1360px;
     margin: 0 auto;
     padding: 0 32px;
@@ -365,12 +377,17 @@
   }
 
   /* ---- Mega menu ---- */
+  /* Anchored to the trigger's own <li> (zero-gap, flush under the button) so
+     hover can travel from trigger straight into the panel with no dead
+     zone. Horizontal viewport clipping is corrected separately via JS
+     (--ssh-mega-shift), not by re-anchoring to a wider container - doing
+     that broke hover continuity whenever the trigger sat off-center. */
   #ssh-{{ section_id }} .ssh__mega {
     position: absolute;
     top: 100%;
     left: 50%;
-    transform: translate(-50%, 10px);
-    width: min(880px, 92vw);
+    transform: translate(-50%, 10px) translateX(var(--ssh-mega-shift, 0px));
+    width: min(820px, calc(100vw - 48px));
     background: #fff;
     color: #141414;
     border-radius: 18px;
@@ -388,7 +405,7 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, 0) translateX(var(--ssh-mega-shift, 0px));
   }
 
   #ssh-{{ section_id }} .ssh__mega-inner {
@@ -411,7 +428,6 @@
   #ssh-{{ section_id }} .ssh__mega-intro-scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(20, 20, 20, 0) 20%, rgba(10, 10, 10, 0.78) 100%), rgba(20, 20, 20, 0.12);
   }
 
   #ssh-{{ section_id }} .ssh__mega-intro-content {
@@ -496,7 +512,6 @@
   #ssh-{{ section_id }} .ssh__tile-image {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
     border-radius: 10px;
     overflow: hidden;
     background: #f0f3f0;
@@ -505,7 +520,6 @@
   #ssh-{{ section_id }} .ssh__tile-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     display: block;
     transition: transform 0.4s ease;
   }
@@ -702,6 +716,45 @@
         panel.hidden = true;
       }
     });
+
+    /* Keep each mega-menu panel flush under its own trigger (so hover can
+       travel from button to panel with zero gap), but nudge it sideways
+       with a CSS variable if that would let it clip past the viewport
+       edge. Geometry only - open/close stays pure CSS hover/focus-within. */
+    var megaTriggers = Array.prototype.slice.call(header.querySelectorAll('.ssh__nav-item--mega'));
+    var edgeMargin = 12;
+
+    function clampMega(item) {
+      var mega = item.querySelector('.ssh__mega');
+      if (!mega) return;
+      mega.style.setProperty('--ssh-mega-shift', '0px');
+      var rect = mega.getBoundingClientRect();
+      var vw = window.innerWidth;
+      /* Clamp the panel's left edge into [margin, vw - margin - width] so
+         both sides are respected together - if the panel is wider than the
+         viewport allows, this pins it to the left margin rather than
+         letting one edge win and the other overflow uncorrected. */
+      var minLeft = edgeMargin;
+      var maxLeft = Math.max(edgeMargin, vw - edgeMargin - rect.width);
+      var clampedLeft = Math.min(Math.max(rect.left, minLeft), maxLeft);
+      var shift = clampedLeft - rect.left;
+      if (shift !== 0) {
+        mega.style.setProperty('--ssh-mega-shift', shift.toFixed(1) + 'px');
+      }
+    }
+
+    megaTriggers.forEach(function (item) {
+      item.addEventListener('mouseenter', function () { clampMega(item); });
+      item.addEventListener('focusin', function () { clampMega(item); });
+    });
+
+    window.addEventListener(
+      'resize',
+      function () {
+        megaTriggers.forEach(clampMega);
+      },
+      { passive: true }
+    );
   })();
 </script>
 
@@ -745,6 +798,8 @@
         { "type": "range", "id": "columns", "label": "Tile columns", "min": 2, "max": 4, "step": 1, "default": 3 },
         { "type": "header", "content": "Context panel" },
         { "type": "image_picker", "id": "intro_image", "label": "Background image" },
+        { "type": "color", "id": "intro_overlay_color", "label": "Overlay color", "default": "#000000" },
+        { "type": "range", "id": "intro_overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 90, "step": 5, "unit": "%", "default": 45 },
         { "type": "text", "id": "intro_eyebrow", "label": "Eyebrow", "default": "Featured" },
         { "type": "text", "id": "intro_heading", "label": "Heading", "default": "Your health, our priority" },
         { "type": "textarea", "id": "intro_text", "label": "Description", "default": "Genuine medicines, wellness essentials and expert care — all in one place." },
@@ -758,6 +813,27 @@
       "settings": [
         { "type": "paragraph", "content": "Place this block directly below the Nav Dropdown it belongs to." },
         { "type": "image_picker", "id": "image", "label": "Image" },
+        {
+          "type": "select",
+          "id": "image_orientation",
+          "label": "Image orientation",
+          "options": [
+            { "value": "landscape", "label": "Landscape (4:3)" },
+            { "value": "portrait", "label": "Portrait (3:4)" },
+            { "value": "square", "label": "Square (1:1)" }
+          ],
+          "default": "landscape"
+        },
+        {
+          "type": "select",
+          "id": "image_fit",
+          "label": "Image fit",
+          "options": [
+            { "value": "cover", "label": "Cover (fills the frame, may crop)" },
+            { "value": "contain", "label": "Contain (shows the full image)" }
+          ],
+          "default": "cover"
+        },
         { "type": "text", "id": "heading", "label": "Heading", "default": "Vitamins & Supplements" },
         { "type": "text", "id": "text", "label": "Short text", "default": "Daily wellness essentials" },
         { "type": "url", "id": "link", "label": "Link" }
