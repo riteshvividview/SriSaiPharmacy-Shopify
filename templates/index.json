@@ -60,7 +60,7 @@
         "slide_U3X9wV": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/1_dfe895f1-7d79-4d6e-9962-f3aef3cb03cb.png",
+            "image": "shopify://shop_images/2.png",
             "title": "Moringa Powder",
             "link": "",
             "alt_text": "",
@@ -80,7 +80,7 @@
         "slide_jDcGG3": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/Ashwa_Powder.png",
+            "image": "shopify://shop_images/4.png",
             "title": "Ashwa Powder",
             "link": "",
             "alt_text": "",
@@ -100,7 +100,7 @@
         "slide_zPXeDN": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/curry_leaves.png",
+            "image": "shopify://shop_images/3.png",
             "title": "Curry Leaf Powder",
             "link": "",
             "alt_text": "",
@@ -191,11 +191,11 @@
         "banner_height": 400,
         "banner_radius": 20,
         "show_bg_decor": true,
-        "bg_decor_image_a": "shopify://shop_images/leaf-icon-design-free-png.webp",
-        "bg_decor_image_b": "shopify://shop_images/38-383647_royalty-laurel-comments-laurel-wreath-vector.png",
+        "bg_decor_image_a": "shopify://shop_images/38-383647_royalty-laurel-comments-laurel-wreath-vector.png",
+        "bg_decor_image_b": "shopify://shop_images/images.png",
         "bg_decor_count": 22,
         "bg_decor_size": 170,
-        "bg_decor_opacity": 2,
+        "bg_decor_opacity": 3,
         "target_date": "2026-12-31",
         "target_time": "23:59",
         "timezone_offset": "+05:30",
@@ -290,7 +290,7 @@
         "product_VYVBfm": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
+            "image": "shopify://shop_images/0.2.png",
             "image_focal_point": "50% 50%",
             "alt_text": "",
             "title": "Purgin Powder",
@@ -307,7 +307,7 @@
         "product_7kFHGd": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.3_6494e1dd-79e2-4b5c-86c6-34b1b24f61b8.png",
+            "image": "shopify://shop_images/0.3.png",
             "image_focal_point": "50% 50%",
             "alt_text": "",
             "title": "Madhuban Powder",
@@ -414,7 +414,6 @@
         "product_concern_1": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.2_9a894af1-ad61-471a-bba3-766bb4342bd6.png",
             "alt_text": "",
             "title": "Digestive Care Combo",
             "vendor": "",
@@ -428,7 +427,6 @@
         "product_concern_2": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.1.png",
             "alt_text": "",
             "title": "Immunity Booster Pack",
             "vendor": "",
@@ -442,7 +440,6 @@
         "product_concern_3": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.4.png",
             "alt_text": "",
             "title": "Joint Relief Balm",
             "vendor": "",
@@ -605,7 +602,6 @@
         "product_packs_1": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/0.4.png",
             "alt_text": "",
             "title": "Family Wellness Pack",
             "vendor": "",
@@ -619,7 +615,6 @@
         "product_packs_2": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/Varun_Drops-2.png",
             "alt_text": "",
             "title": "Immunity Combo Pack",
             "vendor": "",
@@ -633,7 +628,6 @@
         "product_packs_3": {
           "type": "product",
           "settings": {
-            "image": "shopify://shop_images/Mockup.png",
             "alt_text": "",
             "title": "Complete Skin Care Kit",
             "vendor": "",
@@ -688,21 +682,15 @@
       "blocks": {
         "badge_1": {
           "type": "badge",
-          "settings": {
-            "image": "shopify://shop_images/ayush-logo-png_360x_1bf8e606-544d-4577-bd01-43aed0b75195.webp"
-          }
+          "settings": {}
         },
         "badge_2": {
           "type": "badge",
-          "settings": {
-            "image": "shopify://shop_images/gmp-logo-png_360x_bfab9add-5e12-4f7b-870a-c4aa2e8c0d7e.webp"
-          }
+          "settings": {}
         },
         "badge_3": {
           "type": "badge",
-          "settings": {
-            "image": "shopify://shop_images/1971_360x_4dc84aa8-a401-488c-a0d6-f6a161e95c0d.webp"
-          }
+          "settings": {}
         }
       },
       "block_order": [
