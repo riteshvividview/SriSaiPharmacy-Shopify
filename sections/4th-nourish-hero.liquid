@@ -5,7 +5,7 @@
   drift left/right in sync with scroll direction.
 {%- endcomment -%}
 
-{{ 'https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
 
 {%- liquid
   assign section_id = section.id
@@ -171,11 +171,12 @@
 
   #nourish-hero-{{ section_id }} .nourish-hero__word {
     display: inline-block;
-    font-family: 'Anton', 'Impact', sans-serif;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-weight: var(--nh-word-weight);
     color: var(--nh-word-color);
     line-height: 1;
     white-space: nowrap;
+    text-transform: uppercase;
     letter-spacing: 1px;
     will-change: transform;
     transform: translate3d(0, 0, 0);
