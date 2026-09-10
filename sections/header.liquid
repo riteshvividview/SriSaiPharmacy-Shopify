@@ -181,46 +181,43 @@
         </button>
       </div>
     </div>
+
+    <div class="ssh__mobile" id="ssh-mobile-{{ section_id }}" data-ssh-mobile-panel>
+      <ul class="ssh__mobile-list">
+        {%- for block in section.blocks -%}
+          {%- assign bs = block.settings -%}
+          {%- case block.type -%}
+            {%- when 'nav_link' -%}
+              <li><a href="{{ bs.url | default: '#' }}">{{ bs.label }}</a></li>
+            {%- when 'nav_dropdown' -%}
+              <li class="ssh__mobile-group">
+                <span class="ssh__mobile-group-label">{{ bs.label }}</span>
+                <ul>
+                  {%- assign tiles_offset = forloop.index0 | plus: 1 -%}
+                  {%- for tile_block in section.blocks offset: tiles_offset -%}
+                    {%- if tile_block.type == 'dropdown_tile' -%}
+                      <li><a href="{{ tile_block.settings.link | default: '#' }}">{{ tile_block.settings.heading }}</a></li>
+                    {%- else -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </li>
+          {%- endcase -%}
+        {%- endfor -%}
+        <li class="ssh__mobile-account"><a href="{{ routes.account_url }}">My Account</a></li>
+      </ul>
+    </div>
   </div>
 
-  <div class="ssh__mobile" id="ssh-mobile-{{ section_id }}" data-ssh-mobile-panel>
-    <ul class="ssh__mobile-list">
-      {%- for block in section.blocks -%}
-        {%- assign bs = block.settings -%}
-        {%- case block.type -%}
-          {%- when 'nav_link' -%}
-            <li><a href="{{ bs.url | default: '#' }}">{{ bs.label }}</a></li>
-          {%- when 'nav_dropdown' -%}
-            <li class="ssh__mobile-group">
-              <span class="ssh__mobile-group-label">{{ bs.label }}</span>
-              <ul>
-                {%- assign tiles_offset = forloop.index0 | plus: 1 -%}
-                {%- for tile_block in section.blocks offset: tiles_offset -%}
-                  {%- if tile_block.type == 'dropdown_tile' -%}
-                    <li><a href="{{ tile_block.settings.link | default: '#' }}">{{ tile_block.settings.heading }}</a></li>
-                  {%- else -%}
-                    {%- break -%}
-                  {%- endif -%}
-                {%- endfor -%}
-              </ul>
-            </li>
-        {%- endcase -%}
-      {%- endfor -%}
-      <li class="ssh__mobile-account"><a href="{{ routes.account_url }}">My Account</a></li>
-    </ul>
-  </div>
+  <div class="ssh__bar-spacer" data-ssh-bar-spacer aria-hidden="true"></div>
 </header>
 
 <style>
   #ssh-{{ section_id }} {
     --ssh-height: 76px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--ssh-bg);
     color: var(--ssh-text);
     font-family: 'Poppins', sans-serif;
-    border-bottom: 1px solid var(--ssh-border);
   }
 
   #ssh-{{ section_id }} *,
@@ -271,8 +268,34 @@
   }
 
   /* ---- Bar ---- */
+  /* Pinning is JS-driven (see script below) rather than plain CSS
+     `position: sticky`. This theme scrolls `.page-wrapper` (not the
+     document) on desktop, with several unstyled wrapper divs between this
+     bar and that scroll container - a nesting depth where native sticky's
+     containing-block resolution isn't reliable. The JS toggles this class
+     to fix the bar to the viewport once the page has scrolled past the
+     utility strip, while the announcement bar above it scrolls away
+     normally. `.ssh__bar-spacer` (see below) fills the gap it leaves. */
   #ssh-{{ section_id }} .ssh__bar {
+    position: relative;
+    z-index: 100;
     background: var(--ssh-bg);
+    border-bottom: 1px solid var(--ssh-border);
+  }
+
+  #ssh-{{ section_id }}.is-bar-pinned .ssh__bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  #ssh-{{ section_id }} .ssh__bar-spacer {
+    display: none;
+  }
+
+  #ssh-{{ section_id }}.is-bar-pinned .ssh__bar-spacer {
+    display: block;
   }
 
   #ssh-{{ section_id }} .ssh__inner {
@@ -661,12 +684,18 @@
      on open, 0 on close) rather than display/hidden toggling, so it can
      actually transition instead of snapping open/closed. */
   #ssh-{{ section_id }} .ssh__mobile {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 90;
     border-top: 1px solid var(--ssh-border);
     background: var(--ssh-bg);
     max-height: 0;
     overflow: hidden;
     opacity: 0;
     transform: translateY(-6px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, transform 0.3s ease;
   }
 
@@ -755,7 +784,46 @@
 
     var burger = header.querySelector('[data-ssh-burger]');
     var panel = header.querySelector('[data-ssh-mobile-panel]');
+    var bar = header.querySelector('.ssh__bar');
+    var spacer = header.querySelector('[data-ssh-bar-spacer]');
     if (!burger || !panel) return;
+
+    /* Pin the bar to the viewport once scrolled past the utility strip.
+       This theme scrolls `.page-wrapper` (not the document) on desktop, so
+       both scroll sources are watched; whichever is actually active drives
+       the pin state. See the CSS comment above `.ssh__bar` for why this is
+       JS-driven rather than `position: sticky`. */
+    if (bar && spacer) {
+      var pageScroller = document.querySelector('.page-wrapper');
+
+      function currentScrollTop() {
+        var wrapperTop = pageScroller ? pageScroller.scrollTop : 0;
+        var winTop = window.scrollY || document.documentElement.scrollTop || 0;
+        return Math.max(wrapperTop, winTop);
+      }
+
+      var pinTicking = false;
+      function updatePinned() {
+        var shouldPin = currentScrollTop() > 2;
+        if (header.classList.contains('is-bar-pinned') === shouldPin) return;
+        header.classList.toggle('is-bar-pinned', shouldPin);
+        spacer.style.height = shouldPin ? bar.offsetHeight + 'px' : '0px';
+      }
+
+      function onScroll() {
+        if (pinTicking) return;
+        pinTicking = true;
+        window.requestAnimationFrame(function () {
+          updatePinned();
+          pinTicking = false;
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      updatePinned();
+    }
 
     /* Animate open/close by setting max-height to the panel's actual
        content height (rather than an arbitrary large value), so the CSS
@@ -810,6 +878,14 @@
       item.addEventListener('focusin', function () { clampMega(item); });
     });
 
+    /* Panels near the left/right edge of the nav render centered under
+       their trigger by default (unclamped) even while closed - since
+       they're only hidden via opacity/visibility (not display:none), that
+       unclamped box still extends past the viewport and contributes to the
+       page's horizontal scrollable area. Clamp all of them up front, not
+       just on hover, so a closed menu never causes a horizontal scrollbar. */
+    megaTriggers.forEach(clampMega);
+
     window.addEventListener(
       'resize',
       function () {
@@ -817,6 +893,13 @@
       },
       { passive: true }
     );
+
+    /* Re-check once everything (webfonts, logo image) has finished loading,
+       since a late font swap can shift nav-item positions after the initial
+       clamp above ran. */
+    window.addEventListener('load', function () {
+      megaTriggers.forEach(clampMega);
+    });
   })();
 </script>
 

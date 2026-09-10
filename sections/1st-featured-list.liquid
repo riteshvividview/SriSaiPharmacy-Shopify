@@ -64,6 +64,7 @@
     --fc-badge-padding: {{ s.badge_padding }}px;
 
     --fc-icon-bg: {{ s.icon_bg_color }};
+    --fc-icon-bg-hover: {{ s.icon_bg_hover_color }};
     --fc-icon-color: {{ s.icon_color }};
     --fc-icon-size: {{ s.icon_size }}px;
     --fc-icon-radius: {{ s.icon_radius }}px;
@@ -290,6 +291,7 @@
     box-shadow: var(--fc-card-shadow);
     padding: 20px 20px 24px;
     position: relative;
+    overflow: hidden;
     transition: transform var(--fc-anim-speed) cubic-bezier(0.22, 0.61, 0.36, 1),
       box-shadow var(--fc-anim-speed) cubic-bezier(0.22, 0.61, 0.36, 1);
   }
@@ -327,6 +329,17 @@
     background: var(--fc-icon-bg);
     color: var(--fc-icon-color);
     border-radius: var(--fc-icon-radius);
+    transform: translateX(calc(100% + 20px));
+    transition: transform var(--fc-anim-speed) cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.25s ease;
+  }
+
+  #fc-{{ section_id }} .fc__card:hover .fc__icon-btn {
+    transform: translateX(0);
+  }
+
+  #fc-{{ section_id }} .fc__icon-btn:hover {
+    background: var(--fc-icon-bg-hover, var(--fc-accent));
   }
 
   #fc-{{ section_id }} .fc__image-wrap {
@@ -459,12 +472,22 @@
       display: block;
       text-align: center;
     }
+
+    #fc-{{ section_id }} .fc__icon-btn {
+      transform: none;
+      transition: background-color 0.25s ease;
+    }
+
+    #fc-{{ section_id }} .fc__card:hover .fc__icon-btn {
+      transform: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     #fc-{{ section_id }} .fc__card-link,
     #fc-{{ section_id }} .fc__image,
-    #fc-{{ section_id }} .fc__view-all {
+    #fc-{{ section_id }} .fc__view-all,
+    #fc-{{ section_id }} .fc__icon-btn {
       transition: none !important;
     }
   }
@@ -691,6 +714,7 @@
       "default": "bag"
     },
     { "type": "color", "id": "icon_bg_color", "label": "Background color", "default": "#4CAF50" },
+    { "type": "color", "id": "icon_bg_hover_color", "label": "Background color (hover)", "default": "#3D8B40" },
     { "type": "color", "id": "icon_color", "label": "Icon color", "default": "#FFFFFF" },
     { "type": "range", "id": "icon_size", "label": "Size", "min": 24, "max": 56, "step": 2, "unit": "px", "default": 36 },
     { "type": "range", "id": "icon_radius", "label": "Border radius", "min": 0, "max": 28, "step": 2, "unit": "px", "default": 18 },

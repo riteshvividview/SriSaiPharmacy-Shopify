@@ -254,8 +254,16 @@
      content column is untouched - only the slider's right edge extends. */
   @media (min-width: 1000px) {
     #cvc-{{ section_id }} .cvc__slider {
-      margin-right: calc(-1 * max(0px, (100vw - var(--cvc-container-width)) / 2));
-      padding-right: calc(max(0px, (100vw - var(--cvc-container-width)) / 2) + 20px);
+      /* `var(--cvc-vw)` (set by JS below) is the real usable width of the
+         actual scroll container, measured via `clientWidth` so it already
+         excludes any scrollbar - falls back to `100vw` before that JS runs.
+         Raw `100vw` alone overshoots by a scrollbar's width whenever
+         `.page-wrapper` (this theme's real desktop scroll container) shows
+         its own scrollbar, which was bleeding the track past the right
+         edge of the viewport and causing a permanent horizontal scrollbar
+         on the whole page. */
+      margin-right: calc(-1 * max(0px, (var(--cvc-vw, 100vw) - var(--cvc-container-width)) / 2));
+      padding-right: calc(max(0px, (var(--cvc-vw, 100vw) - var(--cvc-container-width)) / 2) + 20px);
     }
   }
 
@@ -430,6 +438,19 @@
     var totalSlides = parseInt(section.getAttribute('data-slides-count'), 10) || cards.length;
 
     if (!track || !cards.length) return;
+
+    /* `clientWidth` excludes scrollbar width, unlike the `100vw` CSS unit -
+       measure the theme's actual desktop scroll container (`.page-wrapper`)
+       so the full-bleed slider math above never overshoots past the real
+       right edge of the viewport. */
+    function updateViewportWidth() {
+      var pageWrapper = document.querySelector('.page-wrapper');
+      var w = pageWrapper && window.innerWidth >= 1000 ? pageWrapper.clientWidth : document.documentElement.clientWidth;
+      section.style.setProperty('--cvc-vw', w + 'px');
+    }
+
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth, { passive: true });
 
     /* Read settings fresh each time rather than caching once - the Shopify
        theme editor can replace this section's markup with new attribute
