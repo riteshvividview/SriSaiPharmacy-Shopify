@@ -1,0 +1,445 @@
+{%- comment -%}
+  Section: About - Story Block
+  Reusable premium content block for the About Us page: eyebrow + heading +
+  a stack of labeled points (or plain paragraphs, if a point's label is
+  left blank) alongside an image. Image side is switchable per instance so
+  several of these, added in sequence with alternating "Image position",
+  build an editorial-style story page (founding story / commitment to
+  health / meet the founder, etc). Everything scroll-reveals in with a
+  staggered fade + slide, matching the reveal technique used elsewhere in
+  this theme (see 4th-nourish-hero.liquid).
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign points = section.blocks
+-%}
+
+<section
+  class="asb{% if s.image_position == 'right' %} asb--image-right{% endif %}"
+  id="asb-{{ section_id }}"
+  data-asb
+  style="
+    --asb-bg: {{ s.background_color | default: '#FFFFFF' }};
+    --asb-text: {{ s.text_color | default: '#141414' }};
+    --asb-muted: {{ s.muted_color | default: '#5B5B5B' }};
+    --asb-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --asb-frame: {{ s.frame_color | default: s.accent_color | default: '#2E7D32' }};
+    --asb-watermark: {{ s.accent_color | default: '#2E7D32' }};
+    --asb-padding-top: {{ s.padding_top | default: 90 }}px;
+    --asb-padding-bottom: {{ s.padding_bottom | default: 90 }}px;
+  "
+>
+  {%- if s.bg_word != blank -%}
+    <p class="asb__watermark" aria-hidden="true">{{ s.bg_word }}</p>
+  {%- endif -%}
+
+  <div class="asb__container">
+    <div class="asb__media" data-reveal data-reveal-media>
+      <div class="asb__media-inner">
+        {%- if s.frame_style == 'accent-offset' -%}
+          <div class="asb__media-frame" aria-hidden="true"></div>
+        {%- endif -%}
+        <div class="asb__media-image">
+          {%- if s.image != blank -%}
+            <img
+              src="{{ s.image | image_url: width: 1200 }}"
+              srcset="
+                {{ s.image | image_url: width: 600 }} 600w,
+                {{ s.image | image_url: width: 900 }} 900w,
+                {{ s.image | image_url: width: 1200 }} 1200w
+              "
+              sizes="(max-width: 899px) 100vw, 560px"
+              alt="{{ s.image_alt | default: s.heading | escape }}"
+              width="{{ s.image.width }}"
+              height="{{ s.image.height }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            <div class="asb__media-placeholder" aria-hidden="true">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+
+    <div class="asb__content">
+      {%- if s.eyebrow != blank -%}
+        <p class="asb__eyebrow" data-reveal data-reveal-delay="0"><span class="asb__eyebrow-rule" aria-hidden="true"></span>{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if s.heading != blank -%}
+        <h2 class="asb__heading" data-reveal data-reveal-delay="1">{{ s.heading }}</h2>
+      {%- endif -%}
+
+      {%- if points.size > 0 -%}
+        <div class="asb__points">
+          {%- for point in points -%}
+            {%- assign ps = point.settings -%}
+            {%- assign delay = forloop.index | plus: 1 -%}
+            <div class="asb__point" data-reveal data-reveal-delay="{{ delay }}" {{ point.shopify_attributes }}>
+              {%- if ps.label != blank -%}
+                <p class="asb__point-label">{{ ps.label }}</p>
+              {%- endif -%}
+              {%- if ps.content != blank -%}
+                <div class="asb__point-content">{{ ps.content }}</div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #asb-{{ section_id }} {
+    position: relative;
+    background: var(--asb-bg);
+    color: var(--asb-text);
+    font-family: 'Poppins', sans-serif;
+    padding: var(--asb-padding-top) 20px var(--asb-padding-bottom);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  #asb-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #asb-{{ section_id }} .asb__watermark {
+    position: absolute;
+    inset: auto 0 -0.12em 0;
+    z-index: 0;
+    margin: 0;
+    text-align: center;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-size: clamp(80px, 16vw, 220px);
+    line-height: 1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--asb-watermark);
+    opacity: 0.05;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #asb-{{ section_id }} .asb__container {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    gap: 72px;
+    align-items: center;
+  }
+
+  #asb-{{ section_id }}.asb--image-right .asb__container {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  }
+
+  #asb-{{ section_id }}.asb--image-right .asb__media {
+    order: 2;
+  }
+
+  /* ---- Media ---- */
+  #asb-{{ section_id }} .asb__media {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #asb-{{ section_id }} .asb__media.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #asb-{{ section_id }} .asb__media-inner {
+    position: relative;
+  }
+
+  #asb-{{ section_id }} .asb__media-frame {
+    position: absolute;
+    inset: 20px -20px -20px 20px;
+    border-radius: 22px;
+    background: var(--asb-frame);
+    opacity: 0.16;
+    z-index: 0;
+  }
+
+  #asb-{{ section_id }}.asb--image-right .asb__media-frame {
+    inset: 20px 20px -20px -20px;
+  }
+
+  #asb-{{ section_id }} .asb__media-image {
+    position: relative;
+    z-index: 1;
+    aspect-ratio: 4 / 5;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #f0f3f0;
+    box-shadow: 0 24px 50px rgba(20, 20, 20, 0.12);
+  }
+
+  #asb-{{ section_id }} .asb__media-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.08);
+    transition: transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #asb-{{ section_id }} .asb__media.is-visible .asb__media-image img {
+    transform: scale(1);
+  }
+
+  #asb-{{ section_id }} .asb__media-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--asb-accent);
+    opacity: 0.5;
+  }
+
+  /* ---- Content ---- */
+  #asb-{{ section_id }} .asb__content {
+    min-width: 0;
+  }
+
+  #asb-{{ section_id }} [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #asb-{{ section_id }} [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #asb-{{ section_id }} [data-reveal-delay="0"] { transition-delay: 0.05s; }
+  #asb-{{ section_id }} [data-reveal-delay="1"] { transition-delay: 0.15s; }
+  #asb-{{ section_id }} [data-reveal-delay="2"] { transition-delay: 0.25s; }
+  #asb-{{ section_id }} [data-reveal-delay="3"] { transition-delay: 0.35s; }
+  #asb-{{ section_id }} [data-reveal-delay="4"] { transition-delay: 0.45s; }
+  #asb-{{ section_id }} [data-reveal-delay="5"] { transition-delay: 0.55s; }
+  #asb-{{ section_id }} [data-reveal-delay="6"] { transition-delay: 0.65s; }
+
+  #asb-{{ section_id }} .asb__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--asb-accent);
+  }
+
+  #asb-{{ section_id }} .asb__eyebrow-rule {
+    width: 28px;
+    height: 2px;
+    background: var(--asb-accent);
+    flex-shrink: 0;
+  }
+
+  #asb-{{ section_id }} .asb__heading {
+    margin: 0 0 32px;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.05;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--asb-text);
+  }
+
+  #asb-{{ section_id }} .asb__points {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  #asb-{{ section_id }} .asb__point-label {
+    margin: 0 0 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--asb-text);
+  }
+
+  #asb-{{ section_id }} .asb__point-content {
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: var(--asb-muted);
+  }
+
+  #asb-{{ section_id }} .asb__point-content p {
+    margin: 0 0 0.8em;
+  }
+
+  #asb-{{ section_id }} .asb__point-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 999px) {
+    #asb-{{ section_id }} .asb__container {
+      gap: 48px;
+    }
+
+    #asb-{{ section_id }} .asb__media-image {
+      aspect-ratio: 4 / 3.4;
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #asb-{{ section_id }} {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    #asb-{{ section_id }} .asb__container,
+    #asb-{{ section_id }}.asb--image-right .asb__container {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    #asb-{{ section_id }}.asb--image-right .asb__media {
+      order: 0;
+    }
+
+    #asb-{{ section_id }} .asb__media-image {
+      aspect-ratio: 4 / 3;
+    }
+
+    #asb-{{ section_id }} .asb__media-frame {
+      inset: 14px -14px -14px 14px;
+    }
+
+    #asb-{{ section_id }}.asb--image-right .asb__media-frame {
+      inset: 14px 14px -14px -14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #asb-{{ section_id }} .asb__media,
+    #asb-{{ section_id }} [data-reveal],
+    #asb-{{ section_id }} .asb__media-image img {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('asb-{{ section_id }}');
+    if (!section) return;
+
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+    if (!revealTargets.length) return;
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+      );
+      revealTargets.forEach(function (el) { observer.observe(el); });
+    } else {
+      revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "About - Story Block",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow label", "default": "Our Story" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Rooted In Trust Since 1971" },
+
+    { "type": "header", "content": "Image" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "frame_style",
+      "label": "Image frame style",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "accent-offset", "label": "Offset accent panel" }
+      ],
+      "default": "accent-offset"
+    },
+    { "type": "color", "id": "frame_color", "label": "Frame panel color", "info": "Defaults to the accent color below if left blank.", "default": "#2E7D32" },
+
+    { "type": "header", "content": "Decoration" },
+    { "type": "text", "id": "bg_word", "label": "Background watermark word", "info": "Optional large faint word behind the section, e.g. \"CARE\". Leave blank to disable." },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
+    { "type": "color", "id": "accent_color", "label": "Accent (eyebrow, frame)", "default": "#2E7D32" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Point",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "info": "Optional. Leave blank to show only the paragraph, with no bold sub-heading.", "default": "Who We Are" },
+        { "type": "richtext", "id": "content", "label": "Text", "default": "<p>Add a short paragraph here.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About - Story Block",
+      "blocks": [
+        { "type": "point" },
+        { "type": "point" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,124 @@
+{
+  "sections": {
+    "about_story_founding": {
+      "type": "about-story-block",
+      "name": "Our Story",
+      "blocks": {
+        "point_who": {
+          "type": "point",
+          "settings": {
+            "label": "Who We Are",
+            "content": "<p>Sri Sai Pharmaceuticals is a trusted neighbourhood pharmacy rooted in Ayurveda and traditional herbal knowledge, dedicated to genuine medicines and wellness products that support the health of our customers, our environment and our community.</p>"
+          }
+        },
+        "point_mission": {
+          "type": "point",
+          "settings": {
+            "label": "Our Mission",
+            "content": "<p>In 1971, Dr. Sai Kumar took a leap of faith in traditional Ayurveda to create high-quality herbal products. Since then, our mission has stayed the same: combine time-tested herbal wisdom with careful, honest care for every customer who walks through our doors.</p>"
+          }
+        },
+        "point_vision": {
+          "type": "point",
+          "settings": {
+            "label": "Our Vision",
+            "content": "<p>We believe in what nature has built over time. We work to inspire more love for plants and respect for nature, and to improve the health, happiness and harmony of our community and all its people.</p>"
+          }
+        }
+      },
+      "block_order": ["point_who", "point_mission", "point_vision"],
+      "settings": {
+        "eyebrow": "Since 1971",
+        "heading": "Our Quest Was Pure From The Beginning",
+        "image_alt": "Sri Sai Pharmaceuticals - rooted in Ayurveda",
+        "image_position": "left",
+        "frame_style": "accent-offset",
+        "frame_color": "#2E7D32",
+        "bg_word": "",
+        "background_color": "#FFFFFF",
+        "text_color": "#141414",
+        "muted_color": "#5B5B5B",
+        "accent_color": "#2E7D32",
+        "padding_top": 100,
+        "padding_bottom": 80
+      }
+    },
+    "about_story_commitment": {
+      "type": "about-story-block",
+      "name": "Commitment To Health",
+      "blocks": {
+        "point_testing": {
+          "type": "point",
+          "settings": {
+            "label": "Testing & Safety",
+            "content": "<p>Every product we stock is scrutinised for safety and proof of effectiveness. We strike a careful balance between traditional herbal medicine and modern science, offering remedies that are both time-tested and backed by evidence.</p>"
+          }
+        },
+        "point_quality": {
+          "type": "point",
+          "settings": {
+            "label": "Quality You Can Trust",
+            "content": "<p>Our commitment to quality has never wavered. From sourcing top-quality ingredients to adhering to Good Manufacturing Practices, we guarantee every product exceeds expectations - so you can always feel confident about what you bring home.</p>"
+          }
+        }
+      },
+      "block_order": ["point_testing", "point_quality"],
+      "settings": {
+        "eyebrow": "Quality & Care",
+        "heading": "Rooted In Tradition, Backed By Research",
+        "image_alt": "Herbal research and quality testing",
+        "image_position": "right",
+        "frame_style": "accent-offset",
+        "frame_color": "#F58220",
+        "bg_word": "CARE",
+        "background_color": "#F7F5F0",
+        "text_color": "#141414",
+        "muted_color": "#5B5B5B",
+        "accent_color": "#2E7D32",
+        "padding_top": 90,
+        "padding_bottom": 90
+      }
+    },
+    "about_story_founder": {
+      "type": "about-story-block",
+      "name": "Meet The Founder",
+      "blocks": {
+        "point_founder_1": {
+          "type": "point",
+          "settings": {
+            "label": "",
+            "content": "<p>In 1971, Dr. Sai Kumar desperately searched for a way to improve health after relying on conventional options without success. That search led him to traditional Ayurveda - and to the founding of Sri Sai Pharmaceuticals.</p>"
+          }
+        },
+        "point_founder_2": {
+          "type": "point",
+          "settings": {
+            "label": "",
+            "content": "<p>Since then, Sri Sai Pharmaceuticals has been at the forefront of the herbal health industry - educating doctors, consumers and retailers on the effectiveness and safety of herbal medicines, and constantly striving to promote better health through the power of nature.</p>"
+          }
+        }
+      },
+      "block_order": ["point_founder_1", "point_founder_2"],
+      "settings": {
+        "eyebrow": "Our Journey",
+        "heading": "Meet The Founder",
+        "image_alt": "Dr. Sai Kumar, Founder of Sri Sai Pharmaceuticals",
+        "image_position": "left",
+        "frame_style": "accent-offset",
+        "frame_color": "#2E7D32",
+        "bg_word": "",
+        "background_color": "#FFFFFF",
+        "text_color": "#141414",
+        "muted_color": "#5B5B5B",
+        "accent_color": "#2E7D32",
+        "padding_top": 90,
+        "padding_bottom": 110
+      }
+    }
+  },
+  "order": [
+    "about_story_founding",
+    "about_story_commitment",
+    "about_story_founder"
+  ]
+}

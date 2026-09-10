@@ -29,3 +29,5 @@ shopify theme pull --store my-store.myshopify.com
 shopify theme dev --ignore config/settings_data.json
 
 shopify theme push --ignore config/settings_data.json
+
+srisai-pharma.myshopify.com
