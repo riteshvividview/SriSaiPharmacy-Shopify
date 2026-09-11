@@ -3,9 +3,11 @@
   One continuous blog listing page (no separate generic hero banner -
   the intro lives here): eyebrow/heading/subheading, an optional trust
   strip, the latest article as a large feature, then the rest in a
-  grid - every image is full color at rest and turns grayscale on
-  hover, with a staggered scroll reveal. Uses `blog.articles` directly,
-  so this only renders meaningfully inside a blog template.
+  grid. The featured image is grayscale at rest and turns full color on
+  hover; grid cards do the opposite (color at rest, grayscale on
+  hover) - deliberately mismatched per request. Staggered scroll reveal
+  throughout. Uses `blog.articles` directly, so this only renders
+  meaningfully inside a blog template.
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
@@ -350,12 +352,12 @@
     height: 100%;
     object-fit: contain;
     display: block;
-    filter: grayscale(0%);
+    filter: grayscale(100%);
     transition: filter 0.5s ease;
   }
 
   #bs-{{ section_id }} .bs__featured:hover .bs__featured-media img {
-    filter: grayscale(100%);
+    filter: grayscale(0%);
   }
 
   #bs-{{ section_id }} .bs__featured-body {

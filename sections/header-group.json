@@ -226,7 +226,7 @@
         "link_blog": {
           "type": "simple_link",
           "settings": {
-            "label": "Blog",
+            "label": "Blogs",
             "url": "/blogs/blog-2"
           }
         },
