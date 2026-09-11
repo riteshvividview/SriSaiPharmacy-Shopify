@@ -476,18 +476,21 @@
     pointer-events: auto;
   }
 
-  /* Flexbox rather than a fixed `260px 1fr` grid: the intro panel is
-     `flex: 1 1 260px` so it grows to soak up whatever width the tiles
-     don't need (no dead empty space with only 2-3 tiles), while the tile
-     grid itself stays sized to its own content (`flex: 0 0 auto`) - so
-     tile size stays constant and predictable regardless of how many tiles
-     a given dropdown has, rather than stretching to fill the row. */
+  /* Flexbox, with both children sized to their own content (the intro
+     panel is a fixed 260px, the tile grid is `flex: 0 1 auto`) - neither
+     stretches to fill leftover row width. Instead the row's overall
+     *width* tracks content (`width: fit-content` below), so a dropdown
+     with only 2-3 tiles (Care & Wellness, Top Picks) renders as a
+     smaller, centered panel instead of a full-width one with a stretched
+     intro; a dropdown with enough tiles (Shop by Concern) naturally
+     reaches close to the max-width on its own, reading as "full width"
+     without being forced there. */
   #ssh-{{ section_id }} .ssh__mega-inner {
     display: flex;
     align-items: stretch;
     min-height: 300px;
-    width: calc(100% - 48px);
-    max-width: 1360px;
+    width: fit-content;
+    max-width: min(1360px, calc(100% - 48px));
     margin: 0 auto;
     /* Safety valve: if a dropdown ever has enough tiles to be taller than
        the viewport allows, it scrolls internally instead of being cut off
@@ -517,8 +520,7 @@
 
   #ssh-{{ section_id }} .ssh__mega-intro {
     position: relative;
-    flex: 1 1 260px;
-    min-width: 260px;
+    flex: 0 0 260px;
     border-radius: 20px 0 0 20px;
     overflow: hidden;
     background-color: var(--ssh-accent);
@@ -597,9 +599,9 @@
      entire row - and since tile height follows the image, that made
      Care & Wellness/Top Picks absurdly tall and forced an internal
      scrollbar. Tiles stay a constant, comfortable size regardless of tile
-     count; `.ssh__mega-grid` itself is `flex: 0 0 auto` (see above), sized
-     to exactly what its tiles need rather than stretching - the intro
-     panel absorbs any space this doesn't use, instead of leaving it empty. */
+     count; `.ssh__mega-grid` itself is `flex: 0 1 auto` (see above), sized
+     to exactly what its tiles need - the row's *overall width* (not the
+     intro panel) is what adapts to tile count, see `.ssh__mega-inner`. */
   #ssh-{{ section_id }} .ssh__mega-grid {
     /* flex-shrink 1 (not 0): sized to its content when there's room, but
        allowed to narrow - which is what lets `flex-wrap` actually kick in
@@ -611,15 +613,15 @@
     padding: 20px;
     display: flex;
     flex-wrap: wrap;
-    gap: 18px;
+    gap: 20px;
   }
 
   #ssh-{{ section_id }} .ssh__tile {
     display: flex;
     flex-direction: column;
-    flex: 0 0 168px;
-    gap: 12px;
-    padding: 10px;
+    flex: 0 0 185px;
+    gap: 14px;
+    padding: 12px;
     border-radius: 12px;
     transition: background-color 0.2s ease, transform 0.2s ease;
   }
