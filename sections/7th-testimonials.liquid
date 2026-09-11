@@ -47,16 +47,20 @@
     <div class="tsm__panel" data-reveal>
       {%- if review_count > 0 -%}
         {%- assign first_review = reviews.first.settings -%}
-        {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.heading != blank -%}
+          <h2 class="tsm__heading">
+            {{ s.heading }}
+            {%- if s.show_rating -%}
+              <span class="tsm__stars-top" data-tsm-stars aria-label="{{ first_review.rating | default: 5 }} out of 5 stars">
+                {%- for i in (1..5) -%}
+                  <svg width="26" height="26" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > first_review.rating %} tsm__star--empty{% endif %}" style="transition-delay: {{ forloop.index0 | times: 0.04 }}s;"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
+                {%- endfor -%}
+              </span>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
 
         <div class="tsm__images" data-tsm-images>
-          {%- if s.show_rating -%}
-            <div class="tsm__stars-top" data-tsm-stars aria-label="{{ first_review.rating | default: 5 }} out of 5 stars">
-              {%- for i in (1..5) -%}
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > first_review.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
           <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="18">
             {%- for block in reviews -%}
               {%- assign rs = block.settings -%}
@@ -201,8 +205,11 @@
     letter-spacing: 3px;
     line-height: 1;
     text-align: center;
-    color: var(--tsm-text);
-    opacity: 0.07;
+    /* A translucent text color rather than element `opacity` - the
+       stars live inside this heading so they can center on it, and
+       `opacity` on a parent would fade its whole subtree (the stars
+       included) instead of just the watermark text. */
+    color: color-mix(in srgb, var(--tsm-text) 7%, transparent);
     white-space: nowrap;
     pointer-events: none;
   }
@@ -260,17 +267,17 @@
     filter: grayscale(1);
   }
 
-  /* Stars sit above the center card, centered over the watermark
-     heading behind it. */
+  /* Centered both ways on the watermark heading's own box (the
+     heading is `position: absolute`, which makes it a valid
+     containing block for this absolutely-positioned child). */
   #tsm-{{ section_id }} .tsm__stars-top {
     position: absolute;
-    bottom: 100%;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     z-index: 2;
     display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
+    gap: 10px;
   }
 
   #tsm-{{ section_id }} .tsm__slot-image {
@@ -466,10 +473,16 @@
 
   #tsm-{{ section_id }} .tsm__star {
     color: var(--tsm-accent);
+    transition: color 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: scale(1);
   }
 
   #tsm-{{ section_id }} .tsm__star--empty {
     color: var(--tsm-border);
+  }
+
+  #tsm-{{ section_id }} .tsm__star.is-changing {
+    transform: scale(1.35);
   }
 
   #tsm-{{ section_id }} .tsm__pull-quote {
@@ -691,7 +704,12 @@
       if (pullQuoteEl) pullQuoteEl.textContent = '“' + data.pullQuote + '”';
       if (reviewTextEl) reviewTextEl.textContent = data.reviewText;
       if (clientNameEl) clientNameEl.textContent = data.name;
-      starEls.forEach(function (star, i) { star.classList.toggle('tsm__star--empty', i + 1 > data.rating); });
+      starEls.forEach(function (star, i) {
+        star.classList.toggle('tsm__star--empty', i + 1 > data.rating);
+        if (prefersReducedMotion) return;
+        star.classList.add('is-changing');
+        window.setTimeout(function () { star.classList.remove('is-changing'); }, 260 + i * 40);
+      });
     }
 
     function transitionEl(outgoingEl, incomingEl, enterClass, exitClass) {
