@@ -679,45 +679,42 @@
     },
     "featured_product_spotlight_FpS001": {
       "type": "featured-product-spotlight",
-      "name": "Product Pack Bundle",
+      "name": "Essentials Pack",
       "blocks": {
         "pack_item_1": {
           "type": "product",
           "settings": {
-            "product": "paurusha-a-ayurvedic-supplements-for-immune-system",
-            "highlight_line": "",
-            "specifications": "",
-            "default_selected": true,
-            "default_quantity": 1
+            "product": "paurusha-a-ayurvedic-supplements-for-immune-system"
           }
         },
         "pack_item_2": {
           "type": "product",
           "settings": {
-            "product": "ganore-ayurvedic-medicine-for-urinary-problems",
-            "highlight_line": "",
-            "specifications": "",
-            "default_selected": true,
-            "default_quantity": 1
+            "product": "ganore-ayurvedic-medicine-for-urinary-problems"
           }
         }
       },
       "block_order": ["pack_item_1", "pack_item_2"],
       "settings": {
-        "eyebrow": "Build Your Pack",
-        "heading": "Grab Your Essentials Pack",
-        "subheading": "Pick what you need and add the whole pack to your cart in one tap.",
-        "product_eyebrow_source": "vendor",
+        "eyebrow": "",
+        "heading": "",
+        "product_eyebrow": "Pure Wellness",
+        "product_title": "Cold & Flu Essentials Pack",
+        "show_shipping_note": true,
+        "shipping_note_label": "Shipping",
+        "shipping_note_text": "calculated at checkout.",
+        "highlight_line": "Everything you need, in one tap",
+        "description": "<p>A hand-picked set of everyday essentials, bundled together so you don't have to add them one at a time.</p>",
         "specifications_label": "Specifications:",
+        "specifications": "",
         "sold_out_text": "Sold out",
-        "show_view_details": true,
-        "view_details_text": "View full details",
-        "show_include_toggle": true,
-        "include_label": "Include in pack",
-        "items_label": "items selected",
+        "all_sold_out_text": "All items in this pack are currently sold out.",
         "add_to_cart_text": "Add Pack to Cart",
         "added_to_cart_text": "Pack added to cart",
-        "promo_note": "",
+        "show_buy_now": true,
+        "buy_now_text": "Buy it now",
+        "show_share": true,
+        "share_label": "Share",
         "sync_scroll_bg": false,
         "background_color": "#F2F6F1",
         "card_color": "#FFFFFF",
