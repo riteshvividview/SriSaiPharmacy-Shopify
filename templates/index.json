@@ -677,6 +677,45 @@
         "border_color": "#ececec"
       }
     },
+    "featured_product_spotlight_FpS001": {
+      "type": "featured-product-spotlight",
+      "name": "Featured Product Spotlight",
+      "settings": {
+        "eyebrow": "Pure Wellness",
+        "heading": "Grab Your Essentials Pack",
+        "product_eyebrow_source": "vendor",
+        "show_unit_price": true,
+        "show_shipping_note": true,
+        "shipping_note_label": "Shipping",
+        "shipping_note_text": "calculated at checkout.",
+        "highlight_line": "Fast Wellness In Every Dose",
+        "specifications_label": "Specifications:",
+        "specifications": "",
+        "show_stock_alert": true,
+        "low_stock_threshold": 5,
+        "low_stock_text": "Only",
+        "low_stock_suffix": "left",
+        "add_to_cart_text": "Add to cart",
+        "sold_out_text": "Sold out",
+        "added_to_cart_text": "Added to cart",
+        "show_buy_now": true,
+        "buy_now_text": "Buy it now",
+        "show_share": true,
+        "share_label": "Share",
+        "show_view_details": true,
+        "view_details_text": "View full details",
+        "sync_scroll_bg": false,
+        "background_color": "#F2F6F1",
+        "card_color": "#FFFFFF",
+        "text_color": "#141414",
+        "muted_color": "#6B6B6B",
+        "accent_color": "#2E7D32",
+        "cta_color": "#F58220",
+        "border_color": "#ECECEC",
+        "padding_top": 90,
+        "padding_bottom": 90
+      }
+    },
     "5th_trust_badges_QW3rTb": {
       "type": "5th-trust-badges",
       "blocks": {
@@ -830,6 +869,7 @@
     "2nd_energy_countdown_banner_zVCGxM",
     "1st_featured_list_GBAW9T",
     "6th_shop_by_category_Vk2Ptm",
+    "featured_product_spotlight_FpS001",
     "5th_trust_badges_QW3rTb",
     "7th_testimonials_Nx4Wqe"
   ]
