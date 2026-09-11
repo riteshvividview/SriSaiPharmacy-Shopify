@@ -679,32 +679,48 @@
     },
     "featured_product_spotlight_FpS001": {
       "type": "featured-product-spotlight",
-      "name": "Product Spotlight",
+      "name": "Product Pack Bundle",
+      "blocks": {
+        "pack_item_1": {
+          "type": "product",
+          "settings": {
+            "product": "paurusha-a-ayurvedic-supplements-for-immune-system",
+            "default_selected": true
+          }
+        },
+        "pack_item_2": {
+          "type": "product",
+          "settings": {
+            "product": "ganore-ayurvedic-medicine-for-urinary-problems",
+            "default_selected": true
+          }
+        },
+        "pack_item_3": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "default_selected": true
+          }
+        },
+        "pack_item_4": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "default_selected": false
+          }
+        }
+      },
+      "block_order": ["pack_item_1", "pack_item_2", "pack_item_3", "pack_item_4"],
       "settings": {
-        "product": "paurusha-a-ayurvedic-supplements-for-immune-system",
-        "eyebrow": "Pure Wellness",
+        "eyebrow": "Build Your Pack",
         "heading": "Grab Your Essentials Pack",
-        "product_eyebrow_source": "vendor",
-        "show_unit_price": true,
-        "show_shipping_note": true,
-        "shipping_note_label": "Shipping",
-        "shipping_note_text": "calculated at checkout.",
-        "highlight_line": "Fast Wellness In Every Dose",
-        "specifications_label": "Specifications:",
-        "specifications": "",
-        "show_stock_alert": true,
-        "low_stock_threshold": 5,
-        "low_stock_text": "Only",
-        "low_stock_suffix": "left",
-        "add_to_cart_text": "Add to cart",
+        "subheading": "Pick what you need and add the whole pack to your cart in one tap.",
+        "columns_desktop": 2,
+        "items_label": "items selected",
+        "add_to_cart_text": "Add Pack to Cart",
+        "added_to_cart_text": "Pack added to cart",
         "sold_out_text": "Sold out",
-        "added_to_cart_text": "Added to cart",
-        "show_buy_now": true,
-        "buy_now_text": "Buy it now",
-        "show_share": true,
-        "share_label": "Share",
-        "show_view_details": true,
-        "view_details_text": "View full details",
+        "promo_note": "",
         "sync_scroll_bg": false,
         "background_color": "#F2F6F1",
         "card_color": "#FFFFFF",
