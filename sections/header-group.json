@@ -210,16 +210,21 @@
             "link": "/collections/all"
           }
         },
-        "nav_about": {
-          "type": "nav_link",
+        "nav_pages": {
+          "type": "simple_dropdown",
           "settings": {
-            "label": "About Us",
+            "label": "Pages"
+          }
+        },
+        "link_our_story": {
+          "type": "simple_link",
+          "settings": {
+            "label": "Our Story",
             "url": "/pages/about-us?view=about-us"
           }
         },
-        "nav_contact": {
-          "type": "nav_link",
-          "disabled": true,
+        "link_contact": {
+          "type": "simple_link",
           "settings": {
             "label": "Contact",
             "url": "/pages/contact"
@@ -243,8 +248,9 @@
         "tile_immunity_combo",
         "tile_skincare_kit",
         "tile_family_pack",
-        "nav_about",
-        "nav_contact"
+        "nav_pages",
+        "link_our_story",
+        "link_contact"
       ],
       "settings": {
         "logo": "shopify://shop_images/SRI-SAI-LOGO_540x_ef454a46-8814-4316-b941-6562611158e6.avif",

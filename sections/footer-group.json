@@ -37,7 +37,7 @@
         "link_about": {
           "type": "footer_link",
           "settings": {
-            "label": "About Us",
+            "label": "Our Story",
             "url": "/pages/about-us?view=about-us"
           }
         },

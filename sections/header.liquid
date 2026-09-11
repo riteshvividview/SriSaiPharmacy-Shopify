@@ -5,6 +5,9 @@
   trigger (with an intro/context panel), followed by any number of
   "Dropdown Tile" blocks (image + heading + text) that belong to it. A tile
   block attaches to whichever Nav Dropdown precedes it in the block order.
+  "Simple Dropdown" is a lighter trigger for plain link lists (e.g. a
+  "Pages" menu grouping About Us / Contact / etc) - same attach-to-preceding-
+  trigger convention, via "Simple Dropdown Link" blocks.
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
@@ -157,8 +160,38 @@
                   </div>
                 </li>
 
-              {%- when 'dropdown_tile' -%}
-                {%- comment -%} rendered inside the preceding nav_dropdown {%- endcomment -%}
+              {%- when 'simple_dropdown' -%}
+                <li class="ssh__nav-item ssh__nav-item--simple" {{ block.shopify_attributes }}>
+                  <button
+                    type="button"
+                    class="ssh__nav-link ssh__nav-trigger"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    data-ssh-trigger
+                  >
+                    {{ bs.label }}
+                    <svg class="ssh__caret" aria-hidden="true" width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M11 5.5L7 9.5L3 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+
+                  <div class="ssh__simple-dropdown">
+                    <ul class="ssh__simple-list">
+                      {%- assign links_offset = forloop.index0 | plus: 1 -%}
+                      {%- for link_block in section.blocks offset: links_offset -%}
+                        {%- if link_block.type == 'simple_link' -%}
+                          {%- assign ls = link_block.settings -%}
+                          <li {{ link_block.shopify_attributes }}>
+                            <a href="{{ ls.url | default: '#' }}">{{ ls.label }}</a>
+                          </li>
+                        {%- else -%}
+                          {%- break -%}
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                </li>
+
+              {%- when 'dropdown_tile' or 'simple_link' -%}
+                {%- comment -%} rendered inside the preceding nav_dropdown / simple_dropdown {%- endcomment -%}
             {%- endcase -%}
           {%- endfor -%}
         </ul>
@@ -197,6 +230,20 @@
                   {%- for tile_block in section.blocks offset: tiles_offset -%}
                     {%- if tile_block.type == 'dropdown_tile' -%}
                       <li><a href="{{ tile_block.settings.link | default: '#' }}">{{ tile_block.settings.heading }}</a></li>
+                    {%- else -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </li>
+            {%- when 'simple_dropdown' -%}
+              <li class="ssh__mobile-group">
+                <span class="ssh__mobile-group-label">{{ bs.label }}</span>
+                <ul>
+                  {%- assign links_offset = forloop.index0 | plus: 1 -%}
+                  {%- for link_block in section.blocks offset: links_offset -%}
+                    {%- if link_block.type == 'simple_link' -%}
+                      <li><a href="{{ link_block.settings.url | default: '#' }}">{{ link_block.settings.label }}</a></li>
                     {%- else -%}
                       {%- break -%}
                     {%- endif -%}
@@ -387,7 +434,9 @@
 
   #ssh-{{ section_id }} .ssh__nav-link:hover,
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__nav-link,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__nav-link {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__nav-link,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__nav-link,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__nav-link {
     color: var(--ssh-accent);
     background: rgba(46, 125, 50, 0.08);
   }
@@ -397,29 +446,34 @@
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__caret,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__caret {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__caret,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__caret,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__caret {
     transform: rotate(180deg);
   }
 
   /* ---- Mega menu ---- */
-  /* Anchored to the trigger's own <li> (so hover can travel from trigger
-     into the panel), but split into two layers so there can be visible
-     breathing room WITHOUT a hover dead-zone:
-       .ssh__mega       - invisible hit-area, flush under the trigger,
-                           its own padding-top *is* the visual gap. It only
-                           becomes interactive (pointer-events) once hover
-                           starts, so it never blocks clicks on page content
+  /* Full-width by design: rather than a narrow panel centered under (and
+     clipped/shifted to stay inside) its own trigger, this hit-area is
+     `position: fixed` and spans the entire viewport width regardless of
+     which trigger opened it or where that trigger sits in the nav - so
+     there's no horizontal-overflow edge case to correct for at any
+     viewport size (the old JS clamp logic is gone; `--ssh-mega-top` is
+     the only thing JS still computes, matching wherever the bar's bottom
+     edge currently is - pinned or not).
+       .ssh__mega       - invisible, full-width hit-area. Only becomes
+                           interactive (pointer-events) once hover starts,
+                           so it never blocks clicks on page content
                            underneath while closed.
-       .ssh__mega-inner - the actual white card: all the visuals (bg,
-                           radius, shadow) and the fade/slide animation live
-                           here, floating below the gap inside the hit-area.
-     Horizontal viewport clipping is corrected via JS (--ssh-mega-shift). */
+       .ssh__mega-inner - the actual glass card: centered within that
+                           full-width area at a readable max-width, with
+                           the frosted blur/shadow/radius and the
+                           fade+slide animation. */
   #ssh-{{ section_id }} .ssh__mega {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, 0) translateX(var(--ssh-mega-shift, 0px));
-    width: min(960px, calc(100vw - 64px));
+    position: fixed;
+    top: var(--ssh-mega-top, 76px);
+    left: 0;
+    right: 0;
     padding-top: 14px;
     pointer-events: none;
     z-index: 20;
@@ -434,17 +488,22 @@
     display: grid;
     grid-template-columns: 260px 1fr;
     min-height: 300px;
+    width: calc(100% - 48px);
+    max-width: 1360px;
+    margin: 0 auto;
     /* Safety valve: if a dropdown ever has enough tiles to be taller than
        the viewport allows, it scrolls internally instead of being cut off
        or pushed off-screen. */
     max-height: calc(100vh - 140px);
     overflow-x: hidden;
     overflow-y: auto;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
     color: #141414;
-    border-radius: 18px;
-    box-shadow: 0 24px 60px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
-    border: 1px solid var(--ssh-border);
+    border-radius: 20px;
+    box-shadow: 0 30px 70px rgba(20, 20, 20, 0.18), 0 2px 8px rgba(20, 20, 20, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-8px);
@@ -460,7 +519,7 @@
 
   #ssh-{{ section_id }} .ssh__mega-intro {
     position: relative;
-    border-radius: 18px 0 0 18px;
+    border-radius: 20px 0 0 20px;
     overflow: hidden;
     background-color: var(--ssh-accent);
     background-size: cover;
@@ -491,10 +550,12 @@
   }
 
   #ssh-{{ section_id }} .ssh__mega-heading {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 19px;
-    line-height: 1.3;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    line-height: 1.15;
     margin: 0 0 8px;
   }
 
@@ -603,6 +664,71 @@
     font-size: 12px;
     color: #7a7a7a;
     line-height: 1.4;
+  }
+
+  /* ---- Simple dropdown (e.g. "Pages") ----
+     A lighter-weight sibling of the mega menu for plain link lists - same
+     glass/blur treatment for visual consistency, but compact and anchored
+     to its own trigger (right-aligned, since triggers like this tend to
+     sit near the end of the nav, close to the right edge) rather than
+     full-width like the mega menu. */
+  #ssh-{{ section_id }} .ssh__simple-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    padding-top: 14px;
+    min-width: 220px;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__simple-dropdown,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-dropdown {
+    pointer-events: auto;
+  }
+
+  #ssh-{{ section_id }} .ssh__simple-list {
+    list-style: none;
+    margin: 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    color: #141414;
+    border-radius: 16px;
+    box-shadow: 0 24px 50px rgba(20, 20, 20, 0.16), 0 2px 8px rgba(20, 20, 20, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+  }
+
+  #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__simple-list,
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-list {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  #ssh-{{ section_id }} .ssh__simple-list li + li {
+    margin-top: 2px;
+  }
+
+  #ssh-{{ section_id }} .ssh__simple-list a {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  #ssh-{{ section_id }} .ssh__simple-list a:hover {
+    background: rgba(46, 125, 50, 0.08);
+    color: var(--ssh-accent);
   }
 
   /* ---- Actions ---- */
@@ -742,8 +868,13 @@
     color: var(--ssh-accent);
   }
 
-  /* ---- Desktop (mega menu enabled) ---- */
-  @media screen and (min-width: 990px) {
+  /* ---- Desktop + tablet (mega menu enabled) ----
+     Hamburger is mobile-only: this shows the full nav from 750px up
+     (matching the "mobile" breakpoint used by every other section in this
+     theme), not just above 990px, so tablets get the real nav instead of
+     a hamburger. A tighter tier just below covers narrower tablets where
+     the full nav item count needs a bit more room to breathe. */
+  @media screen and (min-width: 750px) {
     #ssh-{{ section_id }} .ssh__nav {
       display: block;
     }
@@ -761,7 +892,22 @@
     }
   }
 
-  @media screen and (max-width: 989px) {
+  @media screen and (min-width: 750px) and (max-width: 1099px) {
+    #ssh-{{ section_id }} .ssh__inner {
+      gap: 14px;
+    }
+
+    #ssh-{{ section_id }} .ssh__nav-list {
+      gap: 0;
+    }
+
+    #ssh-{{ section_id }} .ssh__nav-link {
+      padding: 9px 8px;
+      font-size: 13px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
     #ssh-{{ section_id }} .ssh__inner {
       padding: 0 20px;
       gap: 16px;
@@ -805,9 +951,15 @@
       var pinTicking = false;
       function updatePinned() {
         var shouldPin = currentScrollTop() > 2;
-        if (header.classList.contains('is-bar-pinned') === shouldPin) return;
-        header.classList.toggle('is-bar-pinned', shouldPin);
-        spacer.style.height = shouldPin ? bar.offsetHeight + 'px' : '0px';
+        var pinChanged = header.classList.contains('is-bar-pinned') !== shouldPin;
+        if (pinChanged) {
+          header.classList.toggle('is-bar-pinned', shouldPin);
+          spacer.style.height = shouldPin ? bar.offsetHeight + 'px' : '0px';
+        }
+        /* The full-width mega/simple dropdowns are `position: fixed`, so
+           they need to know exactly where the bar's bottom edge is right
+           now (pinned or not) to sit flush beneath it. */
+        header.style.setProperty('--ssh-mega-top', bar.getBoundingClientRect().bottom + 'px');
       }
 
       function onScroll() {
@@ -839,66 +991,12 @@
     });
 
     window.addEventListener('resize', function () {
-      if (window.innerWidth >= 990 && header.classList.contains('is-mobile-open')) {
+      if (window.innerWidth >= 750 && header.classList.contains('is-mobile-open')) {
         setMobilePanelOpen(false);
       } else if (header.classList.contains('is-mobile-open')) {
         /* content height can change on resize (text reflow) - keep it in sync while open */
         panel.style.maxHeight = panel.scrollHeight + 'px';
       }
-    });
-
-    /* Keep each mega-menu panel flush under its own trigger (so hover can
-       travel from button to panel with zero gap), but nudge it sideways
-       with a CSS variable if that would let it clip past the viewport
-       edge. Geometry only - open/close stays pure CSS hover/focus-within. */
-    var megaTriggers = Array.prototype.slice.call(header.querySelectorAll('.ssh__nav-item--mega'));
-    var edgeMargin = 24;
-
-    function clampMega(item) {
-      var mega = item.querySelector('.ssh__mega');
-      if (!mega) return;
-      mega.style.setProperty('--ssh-mega-shift', '0px');
-      var rect = mega.getBoundingClientRect();
-      var vw = window.innerWidth;
-      /* Clamp the panel's left edge into [margin, vw - margin - width] so
-         both sides are respected together - if the panel is wider than the
-         viewport allows, this pins it to the left margin rather than
-         letting one edge win and the other overflow uncorrected. */
-      var minLeft = edgeMargin;
-      var maxLeft = Math.max(edgeMargin, vw - edgeMargin - rect.width);
-      var clampedLeft = Math.min(Math.max(rect.left, minLeft), maxLeft);
-      var shift = clampedLeft - rect.left;
-      if (shift !== 0) {
-        mega.style.setProperty('--ssh-mega-shift', shift.toFixed(1) + 'px');
-      }
-    }
-
-    megaTriggers.forEach(function (item) {
-      item.addEventListener('mouseenter', function () { clampMega(item); });
-      item.addEventListener('focusin', function () { clampMega(item); });
-    });
-
-    /* Panels near the left/right edge of the nav render centered under
-       their trigger by default (unclamped) even while closed - since
-       they're only hidden via opacity/visibility (not display:none), that
-       unclamped box still extends past the viewport and contributes to the
-       page's horizontal scrollable area. Clamp all of them up front, not
-       just on hover, so a closed menu never causes a horizontal scrollbar. */
-    megaTriggers.forEach(clampMega);
-
-    window.addEventListener(
-      'resize',
-      function () {
-        megaTriggers.forEach(clampMega);
-      },
-      { passive: true }
-    );
-
-    /* Re-check once everything (webfonts, logo image) has finished loading,
-       since a late font swap can shift nav-item positions after the initial
-       clamp above ran. */
-    window.addEventListener('load', function () {
-      megaTriggers.forEach(clampMega);
     });
   })();
 </script>
@@ -950,6 +1048,22 @@
         { "type": "textarea", "id": "intro_text", "label": "Description", "default": "Genuine medicines, wellness essentials and expert care — all in one place." },
         { "type": "text", "id": "intro_link_text", "label": "Button text", "default": "Shop now" },
         { "type": "url", "id": "intro_link", "label": "Button link" }
+      ]
+    },
+    {
+      "type": "simple_dropdown",
+      "name": "Simple Dropdown",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Pages" }
+      ]
+    },
+    {
+      "type": "simple_link",
+      "name": "Simple Dropdown Link",
+      "settings": [
+        { "type": "paragraph", "content": "Place this block directly below the Simple Dropdown it belongs to." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Page" },
+        { "type": "url", "id": "url", "label": "Link" }
       ]
     },
     {
@@ -1038,8 +1152,9 @@
         { "type": "dropdown_tile", "settings": { "heading": "Immunity Combo Pack", "text": "Save 15% on the bundle", "link": "/collections/all" } },
         { "type": "dropdown_tile", "settings": { "heading": "Complete Skin Care Kit", "text": "4 products, 1 routine", "link": "/collections/all" } },
         { "type": "dropdown_tile", "settings": { "heading": "Family Wellness Pack", "text": "Everyday essentials for all ages", "link": "/collections/all" } },
-        { "type": "nav_link", "settings": { "label": "About Us", "url": "/pages/about-us" } },
-        { "type": "nav_link", "settings": { "label": "Contact", "url": "/pages/contact" } }
+        { "type": "simple_dropdown", "settings": { "label": "Pages" } },
+        { "type": "simple_link", "settings": { "label": "Our Story", "url": "/pages/about-us" } },
+        { "type": "simple_link", "settings": { "label": "Contact", "url": "/pages/contact" } }
       ]
     }
   ]
