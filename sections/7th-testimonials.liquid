@@ -106,7 +106,7 @@
 
       {%- if s.view_all_text != blank -%}
         <div class="tsm__view-all-wrap">
-          <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all">{{ s.view_all_text }}</a>
+          <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all" data-tsm-magnetic>{{ s.view_all_text }}</a>
         </div>
       {%- endif -%}
     </div>
@@ -160,11 +160,20 @@
     color: var(--tsm-text);
   }
 
-  /* ---- Image row ---- */
+  /* ---- Image row ----
+     A 3D perspective "wheel" transition rather than a flat crossfade:
+     the outgoing slide rotates + recedes off to one side while the
+     incoming slide rotates in from the other, both pushed back in Z
+     and scaled down along the way - clicking Next repeatedly always
+     rotates the same direction, reading as one continuous circular
+     motion rather than a random swap. The overshoot easing
+     (cubic-bezier back-out) gives the requested springy "jerk" snap
+     as each slide settles into place. */
   #tsm-{{ section_id }} .tsm__images {
     position: relative;
     height: var(--tsm-center-size);
     margin-bottom: 26px;
+    perspective: 1400px;
   }
 
   #tsm-{{ section_id }} .tsm__image-slide {
@@ -175,13 +184,37 @@
     justify-content: center;
     gap: clamp(16px, 3vw, 40px);
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    transform: translate3d(0, 0, -220px) scale(0.8);
+    transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  }
+
+  #tsm-{{ section_id }} .tsm__image-slide.no-transition {
+    transition: none !important;
   }
 
   #tsm-{{ section_id }} .tsm__image-slide.is-active {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
+  }
+
+  /* RIGHT pose: the incoming slide's start point on Next (new content
+     rotates in from the right), and the outgoing slide's end point on
+     Prev (old content rotates away to the right). */
+  #tsm-{{ section_id }} .tsm__image-slide.is-enter-from-right,
+  #tsm-{{ section_id }} .tsm__image-slide.is-exit-to-right {
+    opacity: 0;
+    transform: translate3d(42%, 0, -240px) rotateY(-34deg) scale(0.78);
+  }
+
+  /* LEFT pose: the outgoing slide's end point on Next, and the
+     incoming slide's start point on Prev. */
+  #tsm-{{ section_id }} .tsm__image-slide.is-enter-from-left,
+  #tsm-{{ section_id }} .tsm__image-slide.is-exit-to-left {
+    opacity: 0;
+    transform: translate3d(-42%, 0, -240px) rotateY(34deg) scale(0.78);
   }
 
   #tsm-{{ section_id }} .tsm__image {
@@ -263,21 +296,54 @@
     background: var(--tsm-border);
   }
 
-  /* ---- Quotes ---- */
+  /* ---- Quotes ----
+     Absolutely stacked (like the images) so the outgoing and incoming
+     quote can crossfade/slide at the same time; the container's own
+     height is set from JS to each incoming slide's measured height
+     and transitions smoothly so the panel doesn't jump between
+     testimonials of different lengths. */
   #tsm-{{ section_id }} .tsm__quotes {
     position: relative;
     max-width: 900px;
     margin: 0 auto;
+    overflow: hidden;
+    transition: height 0.4s ease;
   }
 
   #tsm-{{ section_id }} .tsm__quote-slide {
-    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 40px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.45s ease;
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-slide.no-transition {
+    transition: none !important;
   }
 
   #tsm-{{ section_id }} .tsm__quote-slide.is-active {
-    display: grid;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-slide.is-enter-from-right,
+  #tsm-{{ section_id }} .tsm__quote-slide.is-exit-to-right {
+    opacity: 0;
+    transform: translate3d(26px, 0, 0);
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-slide.is-enter-from-left,
+  #tsm-{{ section_id }} .tsm__quote-slide.is-exit-to-left {
+    opacity: 0;
+    transform: translate3d(-26px, 0, 0);
   }
 
   #tsm-{{ section_id }} .tsm__stars {
@@ -326,7 +392,12 @@
   }
 
   #tsm-{{ section_id }} .tsm__view-all {
-    display: inline-block;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    isolation: isolate;
     font-weight: 600;
     font-size: 14.5px;
     color: var(--tsm-text);
@@ -334,14 +405,32 @@
     border: 1.5px solid var(--tsm-border);
     padding: 13px 32px;
     border-radius: 999px;
-    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+    transition: border-color 0.3s ease, color 0.4s ease 0.05s, transform 0.15s ease;
+    will-change: transform;
+  }
+
+  #tsm-{{ section_id }} .tsm__view-all::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--tsm-accent);
+    border-radius: 999px;
+    transform: scale(0);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   #tsm-{{ section_id }} .tsm__view-all:hover {
-    background: var(--tsm-accent);
     border-color: var(--tsm-accent);
     color: #fff;
-    transform: translateY(-2px);
+  }
+
+  #tsm-{{ section_id }} .tsm__view-all:hover::before {
+    transform: scale(1);
+  }
+
+  #tsm-{{ section_id }} .tsm__view-all:active {
+    transform: scale(0.95);
   }
 
   /* ---- Mobile ---- */
@@ -416,22 +505,90 @@
       }
     }
 
-    /* ---- Slide cycling (images + quotes stay in sync) ---- */
+    /* ---- Slide cycling (images + quotes stay in sync) ----
+       Both the 3D image wheel and the quote crossfade use the same
+       enter/exit class pair per direction: the incoming element is
+       snapped (no-transition) to its off-screen start pose, forced to
+       reflow so the browser commits that as the "previous" style, then
+       the start-pose class is swapped for `is-active` in the same tick
+       - the still-active transition then animates from the committed
+       start pose to the identity pose. The outgoing element already
+       has a transition, so simply swapping `is-active` for its exit
+       pose animates it away normally. */
+    var imagesWrap = section.querySelector('[data-tsm-images]');
+    var quotesWrap = section.querySelector('[data-tsm-quotes]');
     var imageSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-image-slide]'));
     var quoteSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-quote-slide]'));
     var prevBtn = section.querySelector('[data-tsm-prev]');
     var nextBtn = section.querySelector('[data-tsm-next]');
     var total = imageSlides.length;
     var current = 0;
+    var isAnimating = false;
+    var TRANSITION_MS = 750;
 
-    function goTo(index) {
-      current = (index + total) % total;
-      imageSlides.forEach(function (el) { el.classList.toggle('is-active', parseInt(el.getAttribute('data-index'), 10) === current); });
-      quoteSlides.forEach(function (el) { el.classList.toggle('is-active', parseInt(el.getAttribute('data-index'), 10) === current); });
+    function setQuotesHeight(index) {
+      if (!quotesWrap || !quoteSlides[index]) return;
+      quotesWrap.style.height = quoteSlides[index].scrollHeight + 'px';
     }
 
-    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
+    function animateSlide(index, direction) {
+      if (isAnimating || index === current || !imageSlides[index]) return;
+      isAnimating = true;
+
+      var enterClass = direction === 'next' ? 'is-enter-from-right' : 'is-enter-from-left';
+      var exitClass = direction === 'next' ? 'is-exit-to-left' : 'is-exit-to-right';
+
+      var outgoingImg = imageSlides[current];
+      var incomingImg = imageSlides[index];
+      var outgoingQuote = quoteSlides[current];
+      var incomingQuote = quoteSlides[index];
+
+      if (prefersReducedMotion) {
+        imageSlides.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
+        quoteSlides.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
+        current = index;
+        setQuotesHeight(current);
+        isAnimating = false;
+        return;
+      }
+
+      setQuotesHeight(index);
+
+      [incomingImg, incomingQuote].forEach(function (el) {
+        el.classList.add('no-transition', enterClass);
+      });
+      // Force reflow so the start pose above is committed before we
+      // switch to the animated end pose below.
+      void incomingImg.offsetWidth;
+
+      [incomingImg, incomingQuote].forEach(function (el) {
+        el.classList.remove('no-transition', enterClass);
+        el.classList.add('is-active');
+      });
+      [outgoingImg, outgoingQuote].forEach(function (el) {
+        el.classList.remove('is-active');
+        el.classList.add(exitClass);
+      });
+
+      current = index;
+
+      window.setTimeout(function () {
+        [outgoingImg, outgoingQuote].forEach(function (el) { el.classList.remove(exitClass); });
+        isAnimating = false;
+      }, TRANSITION_MS);
+    }
+
+    function goTo(index, direction) {
+      var target = (index + total) % total;
+      if (!direction) direction = index > current || (current === total - 1 && index === 0) ? 'next' : 'prev';
+      animateSlide(target, direction);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1, 'prev'); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1, 'next'); });
+
+    setQuotesHeight(0);
+    window.addEventListener('resize', function () { setQuotesHeight(current); }, { passive: true });
 
     if (prefersReducedMotion) return;
 
@@ -455,8 +612,9 @@
 
     magneticEls.forEach(function (el) {
       var st = elState.get(el);
-      var strength = el.classList.contains('tsm__nav-btn') ? 0.4 : 0.18;
-      var maxOffset = el.classList.contains('tsm__nav-btn') ? 8 : 14;
+      var isTextControl = el.classList.contains('tsm__nav-btn') || el.classList.contains('tsm__view-all');
+      var strength = isTextControl ? 0.4 : 0.18;
+      var maxOffset = isTextControl ? 10 : 14;
 
       function render() {
         st.curMagX += (st.magX - st.curMagX) * 0.2;
@@ -521,8 +679,6 @@
       window.addEventListener('resize', onScroll, { passive: true });
       updateParallax();
     }
-
-    goTo(0);
   })();
 </script>
 
