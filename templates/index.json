@@ -349,6 +349,7 @@
       "settings": {
         "heading": "Featured Collection",
         "section_bg": "#fdfdfd",
+        "sync_scroll_bg": false,
         "container_width": 1300,
         "content_width": 700,
         "padding_top": 70,
@@ -390,6 +391,7 @@
         "badge_padding": 8,
         "icon_style": "bag",
         "icon_bg_color": "#5d7356",
+        "icon_bg_hover_color": "#3d8b40",
         "icon_color": "#ffffff",
         "icon_size": 36,
         "icon_radius": 18,
@@ -679,12 +681,11 @@
     },
     "featured_product_spotlight_FpS001": {
       "type": "featured-product-spotlight",
-      "name": "Essentials Pack",
       "blocks": {
-        "pack_item_1": {
+        "product_XmMPHz": {
           "type": "product",
           "settings": {
-            "product": "paurusha-a-ayurvedic-supplements-for-immune-system"
+            "product": "nita-ayurvedic-solution-for-kidney-stones-renal-health"
           }
         },
         "pack_item_2": {
@@ -692,9 +693,27 @@
           "settings": {
             "product": "ganore-ayurvedic-medicine-for-urinary-problems"
           }
+        },
+        "product_6MyiFG": {
+          "type": "product",
+          "settings": {
+            "product": "ayursin-guni-ayurvedic-medicine-for-viral-infections-and-immunity"
+          }
+        },
+        "pack_item_1": {
+          "type": "product",
+          "settings": {
+            "product": "paurusha-a-ayurvedic-supplements-for-immune-system"
+          }
         }
       },
-      "block_order": ["pack_item_1", "pack_item_2"],
+      "block_order": [
+        "product_XmMPHz",
+        "pack_item_2",
+        "product_6MyiFG",
+        "pack_item_1"
+      ],
+      "name": "Essentials Pack",
       "settings": {
         "eyebrow": "",
         "heading": "",
@@ -703,6 +722,7 @@
         "show_shipping_note": true,
         "shipping_note_label": "Shipping",
         "shipping_note_text": "calculated at checkout.",
+        "shipping_policy_url": "",
         "highlight_line": "Everything you need, in one tap",
         "description": "<p>A hand-picked set of everyday essentials, bundled together so you don't have to add them one at a time.</p>",
         "specifications_label": "Specifications:",
@@ -716,13 +736,13 @@
         "show_share": true,
         "share_label": "Share",
         "sync_scroll_bg": false,
-        "background_color": "#F2F6F1",
-        "card_color": "#FFFFFF",
+        "background_color": "#f2f6f1",
+        "card_color": "#ffffff",
         "text_color": "#141414",
-        "muted_color": "#6B6B6B",
-        "accent_color": "#2E7D32",
-        "cta_color": "#F58220",
-        "border_color": "#ECECEC",
+        "muted_color": "#6b6b6b",
+        "accent_color": "#2e7d32",
+        "cta_color": "#f58220",
+        "border_color": "#ececec",
         "padding_top": 90,
         "padding_bottom": 90
       }
@@ -775,72 +795,72 @@
           "type": "review",
           "settings": {
             "reviewer_name": "Priya Ramesh",
-            "reviewer_location": "Chennai, TN",
             "rating": 5,
-            "review_text": "Ordered my mother's diabetes medicines here for over a year now. Always genuine, always on time. Never had a single issue."
+            "pull_quote": "Always genuine, always on time. Never had a single issue.",
+            "review_text": "Ordered my mother's diabetes medicines here for over a year now. The whole family trusts them completely."
           }
         },
         "review_2": {
           "type": "review",
           "settings": {
             "reviewer_name": "Arun Kumar",
-            "reviewer_location": "Coimbatore, TN",
             "rating": 5,
-            "review_text": "The immunity combo pack actually works — fewer sick days this monsoon for the whole family. Fast delivery too."
+            "pull_quote": "Fewer sick days this monsoon for the whole family.",
+            "review_text": "The immunity combo pack actually works, and fast delivery every single time."
           }
         },
         "review_3": {
           "type": "review",
           "settings": {
             "reviewer_name": "Meena Sundaram",
-            "reviewer_location": "Madurai, TN",
             "rating": 4,
-            "review_text": "Love that they have a whole section for women's health. Found exactly what my doctor recommended in two minutes."
+            "pull_quote": "Found exactly what my doctor recommended in two minutes.",
+            "review_text": "Love that they have a whole dedicated section for women's health."
           }
         },
         "review_4": {
           "type": "review",
           "settings": {
             "reviewer_name": "Karthik Raja",
-            "reviewer_location": "Salem, TN",
             "rating": 5,
-            "review_text": "Customer support actually picks up the phone and knows what they're talking about. Rare these days."
+            "pull_quote": "Rare these days to find support that actually knows what they're talking about.",
+            "review_text": "Customer support actually picks up the phone and answers real questions, not a script."
           }
         },
         "review_5": {
           "type": "review",
           "settings": {
             "reviewer_name": "Divya Prakash",
-            "reviewer_location": "Trichy, TN",
             "rating": 5,
-            "review_text": "The pain relief balm from the joint care range is now a permanent fixture in our house. Ordering my third bottle."
+            "pull_quote": "Now a permanent fixture in our house.",
+            "review_text": "The pain relief balm from the joint care range worked so well, I'm already ordering my third bottle."
           }
         },
         "review_6": {
           "type": "review",
           "settings": {
             "reviewer_name": "Suresh Babu",
-            "reviewer_location": "Erode, TN",
             "rating": 4,
-            "review_text": "Clean website, easy checkout, and the packaging keeps everything intact. Switched from my old pharmacy for good."
+            "pull_quote": "Switched from my old pharmacy for good.",
+            "review_text": "Clean website, easy checkout, and the packaging keeps everything intact every time."
           }
         },
         "review_7": {
           "type": "review",
           "settings": {
             "reviewer_name": "Lakshmi Narayanan",
-            "reviewer_location": "Vellore, TN",
             "rating": 5,
-            "review_text": "Their digestive care combo sorted out my acidity issues within a week. Wish I'd found them sooner."
+            "pull_quote": "Wish I'd found them sooner.",
+            "review_text": "Their digestive care combo sorted out my acidity issues within just a week."
           }
         },
         "review_8": {
           "type": "review",
           "settings": {
             "reviewer_name": "Vikram Anand",
-            "reviewer_location": "Chennai, TN",
             "rating": 5,
-            "review_text": "Been buying my supplements here for months. Prices are fair and everything ships fast, even during festival season."
+            "pull_quote": "Prices are fair and everything ships fast.",
+            "review_text": "Been buying my supplements here for months, even during festival season rush."
           }
         }
       },
@@ -856,21 +876,20 @@
       ],
       "name": "Testimonials",
       "settings": {
-        "eyebrow": "Loved By Our Customers",
         "heading": "Real Stories, Real Relief",
-        "subheading": "Thousands of families trust us for genuine medicines and caring service — here's what a few of them had to say.",
+        "show_rating": false,
         "view_all_text": "View all reviews",
         "view_all_link": "/pages/reviews",
-        "card_width": 340,
-        "card_gap": 20,
-        "padding_block": 88,
-        "background_color": "#ffffff",
-        "card_background": "#f7f5f0",
-        "card_border_color": "#ececec",
+        "side_image_size": 190,
+        "center_image_size": 280,
+        "padding_block": 100,
+        "background_color": "#F2F6F1",
+        "panel_color": "#FFFFFF",
+        "image_bg_color": "#F2F6F1",
+        "border_color": "#ECECEC",
         "text_color": "#141414",
         "muted_color": "#6b6b6b",
-        "accent_color": "#f58220",
-        "eyebrow_color": "#2e7d32"
+        "accent_color": "#2e7d32"
       }
     }
   },

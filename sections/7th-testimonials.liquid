@@ -1,11 +1,21 @@
 {%- comment -%}
-  Section: Testimonials (light, draggable single-row carousel)
-  A finite row of review cards - native drag/swipe/trackpad scroll plus
-  working prev/next arrows (same proven interaction as the Featured
-  Collection slider elsewhere in this theme), no auto-scroll or looping.
-  Dummy reviews ship in the preset; swap them for real ones later via the
-  "Review" blocks (each just needs a name, rating, quote, and an optional
-  avatar - initials are used as a fallback when no avatar is uploaded).
+  Section: Testimonials ("Love Notes" style)
+  Editorial single-slide testimonial gallery: three square (1:1) photos
+  above a two-column quote (short pull-quote + full testimonial +
+  client name), one full slide per review block, cycled with a
+  minimal PREV / NEXT text nav rather than a scrolling card row. No
+  eyebrow line (dropped per feedback that it read as generic/AI
+  boilerplate) and star ratings are off by default to keep the
+  editorial, uncluttered feel of the reference - toggle back on via
+  schema if wanted.
+
+  Interactions: a magnetic cursor pull on the three images and the
+  PREV/NEXT buttons (they nudge slightly toward the pointer within a
+  radius, snapping back on mouse-leave), a differential slow parallax
+  drift on the three images as the section scrolls, and a scroll
+  reveal on first entering view. Image swap between slides crossfades
+  in place; quote content swaps directly (its height naturally varies
+  with copy length).
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap' | stylesheet_tag }}
@@ -21,88 +31,86 @@
   class="tsm"
   id="tsm-{{ section_id }}"
   style="
-    --tsm-bg: {{ s.background_color | default: '#FFFFFF' }};
-    --tsm-card-bg: {{ s.card_background | default: '#F7F5F0' }};
-    --tsm-card-border: {{ s.card_border_color | default: '#ECECEC' }};
+    --tsm-bg: {{ s.background_color | default: '#F2F6F1' }};
+    --tsm-panel-bg: {{ s.panel_color | default: '#FFFFFF' }};
+    --tsm-image-bg: {{ s.image_bg_color | default: '#F2F6F1' }};
+    --tsm-border: {{ s.border_color | default: '#ECECEC' }};
     --tsm-text: {{ s.text_color | default: '#141414' }};
     --tsm-muted: {{ s.muted_color | default: '#6B6B6B' }};
-    --tsm-accent: {{ s.accent_color | default: '#F58220' }};
-    --tsm-eyebrow: {{ s.eyebrow_color | default: '#2E7D32' }};
-    --tsm-card-width: {{ s.card_width | default: 340 }}px;
-    --tsm-card-gap: {{ s.card_gap | default: 20 }}px;
-    --tsm-padding-block: {{ s.padding_block | default: 88 }}px;
+    --tsm-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --tsm-side-size: {{ s.side_image_size | default: 190 }}px;
+    --tsm-center-size: {{ s.center_image_size | default: 280 }}px;
+    --tsm-padding-block: {{ s.padding_block | default: 100 }}px;
   "
 >
   <div class="tsm__inner">
-    <div class="tsm__header">
-      <div class="tsm__header-text">
-        {%- if s.eyebrow != blank -%}<p class="tsm__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
-        {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
-        {%- if s.subheading != blank -%}<p class="tsm__subheading">{{ s.subheading }}</p>{%- endif -%}
-      </div>
+    <div class="tsm__panel" data-reveal>
+      {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
 
-      {%- if review_count > 1 -%}
-        <div class="tsm__nav">
-          <button type="button" class="tsm__arrow tsm__arrow--prev" data-tsm-prev aria-label="Previous reviews">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button type="button" class="tsm__arrow tsm__arrow--next" data-tsm-next aria-label="Next reviews">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+      {%- if review_count > 0 -%}
+        <div class="tsm__images" data-tsm-images>
+          {%- for block in reviews -%}
+            {%- assign rs = block.settings -%}
+            <div class="tsm__image-slide{% if forloop.first %} is-active{% endif %}" data-tsm-image-slide data-index="{{ forloop.index0 }}">
+              <span class="tsm__image tsm__image--side" data-tsm-magnetic data-tsm-parallax="18">
+                {%- if rs.image_1 != blank -%}
+                  <img src="{{ rs.image_1 | image_url: width: 400 }}" alt="{{ rs.image_1.alt | escape }}" width="{{ rs.image_1.width }}" height="{{ rs.image_1.height }}" loading="lazy">
+                {%- endif -%}
+              </span>
+              <span class="tsm__image tsm__image--center" data-tsm-magnetic data-tsm-parallax="32">
+                {%- if rs.image_2 != blank -%}
+                  <img src="{{ rs.image_2 | image_url: width: 560 }}" alt="{{ rs.image_2.alt | escape }}" width="{{ rs.image_2.width }}" height="{{ rs.image_2.height }}" loading="lazy">
+                {%- endif -%}
+              </span>
+              <span class="tsm__image tsm__image--side" data-tsm-magnetic data-tsm-parallax="18">
+                {%- if rs.image_3 != blank -%}
+                  <img src="{{ rs.image_3 | image_url: width: 400 }}" alt="{{ rs.image_3.alt | escape }}" width="{{ rs.image_3.width }}" height="{{ rs.image_3.height }}" loading="lazy">
+                {%- endif -%}
+              </span>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if review_count > 1 -%}
+          <div class="tsm__nav">
+            <button type="button" class="tsm__nav-btn" data-tsm-prev data-tsm-magnetic>Prev</button>
+            <span class="tsm__nav-line" aria-hidden="true"></span>
+            <button type="button" class="tsm__nav-btn" data-tsm-next data-tsm-magnetic>Next</button>
+          </div>
+        {%- endif -%}
+
+        <div class="tsm__quotes" data-tsm-quotes>
+          {%- for block in reviews -%}
+            {%- assign rs = block.settings -%}
+            <div class="tsm__quote-slide{% if forloop.first %} is-active{% endif %}" data-tsm-quote-slide data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+              <div class="tsm__quote-left">
+                {%- if s.show_rating and rs.rating -%}
+                  <div class="tsm__stars" aria-label="{{ rs.rating }} out of 5 stars">
+                    {%- for i in (1..5) -%}
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > rs.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+                {%- if rs.pull_quote != blank -%}
+                  <p class="tsm__pull-quote">&ldquo;{{ rs.pull_quote }}&rdquo;</p>
+                {%- endif -%}
+              </div>
+              <div class="tsm__quote-right">
+                {%- if rs.review_text != blank -%}<p class="tsm__review-text">{{ rs.review_text }}</p>{%- endif -%}
+                {%- if rs.reviewer_name != blank -%}<p class="tsm__client-name">{{ rs.reviewer_name }}</p>{%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if s.view_all_text != blank -%}
+        <div class="tsm__view-all-wrap">
+          <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all">{{ s.view_all_text }}</a>
         </div>
       {%- endif -%}
     </div>
   </div>
-
-  {%- if review_count > 0 -%}
-    <div class="tsm__track-wrap">
-      <div class="tsm__track" data-tsm-track tabindex="0" role="region" aria-label="Customer reviews">
-        {%- for block in reviews -%}
-          {%- assign rs = block.settings -%}
-          {%- assign initial = rs.reviewer_name | slice: 0, 1 -%}
-          <div class="tsm__card" data-tsm-card {{ block.shopify_attributes }}>
-            <div class="tsm__card-top">
-              <span class="tsm__avatar">
-                {%- if rs.avatar_image != blank -%}
-                  <img
-                    src="{{ rs.avatar_image | image_url: width: 96 }}"
-                    alt=""
-                    width="48"
-                    height="48"
-                    loading="lazy"
-                  >
-                {%- else -%}
-                  <span class="tsm__avatar-initial">{{ initial | default: '?' }}</span>
-                {%- endif -%}
-              </span>
-              <span class="tsm__identity">
-                <span class="tsm__name">{{ rs.reviewer_name | default: 'Happy Customer' }}</span>
-                {%- if rs.reviewer_location != blank -%}<span class="tsm__location">{{ rs.reviewer_location }}</span>{%- endif -%}
-              </span>
-              <svg class="tsm__quote-mark" aria-hidden="true" width="26" height="21" viewBox="0 0 30 24" fill="none"><path d="M12.6 0 8.4 10.8h5.4v13.2H0V12.6L4.8 0zm16.8 0-4.2 10.8h5.4v13.2H16.8V12.6L21.6 0z" fill="currentColor"/></svg>
-            </div>
-
-            <div class="tsm__stars" aria-label="{{ rs.rating | default: 5 }} out of 5 stars">
-              {%- assign rating = rs.rating | default: 5 -%}
-              {%- for i in (1..5) -%}
-                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
-              {%- endfor -%}
-            </div>
-
-            {%- if rs.review_text != blank -%}<p class="tsm__quote">{{ rs.review_text }}</p>{%- endif -%}
-          </div>
-        {%- endfor -%}
-      </div>
-    </div>
-  {%- endif -%}
-
-  {%- if s.view_all_text != blank -%}
-    <div class="tsm__inner">
-      <div class="tsm__view-all-wrap">
-        <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all">{{ s.view_all_text }}</a>
-      </div>
-    </div>
-  {%- endif -%}
 </section>
 
 <style>
@@ -110,7 +118,7 @@
     position: relative;
     background: var(--tsm-bg);
     color: var(--tsm-text);
-    padding: var(--tsm-padding-block) 0;
+    padding: var(--tsm-padding-block) 20px;
     font-family: 'Poppins', sans-serif;
   }
 
@@ -121,149 +129,82 @@
   }
 
   #tsm-{{ section_id }} .tsm__inner {
-    max-width: 1360px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 32px;
   }
 
-  /* ---- Header ---- */
-  #tsm-{{ section_id }} .tsm__header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 32px;
+  #tsm-{{ section_id }} .tsm__panel {
+    background: var(--tsm-panel-bg);
+    border-radius: 28px;
+    padding: 56px 48px;
+    box-shadow: 0 30px 70px rgba(20, 20, 20, 0.07);
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
-  #tsm-{{ section_id }} .tsm__header-text {
-    max-width: 640px;
-  }
-
-  #tsm-{{ section_id }} .tsm__eyebrow {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--tsm-eyebrow);
-    margin: 0 0 10px;
+  #tsm-{{ section_id }} .tsm__panel.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   #tsm-{{ section_id }} .tsm__heading {
+    margin: 0 0 44px;
     font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-weight: 400;
-    font-size: clamp(26px, 3.6vw, 40px);
+    font-size: clamp(30px, 4vw, 46px);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    line-height: 1.15;
+    letter-spacing: 1px;
+    line-height: 1.05;
+    text-align: center;
     color: var(--tsm-text);
-    margin: 0 0 10px;
   }
 
-  #tsm-{{ section_id }} .tsm__subheading {
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--tsm-muted);
-    margin: 0;
-  }
-
-  #tsm-{{ section_id }} .tsm__nav {
-    display: flex;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-
-  #tsm-{{ section_id }} .tsm__arrow {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 1.5px solid var(--tsm-card-border);
-    border-radius: 50%;
-    color: var(--tsm-text);
-    cursor: pointer;
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-    padding: 0;
-  }
-
-  #tsm-{{ section_id }} .tsm__arrow:hover,
-  #tsm-{{ section_id }} .tsm__arrow:focus-visible {
-    background: var(--tsm-eyebrow);
-    border-color: var(--tsm-eyebrow);
-    color: #fff;
-    outline: none;
-  }
-
-  #tsm-{{ section_id }} .tsm__arrow[disabled] {
-    opacity: 0.35;
-    cursor: default;
-    pointer-events: none;
-  }
-
-  /* ---- Track ---- */
-  #tsm-{{ section_id }} .tsm__track-wrap {
-    max-width: 1360px;
-    margin: 0 auto;
-    padding: 0 32px;
-  }
-
-  #tsm-{{ section_id }} .tsm__track {
-    display: flex;
-    gap: var(--tsm-card-gap);
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab;
-    padding: 4px 4px 16px;
-    margin: -4px -4px -16px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    user-select: none;
-  }
-
-  #tsm-{{ section_id }} .tsm__track::-webkit-scrollbar {
-    display: none;
-  }
-
-  #tsm-{{ section_id }} .tsm__track.is-dragging {
-    cursor: grabbing;
-    scroll-snap-type: none;
-  }
-
-  /* ---- Card ---- */
-  #tsm-{{ section_id }} .tsm__card {
-    flex: 0 0 var(--tsm-card-width);
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    background: var(--tsm-card-bg);
-    border: 1px solid var(--tsm-card-border);
-    border-radius: 20px;
-    padding: 24px;
-  }
-
-  #tsm-{{ section_id }} .tsm__card-top {
+  /* ---- Image row ---- */
+  #tsm-{{ section_id }} .tsm__images {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    height: var(--tsm-center-size);
+    margin-bottom: 26px;
   }
 
-  #tsm-{{ section_id }} .tsm__avatar {
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    overflow: hidden;
+  #tsm-{{ section_id }} .tsm__image-slide {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--tsm-accent);
+    gap: clamp(16px, 3vw, 40px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease;
   }
 
-  #tsm-{{ section_id }} .tsm__avatar img {
+  #tsm-{{ section_id }} .tsm__image-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #tsm-{{ section_id }} .tsm__image {
+    display: block;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--tsm-image-bg);
+    will-change: transform;
+    cursor: default;
+  }
+
+  #tsm-{{ section_id }} .tsm__image--side {
+    width: var(--tsm-side-size);
+    align-self: center;
+  }
+
+  #tsm-{{ section_id }} .tsm__image--center {
+    width: var(--tsm-center-size);
+  }
+
+  #tsm-{{ section_id }} .tsm__image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -271,39 +212,72 @@
     pointer-events: none;
   }
 
-  #tsm-{{ section_id }} .tsm__avatar-initial {
-    color: #fff;
-    font-weight: 700;
-    font-size: 16px;
-    text-transform: uppercase;
-  }
-
-  #tsm-{{ section_id }} .tsm__identity {
+  /* ---- Prev / Next nav ---- */
+  #tsm-{{ section_id }} .tsm__nav {
     display: flex;
-    flex-direction: column;
-    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 44px;
   }
 
-  #tsm-{{ section_id }} .tsm__name {
+  #tsm-{{ section_id }} .tsm__nav-btn {
+    background: none;
+    border: none;
+    padding: 6px 2px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11.5px;
     font-weight: 600;
-    font-size: 14.5px;
-    color: var(--tsm-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  #tsm-{{ section_id }} .tsm__location {
-    font-size: 12px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
     color: var(--tsm-muted);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.25s ease;
   }
 
-  #tsm-{{ section_id }} .tsm__quote-mark {
+  #tsm-{{ section_id }} .tsm__nav-btn::after {
+    content: '';
     position: absolute;
-    top: -4px;
+    left: 0;
     right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  #tsm-{{ section_id }} .tsm__nav-btn:hover {
     color: var(--tsm-accent);
-    opacity: 0.25;
+  }
+
+  #tsm-{{ section_id }} .tsm__nav-btn:hover::after {
+    transform: scaleX(1);
+  }
+
+  #tsm-{{ section_id }} .tsm__nav-line {
+    width: 30px;
+    height: 1px;
+    background: var(--tsm-border);
+  }
+
+  /* ---- Quotes ---- */
+  #tsm-{{ section_id }} .tsm__quotes {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-slide {
+    display: none;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-slide.is-active {
+    display: grid;
   }
 
   #tsm-{{ section_id }} .tsm__stars {
@@ -317,22 +291,38 @@
   }
 
   #tsm-{{ section_id }} .tsm__star--empty {
-    color: var(--tsm-card-border);
+    color: var(--tsm-border);
   }
 
-  #tsm-{{ section_id }} .tsm__quote {
-    font-style: italic;
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: var(--tsm-muted);
+  #tsm-{{ section_id }} .tsm__pull-quote {
     margin: 0;
+    font-style: italic;
+    font-size: clamp(19px, 2.1vw, 24px);
+    line-height: 1.5;
+    color: var(--tsm-text);
+  }
+
+  #tsm-{{ section_id }} .tsm__review-text {
+    margin: 0 0 16px;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--tsm-muted);
+  }
+
+  #tsm-{{ section_id }} .tsm__client-name {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--tsm-text);
   }
 
   /* ---- View all ---- */
   #tsm-{{ section_id }} .tsm__view-all-wrap {
     display: flex;
     justify-content: center;
-    margin-top: 40px;
+    margin-top: 48px;
   }
 
   #tsm-{{ section_id }} .tsm__view-all {
@@ -341,44 +331,59 @@
     font-size: 14.5px;
     color: var(--tsm-text);
     text-decoration: none;
-    border: 1.5px solid var(--tsm-card-border);
+    border: 1.5px solid var(--tsm-border);
     padding: 13px 32px;
     border-radius: 999px;
     transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
   }
 
   #tsm-{{ section_id }} .tsm__view-all:hover {
-    background: var(--tsm-eyebrow);
-    border-color: var(--tsm-eyebrow);
+    background: var(--tsm-accent);
+    border-color: var(--tsm-accent);
     color: #fff;
     transform: translateY(-2px);
   }
 
   /* ---- Mobile ---- */
   @media (max-width: 749px) {
-    #tsm-{{ section_id }} .tsm__inner,
-    #tsm-{{ section_id }} .tsm__track-wrap {
-      padding: 0 20px;
+    #tsm-{{ section_id }} .tsm__panel {
+      padding: 36px 22px;
+      border-radius: 22px;
     }
 
-    #tsm-{{ section_id }} .tsm__header {
-      align-items: center;
+    #tsm-{{ section_id }} .tsm__images {
+      height: auto;
     }
 
-    #tsm-{{ section_id }} .tsm__card {
-      flex-basis: min(var(--tsm-card-width), 78vw);
-      padding: 18px;
+    #tsm-{{ section_id }} .tsm__image-slide {
+      position: relative;
+      gap: 10px;
     }
 
-    #tsm-{{ section_id }} .tsm__arrow {
-      width: 38px;
-      height: 38px;
+    #tsm-{{ section_id }} .tsm__image--side {
+      width: 26vw;
+      max-width: 110px;
+    }
+
+    #tsm-{{ section_id }} .tsm__image--center {
+      width: 38vw;
+      max-width: 160px;
+    }
+
+    #tsm-{{ section_id }} .tsm__quote-slide {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      text-align: center;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #tsm-{{ section_id }} .tsm__track {
-      scroll-behavior: auto;
+    #tsm-{{ section_id }} .tsm__panel,
+    #tsm-{{ section_id }} .tsm__image,
+    #tsm-{{ section_id }} .tsm__nav-btn {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
     }
   }
 </style>
@@ -388,99 +393,136 @@
     var section = document.getElementById('tsm-{{ section_id }}');
     if (!section) return;
 
-    var track = section.querySelector('[data-tsm-track]');
-    var cards = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-card]'));
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Scroll reveal ---- */
+    var panel = section.querySelector('.tsm__panel');
+    if (panel) {
+      if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        revealObserver.observe(panel);
+      } else {
+        panel.classList.add('is-visible');
+      }
+    }
+
+    /* ---- Slide cycling (images + quotes stay in sync) ---- */
+    var imageSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-image-slide]'));
+    var quoteSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-quote-slide]'));
     var prevBtn = section.querySelector('[data-tsm-prev]');
     var nextBtn = section.querySelector('[data-tsm-next]');
+    var total = imageSlides.length;
+    var current = 0;
 
-    if (!track || !cards.length) return;
-
-    function stepSize() {
-      var cardRect = cards[0].getBoundingClientRect();
-      var gap = cards.length > 1 ? cards[1].getBoundingClientRect().left - cardRect.right : 0;
-      return cardRect.width + Math.max(gap, 0);
+    function goTo(index) {
+      current = (index + total) % total;
+      imageSlides.forEach(function (el) { el.classList.toggle('is-active', parseInt(el.getAttribute('data-index'), 10) === current); });
+      quoteSlides.forEach(function (el) { el.classList.toggle('is-active', parseInt(el.getAttribute('data-index'), 10) === current); });
     }
 
-    function updateArrows() {
-      if (!prevBtn || !nextBtn) return;
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      prevBtn.disabled = track.scrollLeft <= 1;
-      nextBtn.disabled = track.scrollLeft >= maxScroll - 1;
-    }
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
 
-    var scrollTicking = false;
-    track.addEventListener(
-      'scroll',
-      function () {
-        if (!scrollTicking) {
-          window.requestAnimationFrame(function () {
-            updateArrows();
-            scrollTicking = false;
-          });
-          scrollTicking = true;
-        }
-      },
-      { passive: true }
-    );
+    if (prefersReducedMotion) return;
 
-    window.addEventListener('resize', updateArrows, { passive: true });
-    window.addEventListener('load', updateArrows);
+    /* ---- Magnetic cursor pull + scroll parallax, combined ----
+       Both effects can land on the same `.tsm__image` elements (magnetic
+       hover pull on X/Y, slow scroll parallax drift on Y), so they share
+       one state object and one transform per element instead of each
+       independently overwriting `style.transform` - two separate writers
+       on the same property would just cancel each other out. */
+    var magneticEls = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-magnetic]'));
+    var elState = new Map();
 
-    if (prevBtn) {
-      prevBtn.addEventListener('click', function () {
-        track.scrollBy({ left: -stepSize(), behavior: 'smooth' });
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function () {
-        track.scrollBy({ left: stepSize(), behavior: 'smooth' });
-      });
-    }
-
-    /* ---- Mouse drag-to-scroll (touch/trackpad already work natively) ---- */
-    var isDragging = false;
-    var dragMoved = false;
-    var startX = 0;
-    var startScrollLeft = 0;
-
-    track.addEventListener('pointerdown', function (e) {
-      if (e.pointerType !== 'mouse') return;
-      isDragging = true;
-      dragMoved = false;
-      startX = e.clientX;
-      startScrollLeft = track.scrollLeft;
-      track.classList.add('is-dragging');
+    magneticEls.forEach(function (el) {
+      elState.set(el, { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, ticking: false });
     });
 
-    window.addEventListener('pointermove', function (e) {
-      if (!isDragging) return;
-      var dx = e.clientX - startX;
-      if (Math.abs(dx) > 4) dragMoved = true;
-      track.scrollLeft = startScrollLeft - dx;
-    });
-
-    function endDrag() {
-      if (!isDragging) return;
-      isDragging = false;
-      track.classList.remove('is-dragging');
+    function composeTransform(el) {
+      var st = elState.get(el);
+      el.style.transform = 'translate3d(' + st.curMagX.toFixed(2) + 'px, ' + (st.curMagY + st.parY).toFixed(2) + 'px, 0)';
     }
 
-    window.addEventListener('pointerup', endDrag);
-    window.addEventListener('pointercancel', endDrag);
+    magneticEls.forEach(function (el) {
+      var st = elState.get(el);
+      var strength = el.classList.contains('tsm__nav-btn') ? 0.4 : 0.18;
+      var maxOffset = el.classList.contains('tsm__nav-btn') ? 8 : 14;
 
-    track.addEventListener(
-      'click',
-      function (e) {
-        if (dragMoved) {
-          e.preventDefault();
-          e.stopPropagation();
+      function render() {
+        st.curMagX += (st.magX - st.curMagX) * 0.2;
+        st.curMagY += (st.magY - st.curMagY) * 0.2;
+        composeTransform(el);
+        if (Math.abs(st.magX - st.curMagX) > 0.1 || Math.abs(st.magY - st.curMagY) > 0.1) {
+          window.requestAnimationFrame(render);
+        } else {
+          st.ticking = false;
         }
-        dragMoved = false;
-      },
-      true
-    );
+      }
 
-    updateArrows();
+      function startRender() {
+        if (!st.ticking) {
+          st.ticking = true;
+          window.requestAnimationFrame(render);
+        }
+      }
+
+      el.addEventListener('mousemove', function (e) {
+        var rect = el.getBoundingClientRect();
+        var relX = e.clientX - (rect.left + rect.width / 2);
+        var relY = e.clientY - (rect.top + rect.height / 2);
+        st.magX = Math.max(-maxOffset, Math.min(maxOffset, relX * strength));
+        st.magY = Math.max(-maxOffset, Math.min(maxOffset, relY * strength));
+        startRender();
+      });
+
+      el.addEventListener('mouseleave', function () {
+        st.magX = 0;
+        st.magY = 0;
+        startRender();
+      });
+    });
+
+    /* ---- Slow parallax drift on the three images while scrolling ---- */
+    var parallaxEls = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-parallax]'));
+    if (parallaxEls.length) {
+      var scrollTicking = false;
+      function updateParallax() {
+        scrollTicking = false;
+        var rect = section.getBoundingClientRect();
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.bottom < 0 || rect.top > vh) return;
+        var progress = (vh - rect.top) / (vh + rect.height);
+        parallaxEls.forEach(function (el) {
+          var amount = parseFloat(el.getAttribute('data-tsm-parallax')) || 20;
+          var st = elState.get(el);
+          if (!st) return;
+          st.parY = (progress - 0.5) * amount;
+          composeTransform(el);
+        });
+      }
+      function onScroll() {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        window.requestAnimationFrame(updateParallax);
+      }
+      var pageScroller = document.querySelector('.page-wrapper');
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      updateParallax();
+    }
+
+    goTo(0);
   })();
 </script>
 
@@ -491,38 +533,42 @@
   "class": "shopify-section--testimonials",
   "settings": [
     { "type": "header", "content": "Content" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Loved By Our Customers" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Real Stories, Real Relief" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Thousands of families trust us for genuine medicines and caring service — here's what a few of them had to say." },
+    { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": false },
 
     { "type": "header", "content": "View all button" },
     { "type": "text", "id": "view_all_text", "label": "Button text", "default": "View all reviews" },
     { "type": "url", "id": "view_all_link", "label": "Button link" },
 
     { "type": "header", "content": "Layout" },
-    { "type": "range", "id": "card_width", "label": "Card width", "min": 240, "max": 440, "step": 10, "unit": "px", "default": 340 },
-    { "type": "range", "id": "card_gap", "label": "Gap between cards", "min": 8, "max": 40, "step": 2, "unit": "px", "default": 20 },
-    { "type": "range", "id": "padding_block", "label": "Vertical padding", "min": 20, "max": 160, "step": 4, "unit": "px", "default": 88 },
+    { "type": "range", "id": "side_image_size", "label": "Side image size", "min": 120, "max": 260, "step": 10, "unit": "px", "default": 190 },
+    { "type": "range", "id": "center_image_size", "label": "Center image size", "min": 180, "max": 360, "step": 10, "unit": "px", "default": 280 },
+    { "type": "range", "id": "padding_block", "label": "Vertical padding", "min": 20, "max": 160, "step": 4, "unit": "px", "default": 100 },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
-    { "type": "color", "id": "card_background", "label": "Card background", "default": "#F7F5F0" },
-    { "type": "color", "id": "card_border_color", "label": "Card / button border", "default": "#ECECEC" },
+    { "type": "color", "id": "background_color", "label": "Page background", "default": "#F2F6F1" },
+    { "type": "color", "id": "panel_color", "label": "Panel background", "default": "#FFFFFF" },
+    { "type": "color", "id": "image_bg_color", "label": "Image placeholder background", "default": "#F2F6F1" },
+    { "type": "color", "id": "border_color", "label": "Border", "default": "#ECECEC" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#6B6B6B" },
-    { "type": "color", "id": "accent_color", "label": "Accent (stars, quote mark, avatar)", "default": "#F58220" },
-    { "type": "color", "id": "eyebrow_color", "label": "Eyebrow / hover color", "default": "#2E7D32" }
+    { "type": "color", "id": "accent_color", "label": "Accent (stars, nav hover)", "default": "#2E7D32" }
   ],
   "blocks": [
     {
       "type": "review",
       "name": "Review",
       "settings": [
-        { "type": "image_picker", "id": "avatar_image", "label": "Avatar (optional)", "info": "Falls back to a colored initial if left blank" },
-        { "type": "text", "id": "reviewer_name", "label": "Name", "default": "Happy Customer" },
-        { "type": "text", "id": "reviewer_location", "label": "Location", "default": "Chennai, TN" },
-        { "type": "range", "id": "rating", "label": "Rating", "min": 1, "max": 5, "step": 1, "default": 5 },
-        { "type": "textarea", "id": "review_text", "label": "Review text", "default": "Great service and genuine products every time." }
+        { "type": "header", "content": "Images (1:1 square)" },
+        { "type": "image_picker", "id": "image_1", "label": "Image 1 (left)" },
+        { "type": "image_picker", "id": "image_2", "label": "Image 2 (center, larger)" },
+        { "type": "image_picker", "id": "image_3", "label": "Image 3 (right)" },
+
+        { "type": "header", "content": "Quote" },
+        { "type": "textarea", "id": "pull_quote", "label": "Pull quote", "info": "Short highlighted excerpt.", "default": "An excerpt from the testimonial goes right here to highlight the best part." },
+        { "type": "textarea", "id": "review_text", "label": "Full testimonial", "default": "The rest of the testimonial text goes here, giving the full picture of their experience." },
+        { "type": "text", "id": "reviewer_name", "label": "Client name", "default": "Client Name" },
+        { "type": "range", "id": "rating", "label": "Rating (optional)", "min": 1, "max": 5, "step": 1, "default": 5 }
       ]
     }
   ],
@@ -530,14 +576,9 @@
     {
       "name": "Testimonials",
       "blocks": [
-        { "type": "review", "settings": { "reviewer_name": "Priya Ramesh", "reviewer_location": "Chennai, TN", "rating": 5, "review_text": "Ordered my mother's diabetes medicines here for over a year now. Always genuine, always on time. Never had a single issue." } },
-        { "type": "review", "settings": { "reviewer_name": "Arun Kumar", "reviewer_location": "Coimbatore, TN", "rating": 5, "review_text": "The immunity combo pack actually works — fewer sick days this monsoon for the whole family. Fast delivery too." } },
-        { "type": "review", "settings": { "reviewer_name": "Meena Sundaram", "reviewer_location": "Madurai, TN", "rating": 4, "review_text": "Love that they have a whole section for women's health. Found exactly what my doctor recommended in two minutes." } },
-        { "type": "review", "settings": { "reviewer_name": "Karthik Raja", "reviewer_location": "Salem, TN", "rating": 5, "review_text": "Customer support actually picks up the phone and knows what they're talking about. Rare these days." } },
-        { "type": "review", "settings": { "reviewer_name": "Divya Prakash", "reviewer_location": "Trichy, TN", "rating": 5, "review_text": "The pain relief balm from the joint care range is now a permanent fixture in our house. Ordering my third bottle." } },
-        { "type": "review", "settings": { "reviewer_name": "Suresh Babu", "reviewer_location": "Erode, TN", "rating": 4, "review_text": "Clean website, easy checkout, and the packaging keeps everything intact. Switched from my old pharmacy for good." } },
-        { "type": "review", "settings": { "reviewer_name": "Lakshmi Narayanan", "reviewer_location": "Vellore, TN", "rating": 5, "review_text": "Their digestive care combo sorted out my acidity issues within a week. Wish I'd found them sooner." } },
-        { "type": "review", "settings": { "reviewer_name": "Vikram Anand", "reviewer_location": "Chennai, TN", "rating": 5, "review_text": "Been buying my supplements here for months. Prices are fair and everything ships fast, even during festival season." } }
+        { "type": "review", "settings": { "reviewer_name": "Priya Ramesh", "pull_quote": "Always genuine, always on time. Never had a single issue.", "review_text": "Ordered my mother's diabetes medicines here for over a year now. The whole family trusts them completely." } },
+        { "type": "review", "settings": { "reviewer_name": "Arun Kumar", "pull_quote": "Fewer sick days this monsoon for the whole family.", "review_text": "The immunity combo pack actually works, and fast delivery every single time." } },
+        { "type": "review", "settings": { "reviewer_name": "Meena Sundaram", "pull_quote": "Found exactly what my doctor recommended in two minutes.", "review_text": "Love that they have a whole dedicated section for women's health." } }
       ]
     }
   ]
