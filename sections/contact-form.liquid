@@ -1,0 +1,665 @@
+{%- comment -%}
+  Section: Contact - Form
+  Two columns: a contact-info panel (phone/email/address/hours + optional
+  map embed) and Shopify's native `contact` form, restyled with floating
+  labels, animated focus states and a proper success/error state - all
+  driven by real settings so the phone/email/address/hours shown here are
+  editable from the theme editor rather than hardcoded copy.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign form_id = 'ContactForm-' | append: section_id
+-%}
+
+<section
+  class="cf"
+  id="cf-{{ section_id }}"
+  data-cf
+  style="
+    --cf-bg: {{ s.background_color | default: '#FFFFFF' }};
+    --cf-panel-bg: {{ s.panel_color | default: '#16311B' }};
+    --cf-panel-text: {{ s.panel_text_color | default: '#FFFFFF' }};
+    --cf-text: {{ s.text_color | default: '#141414' }};
+    --cf-muted: {{ s.muted_color | default: '#6B6B6B' }};
+    --cf-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --cf-cta: {{ s.cta_color | default: '#F58220' }};
+    --cf-border: {{ s.border_color | default: '#ECECEC' }};
+    --cf-padding-top: {{ s.padding_top | default: 90 }}px;
+    --cf-padding-bottom: {{ s.padding_bottom | default: 90 }}px;
+  "
+>
+  <div class="cf__container">
+    <div class="cf__panel" data-reveal data-reveal-side="left">
+      <p class="cf__watermark" aria-hidden="true">{{ s.watermark | default: 'TALK' }}</p>
+      <div class="cf__panel-inner">
+        {%- if s.info_eyebrow != blank -%}<p class="cf__eyebrow">{{ s.info_eyebrow }}</p>{%- endif -%}
+        {%- if s.info_heading != blank -%}<h2 class="cf__panel-heading">{{ s.info_heading }}</h2>{%- endif -%}
+        {%- if s.info_text != blank -%}<p class="cf__panel-text">{{ s.info_text }}</p>{%- endif -%}
+
+        <ul class="cf__contact-list">
+          {%- if s.phone != blank -%}
+            <li>
+              <a href="tel:{{ s.phone | remove: ' ' }}" class="cf__contact-item">
+                <span class="cf__contact-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 3h3l2 4.5-2 1.5c.9 2.2 2.8 4.1 5 5l1.5-2 4.5 2v3c0 1-1 2-2 2C9.5 19 1 10.5 1 5c0-1 1-2 2-2z"/></svg></span>
+                <span>
+                  <span class="cf__contact-label">Call us</span>
+                  <span class="cf__contact-value">{{ s.phone }}</span>
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+          {%- if s.email != blank -%}
+            <li>
+              <a href="mailto:{{ s.email }}" class="cf__contact-item">
+                <span class="cf__contact-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M2.5 5.5h15v9a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-9Z"/><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="m3 6 7 5.5L17 6"/></svg></span>
+                <span>
+                  <span class="cf__contact-label">Email us</span>
+                  <span class="cf__contact-value">{{ s.email }}</span>
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+          {%- if s.address != blank -%}
+            <li>
+              <a href="{{ s.map_link | default: '#' }}" class="cf__contact-item" {% if s.map_link != blank %}target="_blank" rel="noopener"{% endif %}>
+                <span class="cf__contact-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M10 18s6-5.5 6-10a6 6 0 1 0-12 0c0 4.5 6 10 6 10Z"/><circle cx="10" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                <span>
+                  <span class="cf__contact-label">Visit us</span>
+                  <span class="cf__contact-value">{{ s.address }}</span>
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+          {%- if s.hours != blank -%}
+            <li>
+              <span class="cf__contact-item cf__contact-item--static">
+                <span class="cf__contact-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 6v4l3 2"/></svg></span>
+                <span>
+                  <span class="cf__contact-label">Hours</span>
+                  <span class="cf__contact-value">{{ s.hours }}</span>
+                </span>
+              </span>
+            </li>
+          {%- endif -%}
+        </ul>
+
+        {%- if s.whatsapp_text != blank -%}
+          <a href="{{ s.whatsapp_url | default: '#' }}" class="cf__whatsapp" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M17.6 14.2c-.3-.15-1.7-.85-2-.95-.25-.1-.45-.15-.65.15-.2.3-.75.95-.9 1.15-.2.2-.35.25-.65.1-.95-.4-1.95-1.05-2.75-1.85-.75-.75-1.35-1.6-1.85-2.6-.15-.3-.05-.5.1-.65l.55-.65c.15-.2.2-.35.05-.6-.1-.2-.65-1.55-.9-2.1-.2-.4-.4-.35-.6-.35h-.5c-.2 0-.5.1-.7.35-.2.25-.85.9-.85 2.15 0 1.25.9 2.5 1.05 2.65.15.2 1.85 2.85 4.55 4 .65.3 1.15.45 1.55.55.65.15 1.25.15 1.7.1.5-.05 1.7-.7 1.95-1.35.25-.65.25-1.2.15-1.35-.1-.15-.3-.2-.65-.35Z"/><path fill="currentColor" d="M12 2a10 10 0 0 0-8.5 15.2L2 22l5-1.4A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 0 1 6.9 12.7l-.25.4.6 2.2-2.25-.6-.4.25A8.2 8.2 0 1 1 12 3.8Z"/></svg>
+            {{ s.whatsapp_text }}
+          </a>
+        {%- endif -%}
+
+        {%- if s.map_embed_url != blank -%}
+          <div class="cf__map">
+            <iframe src="{{ s.map_embed_url }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Store location"></iframe>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="cf__form-wrap" data-reveal data-reveal-side="right">
+      {%- if s.form_eyebrow != blank -%}<p class="cf__eyebrow cf__eyebrow--dark">{{ s.form_eyebrow }}</p>{%- endif -%}
+      {%- if s.form_heading != blank -%}<h2 class="cf__form-heading">{{ s.form_heading }}</h2>{%- endif -%}
+      {%- if s.form_text != blank -%}<p class="cf__form-text">{{ s.form_text }}</p>{%- endif -%}
+
+      {%- form 'contact', id: form_id, class: 'cf__form' -%}
+        {%- if form.posted_successfully? -%}
+          <div class="cf__notice cf__notice--success" data-cf-notice tabindex="-1">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="m6 10.5 2.5 2.5L14 7.5"/></svg>
+            <span>{{ s.success_message | default: "Thanks - your message is in. We'll get back to you shortly." }}</span>
+          </div>
+        {%- endif -%}
+
+        {%- if form.errors -%}
+          <div class="cf__notice cf__notice--error" data-cf-notice tabindex="-1">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M10 6v5M10 14h.01"/></svg>
+            <span>{{ form.errors | default_errors }}</span>
+          </div>
+        {%- endif -%}
+
+        <div class="cf__row">
+          <div class="cf__field">
+            <input type="text" id="ContactFormName-{{ section_id }}" name="contact[name]" value="{{ form.name }}" placeholder=" " autocomplete="name">
+            <label for="ContactFormName-{{ section_id }}">Full Name</label>
+          </div>
+          <div class="cf__field">
+            <input type="tel" id="ContactFormPhone-{{ section_id }}" name="contact[phone]" value="{{ form.phone }}" placeholder=" " autocomplete="tel">
+            <label for="ContactFormPhone-{{ section_id }}">Phone Number</label>
+          </div>
+        </div>
+
+        <div class="cf__field">
+          <input type="email" id="ContactFormEmail-{{ section_id }}" name="contact[email]" value="{{ form.email }}" placeholder=" " autocomplete="email" required>
+          <label for="ContactFormEmail-{{ section_id }}">Email Address*</label>
+        </div>
+
+        <div class="cf__field">
+          <textarea id="ContactFormMessage-{{ section_id }}" name="contact[body]" rows="5" placeholder=" " required>{{ form.body }}</textarea>
+          <label for="ContactFormMessage-{{ section_id }}">Your Message*</label>
+        </div>
+
+        <button type="submit" class="cf__submit" data-cf-submit>
+          <span class="cf__submit-label">{{ s.submit_text | default: 'Send Message' }}</span>
+          <span class="cf__submit-spinner" aria-hidden="true"></span>
+          <svg class="cf__submit-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 10h12M11 5l5 5-5 5"/></svg>
+        </button>
+      {%- endform -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #cf-{{ section_id }} {
+    position: relative;
+    background: var(--cf-bg);
+    color: var(--cf-text);
+    font-family: 'Poppins', sans-serif;
+    padding: var(--cf-padding-top) 20px var(--cf-padding-bottom);
+  }
+
+  #cf-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #cf-{{ section_id }} .cf__container {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    gap: 0;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(20, 20, 20, 0.1);
+  }
+
+  #cf-{{ section_id }} [data-reveal] {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cf-{{ section_id }} [data-reveal-side="left"] {
+    transform: translate3d(-24px, 0, 0);
+  }
+
+  #cf-{{ section_id }} [data-reveal-side="right"] {
+    transform: translate3d(24px, 0, 0);
+  }
+
+  #cf-{{ section_id }} [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ---- Info panel ---- */
+  #cf-{{ section_id }} .cf__panel {
+    position: relative;
+    background: var(--cf-panel-bg);
+    color: var(--cf-panel-text);
+    overflow: hidden;
+    isolation: isolate;
+    display: flex;
+  }
+
+  #cf-{{ section_id }} .cf__watermark {
+    position: absolute;
+    inset: auto 0 -0.15em -0.05em;
+    z-index: 0;
+    margin: 0;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-size: clamp(70px, 12vw, 160px);
+    line-height: 1;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.06;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #cf-{{ section_id }} .cf__panel-inner {
+    position: relative;
+    z-index: 1;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #cf-{{ section_id }} .cf__eyebrow {
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--cf-cta);
+  }
+
+  #cf-{{ section_id }} .cf__eyebrow--dark {
+    color: var(--cf-accent);
+  }
+
+  #cf-{{ section_id }} .cf__panel-heading {
+    margin: 0 0 14px;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.2vw, 38px);
+    line-height: 1.1;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  #cf-{{ section_id }} .cf__panel-text {
+    margin: 0 0 28px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  #cf-{{ section_id }} .cf__contact-list {
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  #cf-{{ section_id }} .cf__contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 10px;
+    margin: 0 -10px;
+    border-radius: 12px;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  #cf-{{ section_id }} a.cf__contact-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+  }
+
+  #cf-{{ section_id }} .cf__contact-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--cf-cta);
+  }
+
+  #cf-{{ section_id }} .cf__contact-label {
+    display: block;
+    font-size: 11.5px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 2px;
+  }
+
+  #cf-{{ section_id }} .cf__contact-value {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  #cf-{{ section_id }} .cf__whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 13px 20px;
+    border-radius: 999px;
+    background: #25D366;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.25s ease;
+  }
+
+  #cf-{{ section_id }} .cf__whatsapp:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.25);
+  }
+
+  #cf-{{ section_id }} .cf__map {
+    margin-top: 24px;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  #cf-{{ section_id }} .cf__map iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  /* ---- Form ---- */
+  #cf-{{ section_id }} .cf__form-wrap {
+    background: #fff;
+    padding: 48px 44px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #cf-{{ section_id }} .cf__form-heading {
+    margin: 0 0 12px;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.2vw, 38px);
+    line-height: 1.1;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--cf-text);
+  }
+
+  #cf-{{ section_id }} .cf__form-text {
+    margin: 0 0 28px;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--cf-muted);
+  }
+
+  #cf-{{ section_id }} .cf__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  #cf-{{ section_id }} .cf__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  #cf-{{ section_id }} .cf__field {
+    position: relative;
+  }
+
+  #cf-{{ section_id }} .cf__field input,
+  #cf-{{ section_id }} .cf__field textarea {
+    width: 100%;
+    padding: 22px 16px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14.5px;
+    color: var(--cf-text);
+    background: #f7f8f6;
+    border: 1.5px solid var(--cf-border);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  #cf-{{ section_id }} .cf__field textarea {
+    resize: vertical;
+    min-height: 120px;
+    padding-top: 24px;
+  }
+
+  #cf-{{ section_id }} .cf__field input:focus,
+  #cf-{{ section_id }} .cf__field textarea:focus {
+    background: #fff;
+    border-color: var(--cf-accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--cf-accent) 14%, transparent);
+  }
+
+  #cf-{{ section_id }} .cf__field label {
+    position: absolute;
+    left: 17px;
+    top: 18px;
+    font-size: 14px;
+    color: var(--cf-muted);
+    pointer-events: none;
+    transform-origin: left top;
+    transition: transform 0.18s ease, color 0.18s ease, top 0.18s ease;
+  }
+
+  #cf-{{ section_id }} .cf__field input:focus + label,
+  #cf-{{ section_id }} .cf__field input:not(:placeholder-shown) + label,
+  #cf-{{ section_id }} .cf__field textarea:focus + label,
+  #cf-{{ section_id }} .cf__field textarea:not(:placeholder-shown) + label {
+    top: 7px;
+    transform: scale(0.78);
+    color: var(--cf-accent);
+  }
+
+  #cf-{{ section_id }} .cf__submit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 999px;
+    background: var(--cf-cta);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.25s ease, background-color 0.25s ease;
+  }
+
+  #cf-{{ section_id }} .cf__submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
+  }
+
+  #cf-{{ section_id }} .cf__submit-icon {
+    transition: transform 0.25s ease;
+  }
+
+  #cf-{{ section_id }} .cf__submit:hover .cf__submit-icon {
+    transform: translateX(3px);
+  }
+
+  #cf-{{ section_id }} .cf__submit-spinner {
+    display: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+  }
+
+  #cf-{{ section_id }} .cf__submit.is-loading .cf__submit-spinner {
+    display: inline-block;
+    animation: cf-spin 0.7s linear infinite;
+  }
+
+  #cf-{{ section_id }} .cf__submit.is-loading .cf__submit-icon {
+    display: none;
+  }
+
+  @keyframes cf-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  #cf-{{ section_id }} .cf__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  #cf-{{ section_id }} .cf__notice--success {
+    background: rgba(46, 125, 50, 0.1);
+    color: #1f5f24;
+  }
+
+  #cf-{{ section_id }} .cf__notice--error {
+    background: rgba(214, 69, 69, 0.1);
+    color: #a32e2e;
+  }
+
+  #cf-{{ section_id }} .cf__notice svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ---- Tablet / Mobile ---- */
+  @media (max-width: 999px) {
+    #cf-{{ section_id }} .cf__container {
+      grid-template-columns: 1fr;
+      border-radius: 20px;
+    }
+
+    #cf-{{ section_id }} .cf__panel-inner,
+    #cf-{{ section_id }} .cf__form-wrap {
+      padding: 36px 28px;
+    }
+  }
+
+  @media (max-width: 749px) {
+    #cf-{{ section_id }} {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    #cf-{{ section_id }} .cf__row {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    #cf-{{ section_id }} .cf__panel-inner,
+    #cf-{{ section_id }} .cf__form-wrap {
+      padding: 30px 22px;
+    }
+
+    #cf-{{ section_id }} .cf__submit {
+      align-self: stretch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cf-{{ section_id }} [data-reveal],
+    #cf-{{ section_id }} .cf__contact-item,
+    #cf-{{ section_id }} .cf__whatsapp,
+    #cf-{{ section_id }} .cf__submit,
+    #cf-{{ section_id }} .cf__submit-icon,
+    #cf-{{ section_id }} .cf__field label {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('cf-{{ section_id }}');
+    if (!section) return;
+
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+    if (revealTargets.length) {
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        revealTargets.forEach(function (el) { observer.observe(el); });
+      } else {
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+    }
+
+    /* Brief loading state on the submit button - Shopify's contact form
+       does a full page reload on submit, so this is only visible for the
+       moment before navigation, but it beats the button looking inert. */
+    var form = section.querySelector('.cf__form');
+    var submitBtn = section.querySelector('[data-cf-submit]');
+    if (form && submitBtn) {
+      form.addEventListener('submit', function () {
+        if (typeof form.reportValidity === 'function' && !form.reportValidity()) return;
+        submitBtn.classList.add('is-loading');
+      });
+    }
+
+    /* Scroll a posted success/error notice into view and focus it, since
+       the page reloads at the top of this section on submit otherwise
+       giving no visual confirmation on longer pages. */
+    var notice = section.querySelector('[data-cf-notice]');
+    if (notice) {
+      notice.focus({ preventScroll: true });
+      notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Contact - Form",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Info panel" },
+    { "type": "text", "id": "info_eyebrow", "label": "Eyebrow", "default": "Contact Info" },
+    { "type": "text", "id": "info_heading", "label": "Heading", "default": "Let's Talk Health" },
+    { "type": "textarea", "id": "info_text", "label": "Description", "default": "Drop by, call, or message us - our pharmacists are happy to help with anything from order questions to product advice." },
+    { "type": "text", "id": "watermark", "label": "Background watermark word", "default": "TALK" },
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "+91 98765 43210" },
+    { "type": "text", "id": "email", "label": "Email address", "default": "care@srisaipharmacy.com" },
+    { "type": "text", "id": "address", "label": "Store address", "default": "12 Gandhi Road, Chennai, Tamil Nadu 600001" },
+    { "type": "url", "id": "map_link", "label": "Map link", "info": "Opens when the address is clicked (e.g. a Google Maps link)." },
+    { "type": "text", "id": "hours", "label": "Hours", "default": "Open 8 AM - 10 PM, all days" },
+    { "type": "text", "id": "whatsapp_text", "label": "WhatsApp button text", "default": "Chat On WhatsApp" },
+    { "type": "url", "id": "whatsapp_url", "label": "WhatsApp link" },
+    { "type": "text", "id": "map_embed_url", "label": "Map embed URL", "info": "Optional. Paste a Google Maps \"Embed a map\" iframe src URL to show a map below the contact details." },
+
+    { "type": "header", "content": "Form" },
+    { "type": "text", "id": "form_eyebrow", "label": "Eyebrow", "default": "Send A Message" },
+    { "type": "text", "id": "form_heading", "label": "Heading", "default": "We'd Love To Hear From You" },
+    { "type": "textarea", "id": "form_text", "label": "Description", "default": "Fill in the form and our team will get back to you within one business day." },
+    { "type": "text", "id": "submit_text", "label": "Submit button text", "default": "Send Message" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Thanks - your message is in. We'll get back to you shortly." },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Section background", "default": "#FFFFFF" },
+    { "type": "color", "id": "panel_color", "label": "Info panel background", "default": "#16311B" },
+    { "type": "color", "id": "panel_text_color", "label": "Info panel text", "default": "#FFFFFF" },
+    { "type": "color", "id": "text_color", "label": "Form text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#6B6B6B" },
+    { "type": "color", "id": "accent_color", "label": "Accent (focus ring, links)", "default": "#2E7D32" },
+    { "type": "color", "id": "cta_color", "label": "CTA (submit button, icons)", "default": "#F58220" },
+    { "type": "color", "id": "border_color", "label": "Input border", "default": "#ECECEC" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 }
+  ],
+  "presets": [
+    { "name": "Contact - Form" }
+  ]
+}
+{% endschema %}

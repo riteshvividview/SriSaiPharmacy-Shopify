@@ -227,7 +227,7 @@
           "type": "simple_link",
           "settings": {
             "label": "Contact",
-            "url": "/pages/contact"
+            "url": "/pages/contact?view=contact"
           }
         }
       },

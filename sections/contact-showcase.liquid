@@ -1,0 +1,550 @@
+{%- comment -%}
+  Section: Contact - Showcase
+  Heading + arrow-nav image-card slider (native drag/swipe/trackpad
+  scroll, same technique as 1st-featured-list.liquid) with a CTA button
+  below. Generic enough for "Meet the Team", "Visit Our Store" or any
+  other photo set - content is fully block-driven.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign cards = section.blocks
+  assign cards_count = cards.size
+-%}
+
+<section
+  class="cs"
+  id="cs-{{ section_id }}"
+  data-cs
+  data-desktop-visible="{{ s.desktop_visible | default: 4 }}"
+  data-tablet-visible="{{ s.tablet_visible | default: 2.2 }}"
+  data-mobile-visible="{{ s.mobile_visible | default: 1.3 }}"
+  style="
+    --cs-bg: {{ s.background_color | default: '#F7F5F0' }};
+    --cs-text: {{ s.text_color | default: '#141414' }};
+    --cs-muted: {{ s.muted_color | default: '#6B6B6B' }};
+    --cs-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --cs-cta: {{ s.cta_color | default: '#F58220' }};
+    --cs-card-gap: {{ s.card_gap | default: 20 }}px;
+    --cs-padding-top: {{ s.padding_top | default: 90 }}px;
+    --cs-padding-bottom: {{ s.padding_bottom | default: 90 }}px;
+  "
+>
+  <div class="cs__container">
+    <div class="cs__header">
+      {%- if s.eyebrow != blank -%}<p class="cs__eyebrow" data-reveal>{{ s.eyebrow }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="cs__heading" data-reveal>{{ s.heading }}</h2>{%- endif -%}
+      {%- if s.subheading != blank -%}<p class="cs__subheading" data-reveal>{{ s.subheading }}</p>{%- endif -%}
+    </div>
+
+    {%- if cards_count > 0 -%}
+      <div class="cs__slider">
+        <div class="cs__track" data-track tabindex="0" role="region" aria-label="{{ s.heading | escape }}">
+          {%- for card in cards -%}
+            {%- assign cs = card.settings -%}
+            <div class="cs__card" data-card {{ card.shopify_attributes }}>
+              <a href="{{ cs.link | default: '#' }}" class="cs__card-link" aria-label="{{ cs.name | escape }}">
+                <span class="cs__card-image">
+                  {%- if cs.image != blank -%}
+                    <img
+                      src="{{ cs.image | image_url: width: 500 }}"
+                      srcset="{{ cs.image | image_url: width: 300 }} 300w, {{ cs.image | image_url: width: 500 }} 500w, {{ cs.image | image_url: width: 700 }} 700w"
+                      sizes="(max-width: 749px) 240px, 280px"
+                      alt="{{ cs.image.alt | default: cs.name | escape }}"
+                      width="{{ cs.image.width }}"
+                      height="{{ cs.image.height }}"
+                      loading="lazy"
+                    >
+                  {%- else -%}
+                    <span class="cs__card-placeholder" aria-hidden="true">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    </span>
+                  {%- endif -%}
+                  {%- if cs.name != blank or cs.caption != blank -%}
+                    <span class="cs__card-caption">
+                      {%- if cs.name != blank -%}<span class="cs__card-name">{{ cs.name }}</span>{%- endif -%}
+                      {%- if cs.caption != blank -%}<span class="cs__card-role">{{ cs.caption }}</span>{%- endif -%}
+                    </span>
+                  {%- endif -%}
+                </span>
+              </a>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="cs__footer">
+      {%- if cards_count > 1 -%}
+        <button type="button" class="cs__arrow cs__arrow--prev" data-prev aria-label="Previous">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      {%- endif -%}
+
+      {%- if s.button_text != blank -%}
+        <a href="{{ s.button_url | default: '#' }}" class="cs__cta">{{ s.button_text }}</a>
+      {%- endif -%}
+
+      {%- if cards_count > 1 -%}
+        <button type="button" class="cs__arrow cs__arrow--next" data-next aria-label="Next">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #cs-{{ section_id }} {
+    position: relative;
+    background: var(--cs-bg);
+    color: var(--cs-text);
+    font-family: 'Poppins', sans-serif;
+    padding: var(--cs-padding-top) 20px var(--cs-padding-bottom);
+    overflow: hidden;
+  }
+
+  #cs-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #cs-{{ section_id }} .cs__container {
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  #cs-{{ section_id }} .cs__header {
+    max-width: 620px;
+    margin: 0 auto 44px;
+    text-align: center;
+  }
+
+  #cs-{{ section_id }} [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cs-{{ section_id }} [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #cs-{{ section_id }} .cs__header [data-reveal]:nth-child(2) { transition-delay: 0.08s; }
+  #cs-{{ section_id }} .cs__header [data-reveal]:nth-child(3) { transition-delay: 0.16s; }
+
+  #cs-{{ section_id }} .cs__eyebrow {
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cs-accent);
+  }
+
+  #cs-{{ section_id }} .cs__heading {
+    margin: 0 0 12px;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  #cs-{{ section_id }} .cs__subheading {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--cs-muted);
+  }
+
+  /* ---- Slider (drag/swipe/trackpad, same pattern as 1st-featured-list) ---- */
+  #cs-{{ section_id }} .cs__slider {
+    min-width: 0;
+  }
+
+  #cs-{{ section_id }} .cs__track {
+    display: flex;
+    gap: var(--cs-card-gap);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    padding: 6px 4px 16px;
+    margin: -6px -4px -16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+  }
+
+  #cs-{{ section_id }} .cs__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  #cs-{{ section_id }} .cs__track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  #cs-{{ section_id }} .cs__card {
+    position: relative;
+    flex: 0 0 var(--cs-card-w, 260px);
+    scroll-snap-align: start;
+  }
+
+  #cs-{{ section_id }} .cs__card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #cs-{{ section_id }} .cs__card-image {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #eceee9;
+    box-shadow: 0 16px 34px rgba(20, 20, 20, 0.1);
+  }
+
+  #cs-{{ section_id }} .cs__card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cs-{{ section_id }} .cs__card:hover .cs__card-image img {
+    transform: scale(1.06);
+  }
+
+  #cs-{{ section_id }} .cs__card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cs-accent);
+    opacity: 0.5;
+  }
+
+  #cs-{{ section_id }} .cs__card-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 28px 16px 16px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.6));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #cs-{{ section_id }} .cs__card-name {
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+
+  #cs-{{ section_id }} .cs__card-role {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* ---- Footer: arrows + CTA ---- */
+  #cs-{{ section_id }} .cs__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 40px;
+  }
+
+  #cs-{{ section_id }} .cs__arrow {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1.5px solid var(--cs-text);
+    border-radius: 10px;
+    color: var(--cs-text);
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    padding: 0;
+  }
+
+  #cs-{{ section_id }} .cs__arrow:hover,
+  #cs-{{ section_id }} .cs__arrow:focus-visible {
+    background: var(--cs-accent);
+    border-color: var(--cs-accent);
+    color: #fff;
+    outline: none;
+  }
+
+  #cs-{{ section_id }} .cs__arrow[disabled] {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  #cs-{{ section_id }} .cs__cta {
+    display: inline-flex;
+    align-items: center;
+    background: var(--cs-cta);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 999px;
+    transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.25s ease;
+  }
+
+  #cs-{{ section_id }} .cs__cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 749px) {
+    #cs-{{ section_id }} .cs__footer {
+      gap: 12px;
+    }
+
+    #cs-{{ section_id }} .cs__arrow {
+      width: 38px;
+      height: 38px;
+    }
+
+    #cs-{{ section_id }} .cs__cta {
+      padding: 13px 22px;
+      font-size: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cs-{{ section_id }} [data-reveal],
+    #cs-{{ section_id }} .cs__card-image img,
+    #cs-{{ section_id }} .cs__cta {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('cs-{{ section_id }}');
+    if (!section) return;
+
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+    if (revealTargets.length) {
+      if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+        revealTargets.forEach(function (el) { revealObserver.observe(el); });
+      } else {
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+    }
+
+    var track = section.querySelector('[data-track]');
+    var cards = Array.prototype.slice.call(section.querySelectorAll('[data-card]'));
+    var prevBtn = section.querySelector('[data-prev]');
+    var nextBtn = section.querySelector('[data-next]');
+
+    if (!track || !cards.length) return;
+
+    function readSettings() {
+      return {
+        desktopVisible: parseFloat(section.getAttribute('data-desktop-visible')) || 4,
+        tabletVisible: parseFloat(section.getAttribute('data-tablet-visible')) || 2.2,
+        mobileVisible: parseFloat(section.getAttribute('data-mobile-visible')) || 1.3,
+        gap: parseFloat(getComputedStyle(section).getPropertyValue('--cs-card-gap')) || 20
+      };
+    }
+
+    function updateCardWidth() {
+      var settings = readSettings();
+      var w = window.innerWidth;
+      var visible = w <= 749 ? settings.mobileVisible : w <= 999 ? settings.tabletVisible : settings.desktopVisible;
+      var viewportWidth = track.clientWidth;
+      var width = (viewportWidth - settings.gap * (visible - 1)) / visible;
+      width = Math.max(140, width);
+      section.style.setProperty('--cs-card-w', width.toFixed(2) + 'px');
+    }
+
+    function stepSize() {
+      var cardRect = cards[0].getBoundingClientRect();
+      var gap = cards.length > 1 ? cards[1].getBoundingClientRect().left - cardRect.right : 0;
+      return cardRect.width + Math.max(gap, 0);
+    }
+
+    function updateArrows() {
+      if (!prevBtn || !nextBtn) return;
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      prevBtn.disabled = track.scrollLeft <= 1;
+      nextBtn.disabled = track.scrollLeft >= maxScroll - 1;
+    }
+
+    var resizeRaf = null;
+    function handleResize() {
+      if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+      resizeRaf = window.requestAnimationFrame(function () {
+        updateCardWidth();
+        updateArrows();
+      });
+    }
+
+    var scrollTicking = false;
+    track.addEventListener(
+      'scroll',
+      function () {
+        if (!scrollTicking) {
+          window.requestAnimationFrame(function () {
+            updateArrows();
+            scrollTicking = false;
+          });
+          scrollTicking = true;
+        }
+      },
+      { passive: true }
+    );
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('load', handleResize);
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        track.scrollBy({ left: -stepSize(), behavior: 'smooth' });
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        track.scrollBy({ left: stepSize(), behavior: 'smooth' });
+      });
+    }
+
+    var isDragging = false;
+    var dragMoved = false;
+    var startX = 0;
+    var startScrollLeft = 0;
+
+    track.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      isDragging = true;
+      dragMoved = false;
+      startX = e.clientX;
+      startScrollLeft = track.scrollLeft;
+      track.classList.add('is-dragging');
+    });
+
+    window.addEventListener('pointermove', function (e) {
+      if (!isDragging) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) dragMoved = true;
+      track.scrollLeft = startScrollLeft - dx;
+    });
+
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      track.classList.remove('is-dragging');
+    }
+
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    track.addEventListener(
+      'click',
+      function (e) {
+        if (dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        dragMoved = false;
+      },
+      true
+    );
+
+    updateCardWidth();
+    updateArrows();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Contact - Showcase",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "General" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Proven Trust" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Meet Our Pharmacists" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Licensed, experienced, and always happy to talk through a question before you buy." },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "desktop_visible", "label": "Cards visible (desktop)", "min": 2, "max": 6, "step": 0.1, "default": 4 },
+    { "type": "range", "id": "tablet_visible", "label": "Cards visible (tablet)", "min": 1, "max": 4, "step": 0.1, "default": 2.2 },
+    { "type": "range", "id": "mobile_visible", "label": "Cards visible (mobile)", "min": 1, "max": 3, "step": 0.1, "default": 1.3 },
+    { "type": "range", "id": "card_gap", "label": "Gap between cards", "min": 8, "max": 40, "step": 2, "unit": "px", "default": 20 },
+
+    { "type": "header", "content": "Button" },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Explore Our Products" },
+    { "type": "url", "id": "button_url", "label": "Button link" },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#F7F5F0" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#6B6B6B" },
+    { "type": "color", "id": "accent_color", "label": "Accent (arrows hover)", "default": "#2E7D32" },
+    { "type": "color", "id": "cta_color", "label": "CTA button", "default": "#F58220" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Team Member" },
+        { "type": "text", "id": "caption", "label": "Role / caption", "default": "Pharmacist" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact - Showcase",
+      "blocks": [
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" }
+      ]
+    }
+  ]
+}
+{% endschema %}
