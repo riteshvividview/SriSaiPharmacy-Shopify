@@ -546,16 +546,16 @@
     color: #fff;
   }
 
-  /* Intro panel content enters the same way the tiles do (blur -> sharp,
-     slide up, staggered) so both sides of the dropdown feel like one
-     coordinated reveal rather than the tiles animating alone. */
+  /* Intro panel content enters with a fade + slide-up + gentle scale
+     (deliberately not the tiles' blur-in - a plainer, softer reveal for
+     this side), staggered so eyebrow/heading/text settle in one after
+     another. */
   #ssh-{{ section_id }} .ssh__mega-eyebrow,
   #ssh-{{ section_id }} .ssh__mega-heading,
   #ssh-{{ section_id }} .ssh__mega-text {
     opacity: 0;
-    filter: blur(6px);
-    transform: translateY(14px);
-    transition: opacity 0.45s ease, filter 0.45s ease, transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transform: translateY(14px) scale(0.96);
+    transition: opacity 0.45s ease, transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-eyebrow,
@@ -565,8 +565,7 @@
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-text,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-text {
     opacity: 1;
-    filter: blur(0);
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 
   #ssh-{{ section_id }} .ssh__mega-eyebrow {
@@ -599,8 +598,8 @@
   }
 
   /* The CTA has its own hover-lift (translateY) alongside the entrance
-     slide, so - same as the tiles - the two offsets are composed via
-     custom properties instead of one rule overriding the other. */
+     slide/scale, so - same idea as the tiles - the offsets are composed
+     via custom properties instead of one rule overriding the other. */
   #ssh-{{ section_id }} .ssh__mega-cta {
     display: inline-flex;
     align-items: center;
@@ -613,10 +612,10 @@
     border-radius: 999px;
     --cta-enter-y: 14px;
     --cta-hover-y: 0px;
+    --cta-enter-scale: 0.96;
     opacity: 0;
-    filter: blur(6px);
-    transform: translateY(calc(var(--cta-enter-y) + var(--cta-hover-y)));
-    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.45s ease, filter 0.45s ease;
+    transform: translateY(calc(var(--cta-enter-y) + var(--cta-hover-y))) scale(var(--cta-enter-scale));
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.45s ease;
     transition-delay: 0.18s;
   }
 
@@ -628,8 +627,8 @@
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-cta,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-cta {
     --cta-enter-y: 0px;
+    --cta-enter-scale: 1;
     opacity: 1;
-    filter: blur(0);
   }
 
   #ssh-{{ section_id }} .ssh__mega-cta svg {
