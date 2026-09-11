@@ -70,10 +70,6 @@
       </div>
     {%- endif -%}
   </div>
-
-  <div class="ch__scroll-cue" aria-hidden="true">
-    <svg width="18" height="28" viewBox="0 0 18 28" fill="none"><rect x="1" y="1" width="16" height="26" rx="8" stroke="currentColor" stroke-width="1.4"/><circle class="ch__scroll-dot" cx="9" cy="8" r="2.2" fill="currentColor"/></svg>
-  </div>
 </section>
 
 {%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
@@ -212,33 +208,6 @@
     background: rgba(255, 255, 255, 0.22);
   }
 
-  #ch-{{ section_id }} .ch__scroll-cue {
-    position: absolute;
-    left: 50%;
-    bottom: 22px;
-    z-index: 1;
-    transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.75);
-    animation: ch-bob 2.2s ease-in-out infinite;
-  }
-
-  #ch-{{ section_id }} .ch__scroll-dot {
-    animation: ch-scroll-dot 2.2s ease-in-out infinite;
-    transform-origin: 9px 8px;
-  }
-
-  @keyframes ch-bob {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(6px); }
-  }
-
-  @keyframes ch-scroll-dot {
-    0% { opacity: 1; transform: translateY(0); }
-    60% { opacity: 0; transform: translateY(10px); }
-    61% { opacity: 0; transform: translateY(0); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
   @media (max-width: 749px) {
     #ch-{{ section_id }} {
       min-height: 360px;
@@ -252,17 +221,11 @@
       padding: 12px 22px;
       font-size: 14px;
     }
-
-    #ch-{{ section_id }} .ch__scroll-cue {
-      display: none;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     #ch-{{ section_id }} [data-reveal],
-    #ch-{{ section_id }} .ch__btn,
-    #ch-{{ section_id }} .ch__scroll-cue,
-    #ch-{{ section_id }} .ch__scroll-dot {
+    #ch-{{ section_id }} .ch__btn {
       transition: none !important;
       animation: none !important;
       transform: none !important;
