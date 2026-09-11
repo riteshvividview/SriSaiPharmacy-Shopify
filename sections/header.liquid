@@ -466,7 +466,11 @@
     top: var(--ssh-mega-top, 76px);
     left: 0;
     right: 0;
-    padding-top: 14px;
+    /* The visible gap between the bar and the panel - this whole hit-area
+       (including the padding) becomes pointer-events:auto on hover/focus,
+       so the mouse can travel straight down through it without the
+       dropdown closing. */
+    padding-top: 22px;
     pointer-events: none;
     z-index: 20;
   }
@@ -542,6 +546,29 @@
     color: #fff;
   }
 
+  /* Intro panel content enters the same way the tiles do (blur -> sharp,
+     slide up, staggered) so both sides of the dropdown feel like one
+     coordinated reveal rather than the tiles animating alone. */
+  #ssh-{{ section_id }} .ssh__mega-eyebrow,
+  #ssh-{{ section_id }} .ssh__mega-heading,
+  #ssh-{{ section_id }} .ssh__mega-text {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(14px);
+    transition: opacity 0.45s ease, filter 0.45s ease, transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-eyebrow,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-eyebrow,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-heading,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-heading,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-text,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-text {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
   #ssh-{{ section_id }} .ssh__mega-eyebrow {
     font-size: 11px;
     font-weight: 600;
@@ -549,6 +576,7 @@
     text-transform: uppercase;
     color: var(--ssh-cta);
     margin: 0 0 8px;
+    transition-delay: 0.03s;
   }
 
   #ssh-{{ section_id }} .ssh__mega-heading {
@@ -559,6 +587,7 @@
     text-transform: uppercase;
     line-height: 1.15;
     margin: 0 0 8px;
+    transition-delay: 0.08s;
   }
 
   #ssh-{{ section_id }} .ssh__mega-text {
@@ -566,8 +595,12 @@
     line-height: 1.55;
     color: rgba(255, 255, 255, 0.85);
     margin: 0 0 16px;
+    transition-delay: 0.13s;
   }
 
+  /* The CTA has its own hover-lift (translateY) alongside the entrance
+     slide, so - same as the tiles - the two offsets are composed via
+     custom properties instead of one rule overriding the other. */
   #ssh-{{ section_id }} .ssh__mega-cta {
     display: inline-flex;
     align-items: center;
@@ -578,12 +611,25 @@
     background: var(--ssh-cta);
     padding: 9px 14px;
     border-radius: 999px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    --cta-enter-y: 14px;
+    --cta-hover-y: 0px;
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(calc(var(--cta-enter-y) + var(--cta-hover-y)));
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.45s ease, filter 0.45s ease;
+    transition-delay: 0.18s;
   }
 
   #ssh-{{ section_id }} .ssh__mega-cta:hover {
-    transform: translateY(-2px);
+    --cta-hover-y: -2px;
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-cta,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-cta {
+    --cta-enter-y: 0px;
+    opacity: 1;
+    filter: blur(0);
   }
 
   #ssh-{{ section_id }} .ssh__mega-cta svg {
@@ -719,7 +765,7 @@
     position: absolute;
     top: 100%;
     right: 0;
-    padding-top: 14px;
+    padding-top: 22px;
     min-width: 220px;
     pointer-events: none;
     z-index: 20;
@@ -969,6 +1015,17 @@
       opacity: 1;
       filter: none;
       --tile-enter-y: 0px;
+    }
+
+    #ssh-{{ section_id }} .ssh__mega-eyebrow,
+    #ssh-{{ section_id }} .ssh__mega-heading,
+    #ssh-{{ section_id }} .ssh__mega-text,
+    #ssh-{{ section_id }} .ssh__mega-cta {
+      transition: none !important;
+      opacity: 1;
+      filter: none;
+      transform: none !important;
+      --cta-enter-y: 0px;
     }
   }
 </style>
