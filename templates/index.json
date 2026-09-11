@@ -681,6 +681,7 @@
       "type": "featured-product-spotlight",
       "name": "Product Spotlight",
       "settings": {
+        "product": "paurusha-a-ayurvedic-supplements-for-immune-system",
         "eyebrow": "Pure Wellness",
         "heading": "Grab Your Essentials Pack",
         "product_eyebrow_source": "vendor",
