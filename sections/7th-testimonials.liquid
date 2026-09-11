@@ -49,26 +49,36 @@
 
       {%- if review_count > 0 -%}
         <div class="tsm__images" data-tsm-images>
-          {%- for block in reviews -%}
-            {%- assign rs = block.settings -%}
-            <div class="tsm__image-slide{% if forloop.first %} is-active{% endif %}" data-tsm-image-slide data-index="{{ forloop.index0 }}">
-              <span class="tsm__image tsm__image--side" data-tsm-magnetic data-tsm-parallax="18">
+          <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="18">
+            {%- for block in reviews -%}
+              {%- assign rs = block.settings -%}
+              <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_1 != blank -%}
                   <img src="{{ rs.image_1 | image_url: width: 400 }}" alt="{{ rs.image_1.alt | escape }}" width="{{ rs.image_1.width }}" height="{{ rs.image_1.height }}" loading="lazy">
                 {%- endif -%}
               </span>
-              <span class="tsm__image tsm__image--center" data-tsm-magnetic data-tsm-parallax="32">
+            {%- endfor -%}
+          </span>
+          <span class="tsm__slot tsm__slot--center" data-tsm-slot="1" data-tsm-magnetic data-tsm-parallax="32">
+            {%- for block in reviews -%}
+              {%- assign rs = block.settings -%}
+              <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_2 != blank -%}
                   <img src="{{ rs.image_2 | image_url: width: 560 }}" alt="{{ rs.image_2.alt | escape }}" width="{{ rs.image_2.width }}" height="{{ rs.image_2.height }}" loading="lazy">
                 {%- endif -%}
               </span>
-              <span class="tsm__image tsm__image--side" data-tsm-magnetic data-tsm-parallax="18">
+            {%- endfor -%}
+          </span>
+          <span class="tsm__slot tsm__slot--side" data-tsm-slot="2" data-tsm-magnetic data-tsm-parallax="18">
+            {%- for block in reviews -%}
+              {%- assign rs = block.settings -%}
+              <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_3 != blank -%}
                   <img src="{{ rs.image_3 | image_url: width: 400 }}" alt="{{ rs.image_3.alt | escape }}" width="{{ rs.image_3.width }}" height="{{ rs.image_3.height }}" loading="lazy">
                 {%- endif -%}
               </span>
-            </div>
-          {%- endfor -%}
+            {%- endfor -%}
+          </span>
         </div>
 
         {%- if review_count > 1 -%}
@@ -106,7 +116,11 @@
 
       {%- if s.view_all_text != blank -%}
         <div class="tsm__view-all-wrap">
-          <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all" data-tsm-magnetic>{{ s.view_all_text }}</a>
+          <a href="{{ s.view_all_link | default: '#' }}" class="tsm__view-all" data-tsm-magnetic>
+            <span class="tsm__view-all-ring" aria-hidden="true"></span>
+            <span class="tsm__view-all-text">{{ s.view_all_text }}</span>
+            <svg class="tsm__view-all-arrow" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
       {%- endif -%}
     </div>
@@ -161,28 +175,55 @@
   }
 
   /* ---- Image row ----
-     A 3D perspective "wheel" transition rather than a flat crossfade:
-     the outgoing slide rotates + recedes off to one side while the
-     incoming slide rotates in from the other, both pushed back in Z
-     and scaled down along the way - clicking Next repeatedly always
-     rotates the same direction, reading as one continuous circular
-     motion rather than a random swap. The overshoot easing
-     (cubic-bezier back-out) gives the requested springy "jerk" snap
-     as each slide settles into place. */
+     Three fixed slots (left / center / right) each hold a stack of
+     every review's own image for that position; only the current
+     review's image is active within each slot. Slots are the stable
+     hover/parallax targets, while the images inside them are what
+     actually crossfades - this lets each slot's card animate on its
+     own schedule (JS staggers the three slots' transitions slightly)
+     instead of all three moving together as one locked group. Each
+     card gets a 3D perspective "wheel" pose: the outgoing card
+     rotates (rotateY) and recedes in Z off to one side while the
+     incoming card rotates in from the other - repeated Next clicks
+     always rotate the same direction, reading as one continuous
+     circular motion. The overshoot easing (cubic-bezier back-out)
+     gives the requested springy "jerk" snap as each card settles. */
   #tsm-{{ section_id }} .tsm__images {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 3vw, 40px);
     height: var(--tsm-center-size);
     margin-bottom: 26px;
     perspective: 1400px;
   }
 
-  #tsm-{{ section_id }} .tsm__image-slide {
+  #tsm-{{ section_id }} .tsm__slot {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--tsm-image-bg);
+    transform-style: preserve-3d;
+    will-change: transform;
+    cursor: default;
+  }
+
+  #tsm-{{ section_id }} .tsm__slot--side {
+    width: var(--tsm-side-size);
+    align-self: center;
+  }
+
+  #tsm-{{ section_id }} .tsm__slot--center {
+    width: var(--tsm-center-size);
+  }
+
+  #tsm-{{ section_id }} .tsm__slot-image {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(16px, 3vw, 40px);
     opacity: 0;
     pointer-events: none;
     transform-style: preserve-3d;
@@ -190,54 +231,34 @@
     transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
   }
 
-  #tsm-{{ section_id }} .tsm__image-slide.no-transition {
+  #tsm-{{ section_id }} .tsm__slot-image.no-transition {
     transition: none !important;
   }
 
-  #tsm-{{ section_id }} .tsm__image-slide.is-active {
+  #tsm-{{ section_id }} .tsm__slot-image.is-active {
     opacity: 1;
     pointer-events: auto;
     transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
   }
 
-  /* RIGHT pose: the incoming slide's start point on Next (new content
-     rotates in from the right), and the outgoing slide's end point on
+  /* RIGHT pose: the incoming card's start point on Next (new content
+     rotates in from the right), and the outgoing card's end point on
      Prev (old content rotates away to the right). */
-  #tsm-{{ section_id }} .tsm__image-slide.is-enter-from-right,
-  #tsm-{{ section_id }} .tsm__image-slide.is-exit-to-right {
+  #tsm-{{ section_id }} .tsm__slot-image.is-enter-from-right,
+  #tsm-{{ section_id }} .tsm__slot-image.is-exit-to-right {
     opacity: 0;
-    transform: translate3d(42%, 0, -240px) rotateY(-34deg) scale(0.78);
+    transform: translate3d(60%, 0, -240px) rotateY(-40deg) scale(0.78);
   }
 
-  /* LEFT pose: the outgoing slide's end point on Next, and the
-     incoming slide's start point on Prev. */
-  #tsm-{{ section_id }} .tsm__image-slide.is-enter-from-left,
-  #tsm-{{ section_id }} .tsm__image-slide.is-exit-to-left {
+  /* LEFT pose: the outgoing card's end point on Next, and the
+     incoming card's start point on Prev. */
+  #tsm-{{ section_id }} .tsm__slot-image.is-enter-from-left,
+  #tsm-{{ section_id }} .tsm__slot-image.is-exit-to-left {
     opacity: 0;
-    transform: translate3d(-42%, 0, -240px) rotateY(34deg) scale(0.78);
+    transform: translate3d(-60%, 0, -240px) rotateY(40deg) scale(0.78);
   }
 
-  #tsm-{{ section_id }} .tsm__image {
-    display: block;
-    flex-shrink: 0;
-    aspect-ratio: 1 / 1;
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--tsm-image-bg);
-    will-change: transform;
-    cursor: default;
-  }
-
-  #tsm-{{ section_id }} .tsm__image--side {
-    width: var(--tsm-side-size);
-    align-self: center;
-  }
-
-  #tsm-{{ section_id }} .tsm__image--center {
-    width: var(--tsm-center-size);
-  }
-
-  #tsm-{{ section_id }} .tsm__image img {
+  #tsm-{{ section_id }} .tsm__slot-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -396,6 +417,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     overflow: hidden;
     isolation: isolate;
     font-weight: 600;
@@ -403,9 +425,10 @@
     color: var(--tsm-text);
     text-decoration: none;
     border: 1.5px solid var(--tsm-border);
-    padding: 13px 32px;
+    padding: 13px 30px;
     border-radius: 999px;
-    transition: border-color 0.3s ease, color 0.4s ease 0.05s, transform 0.15s ease;
+    box-shadow: 0 10px 26px rgba(46, 125, 50, 0.14);
+    transition: border-color 0.3s ease, color 0.4s ease 0.05s, box-shadow 0.3s ease;
     will-change: transform;
   }
 
@@ -420,17 +443,41 @@
     transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
+  /* Pulsing ring: a quiet, continuous "this is clickable" cue that
+     reads even in a still screenshot, not just on hover. */
+  #tsm-{{ section_id }} .tsm__view-all-ring {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: 999px;
+    border: 1.5px solid var(--tsm-accent);
+    opacity: 0;
+    animation: tsm-pulse-ring 2.8s ease-out infinite;
+  }
+
+  @keyframes tsm-pulse-ring {
+    0% { transform: scale(1); opacity: 0.45; }
+    75% { transform: scale(1.16); opacity: 0; }
+    100% { transform: scale(1.16); opacity: 0; }
+  }
+
+  #tsm-{{ section_id }} .tsm__view-all-arrow {
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   #tsm-{{ section_id }} .tsm__view-all:hover {
     border-color: var(--tsm-accent);
     color: #fff;
+    box-shadow: 0 16px 34px rgba(46, 125, 50, 0.28);
   }
 
   #tsm-{{ section_id }} .tsm__view-all:hover::before {
     transform: scale(1);
   }
 
-  #tsm-{{ section_id }} .tsm__view-all:active {
-    transform: scale(0.95);
+  #tsm-{{ section_id }} .tsm__view-all:hover .tsm__view-all-arrow {
+    transform: translateX(5px);
   }
 
   /* ---- Mobile ---- */
@@ -442,19 +489,15 @@
 
     #tsm-{{ section_id }} .tsm__images {
       height: auto;
-    }
-
-    #tsm-{{ section_id }} .tsm__image-slide {
-      position: relative;
       gap: 10px;
     }
 
-    #tsm-{{ section_id }} .tsm__image--side {
+    #tsm-{{ section_id }} .tsm__slot--side {
       width: 26vw;
       max-width: 110px;
     }
 
-    #tsm-{{ section_id }} .tsm__image--center {
+    #tsm-{{ section_id }} .tsm__slot--center {
       width: 38vw;
       max-width: 160px;
     }
@@ -468,7 +511,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     #tsm-{{ section_id }} .tsm__panel,
-    #tsm-{{ section_id }} .tsm__image,
+    #tsm-{{ section_id }} .tsm__slot-image,
     #tsm-{{ section_id }} .tsm__nav-btn {
       transition: none !important;
       transform: none !important;
@@ -505,46 +548,66 @@
       }
     }
 
-    /* ---- Slide cycling (images + quotes stay in sync) ----
-       Both the 3D image wheel and the quote crossfade use the same
-       enter/exit class pair per direction: the incoming element is
-       snapped (no-transition) to its off-screen start pose, forced to
-       reflow so the browser commits that as the "previous" style, then
-       the start-pose class is swapped for `is-active` in the same tick
-       - the still-active transition then animates from the committed
+    /* ---- Slide cycling ----
+       Each of the 3 image slots (left/center/right) holds its own
+       stack of per-review cards and transitions independently, with a
+       small stagger between slots so they visibly move one after
+       another rather than as one locked group. Every card transition
+       (per slot, plus the quote block) uses the same enter/exit class
+       pair per direction: the incoming element is snapped
+       (no-transition) to its off-screen start pose, forced to reflow
+       so the browser commits that as the "previous" style, then the
+       start-pose class is swapped for `is-active` in the same tick -
+       the still-active transition then animates from the committed
        start pose to the identity pose. The outgoing element already
        has a transition, so simply swapping `is-active` for its exit
        pose animates it away normally. */
-    var imagesWrap = section.querySelector('[data-tsm-images]');
     var quotesWrap = section.querySelector('[data-tsm-quotes]');
-    var imageSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-image-slide]'));
+    var slots = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-slot]'));
+    var slotImages = slots.map(function (slot) {
+      return Array.prototype.slice.call(slot.querySelectorAll('[data-tsm-slot-image]'));
+    });
     var quoteSlides = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-quote-slide]'));
     var prevBtn = section.querySelector('[data-tsm-prev]');
     var nextBtn = section.querySelector('[data-tsm-next]');
-    var total = imageSlides.length;
+    var total = quoteSlides.length;
     var current = 0;
     var isAnimating = false;
     var TRANSITION_MS = 750;
+    var STAGGER_MS = 110;
+    var SLOT_ORDER = [0, 1, 2]; // left, center, right - the "one after another" order
 
     function setQuotesHeight(index) {
       if (!quotesWrap || !quoteSlides[index]) return;
       quotesWrap.style.height = quoteSlides[index].scrollHeight + 'px';
     }
 
+    function transitionEl(outgoingEl, incomingEl, enterClass, exitClass) {
+      outgoingEl.classList.add(exitClass);
+      outgoingEl.classList.remove('is-active');
+
+      incomingEl.classList.add('no-transition', enterClass);
+      void incomingEl.offsetWidth; // force reflow to commit the start pose
+      incomingEl.classList.remove('no-transition', enterClass);
+      incomingEl.classList.add('is-active');
+
+      window.setTimeout(function () {
+        outgoingEl.classList.remove(exitClass);
+      }, TRANSITION_MS);
+    }
+
     function animateSlide(index, direction) {
-      if (isAnimating || index === current || !imageSlides[index]) return;
+      if (isAnimating || index === current) return;
       isAnimating = true;
 
       var enterClass = direction === 'next' ? 'is-enter-from-right' : 'is-enter-from-left';
       var exitClass = direction === 'next' ? 'is-exit-to-left' : 'is-exit-to-right';
-
-      var outgoingImg = imageSlides[current];
-      var incomingImg = imageSlides[index];
-      var outgoingQuote = quoteSlides[current];
-      var incomingQuote = quoteSlides[index];
+      var fromIndex = current;
 
       if (prefersReducedMotion) {
-        imageSlides.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
+        slotImages.forEach(function (images) {
+          images.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
+        });
         quoteSlides.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
         current = index;
         setQuotesHeight(current);
@@ -553,29 +616,21 @@
       }
 
       setQuotesHeight(index);
+      transitionEl(quoteSlides[fromIndex], quoteSlides[index], enterClass, exitClass);
 
-      [incomingImg, incomingQuote].forEach(function (el) {
-        el.classList.add('no-transition', enterClass);
-      });
-      // Force reflow so the start pose above is committed before we
-      // switch to the animated end pose below.
-      void incomingImg.offsetWidth;
-
-      [incomingImg, incomingQuote].forEach(function (el) {
-        el.classList.remove('no-transition', enterClass);
-        el.classList.add('is-active');
-      });
-      [outgoingImg, outgoingQuote].forEach(function (el) {
-        el.classList.remove('is-active');
-        el.classList.add(exitClass);
+      SLOT_ORDER.forEach(function (slotIndex, i) {
+        var images = slotImages[slotIndex];
+        if (!images || !images[fromIndex] || !images[index]) return;
+        window.setTimeout(function () {
+          transitionEl(images[fromIndex], images[index], enterClass, exitClass);
+        }, i * STAGGER_MS);
       });
 
       current = index;
 
       window.setTimeout(function () {
-        [outgoingImg, outgoingQuote].forEach(function (el) { el.classList.remove(exitClass); });
         isAnimating = false;
-      }, TRANSITION_MS);
+      }, (SLOT_ORDER.length - 1) * STAGGER_MS + TRANSITION_MS);
     }
 
     function goTo(index, direction) {
@@ -593,7 +648,7 @@
     if (prefersReducedMotion) return;
 
     /* ---- Magnetic cursor pull + scroll parallax, combined ----
-       Both effects can land on the same `.tsm__image` elements (magnetic
+       Both effects can land on the same `.tsm__slot` elements (magnetic
        hover pull on X/Y, slow scroll parallax drift on Y), so they share
        one state object and one transform per element instead of each
        independently overwriting `style.transform` - two separate writers
@@ -602,12 +657,12 @@
     var elState = new Map();
 
     magneticEls.forEach(function (el) {
-      elState.set(el, { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, ticking: false });
+      elState.set(el, { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, scale: 1, curScale: 1, ticking: false });
     });
 
     function composeTransform(el) {
       var st = elState.get(el);
-      el.style.transform = 'translate3d(' + st.curMagX.toFixed(2) + 'px, ' + (st.curMagY + st.parY).toFixed(2) + 'px, 0)';
+      el.style.transform = 'translate3d(' + st.curMagX.toFixed(2) + 'px, ' + (st.curMagY + st.parY).toFixed(2) + 'px, 0) scale(' + st.curScale.toFixed(3) + ')';
     }
 
     magneticEls.forEach(function (el) {
@@ -619,8 +674,13 @@
       function render() {
         st.curMagX += (st.magX - st.curMagX) * 0.2;
         st.curMagY += (st.magY - st.curMagY) * 0.2;
+        st.curScale += (st.scale - st.curScale) * 0.25;
         composeTransform(el);
-        if (Math.abs(st.magX - st.curMagX) > 0.1 || Math.abs(st.magY - st.curMagY) > 0.1) {
+        if (
+          Math.abs(st.magX - st.curMagX) > 0.1 ||
+          Math.abs(st.magY - st.curMagY) > 0.1 ||
+          Math.abs(st.scale - st.curScale) > 0.002
+        ) {
           window.requestAnimationFrame(render);
         } else {
           st.ticking = false;
@@ -646,8 +706,20 @@
       el.addEventListener('mouseleave', function () {
         st.magX = 0;
         st.magY = 0;
+        st.scale = 1;
         startRender();
       });
+
+      if (el.tagName === 'A' || el.tagName === 'BUTTON') {
+        el.addEventListener('mousedown', function () {
+          st.scale = 0.94;
+          startRender();
+        });
+        el.addEventListener('mouseup', function () {
+          st.scale = 1;
+          startRender();
+        });
+      }
     });
 
     /* ---- Slow parallax drift on the three images while scrolling ---- */
