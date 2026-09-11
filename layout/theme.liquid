@@ -181,8 +181,25 @@
           function createLenis() {
             var isDesktop = DESKTOP_QUERY.matches;
             var wrapper = isDesktop ? document.querySelector('.page-wrapper') : window;
-            var options = { duration: 1.1, smoothWheel: true, syncTouch: false };
+            var options = {
+              duration: 0.85,
+              // Exponential ease-out (Lenis's own recommended default) -
+              // starts with real velocity immediately instead of the
+              // slow ramp-up feel of a softer curve, which is what was
+              // reading as "scroll happens after a delay".
+              easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+              smoothWheel: true,
+              syncTouch: false,
+            };
             if (wrapper && wrapper !== window) {
+              // .page-wrapper has `scroll-behavior: smooth` in this
+              // theme's own base CSS (assets/base.css). Left in place,
+              // every scrollTop update Lenis makes each frame would
+              // ALSO get the browser's native smooth-scroll easing
+              // layered on top of Lenis's own easing - two animations
+              // chasing each other, which is exactly what shows up as
+              // input lag. Force it off while Lenis owns this element.
+              wrapper.style.scrollBehavior = 'auto';
               options.wrapper = wrapper;
               options.content = wrapper;
             }
@@ -194,6 +211,8 @@
               lenisInstance.destroy();
               lenisInstance = null;
             }
+            var pageWrapper = document.querySelector('.page-wrapper');
+            if (pageWrapper) pageWrapper.style.scrollBehavior = '';
           }
 
           function raf(time) {
