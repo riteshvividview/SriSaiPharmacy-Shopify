@@ -4,13 +4,12 @@
       "type": "collection-banner",
       "name": "Collection Banner",
       "settings": {
-        "enable_pin": true,
-        "pin_duration": 400,
-        "height": 380,
-        "overlay_color": "#0B1F0F",
-        "overlay_opacity": 55,
-        "text_color": "#FFFFFF",
-        "accent_color": "#F58220"
+        "eyebrow": "Collection",
+        "watermark": "",
+        "panel_color": "#16311B",
+        "panel_text_color": "#FFFFFF",
+        "accent_color": "#F58220",
+        "frame_color": "#2E7D32"
       }
     },
     "collection_grid": {

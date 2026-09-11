@@ -96,7 +96,7 @@
             <span>Sort by</span>
             <select name="sort_by" data-cg-auto-submit>
               {%- for option in collection.sort_options -%}
-                <option value="{{ option.value }}" {% if option.value == collection.sort_by or option.value == sort_by %}selected{% endif %}>{{ option.name }}</option>
+                <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
               {%- endfor -%}
             </select>
           </label>
@@ -522,6 +522,17 @@
     z-index: 3;
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -531,6 +542,11 @@
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cg-{{ section_id }} .cg__quick-add svg {
+    display: block;
+    flex-shrink: 0;
   }
 
   #cg-{{ section_id }} .cg__card:hover .cg__quick-add {

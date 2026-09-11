@@ -1,12 +1,13 @@
 {%- comment -%}
   Section: Collection - Banner
   Premium replacement for the default plain collection title/description.
-  Pins in place for a short scroll distance (reusing the same
-  position:sticky-in-a-tall-wrapper technique as
-  2nd-energy-countdown-banner.liquid) while the product grid section
-  right after it scrolls up and covers it - a combined "pin + cover"
-  reveal. Falls back to a normal (non-pinned) banner on mobile and for
-  reduced-motion users.
+  Split layout (colored content panel + framed image) rather than a
+  full-bleed overlay banner, for a different, more editorial feel than
+  the other hero-style banners already on the site. Image drifts with a
+  light parallax and the content panel has a watermark word, both reused
+  from about-story-block.liquid's proven pattern; text reveals in
+  staggered on scroll-into-view. No pin/sticky effect - removed after
+  feedback that it felt janky rather than premium.
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
@@ -14,51 +15,59 @@
 {%- liquid
   assign section_id = section.id
   assign s = section.settings
-  assign overlay_opacity = s.overlay_opacity | default: 55 | divided_by: 100.0
-  assign overlay_color = s.overlay_color | default: '#0B1F0F' | color_modify: 'alpha', overlay_opacity
 -%}
 
 <section
   class="cb"
   id="cb-{{ section_id }}"
   data-cb
-  data-enable-pin="{{ s.enable_pin }}"
-  data-pin-duration="{{ s.pin_duration | default: 400 }}"
   style="
-    --cb-text: {{ s.text_color | default: '#FFFFFF' }};
+    --cb-panel-bg: {{ s.panel_color | default: '#16311B' }};
+    --cb-panel-text: {{ s.panel_text_color | default: '#FFFFFF' }};
     --cb-accent: {{ s.accent_color | default: '#F58220' }};
-    --cb-overlay: {{ overlay_color }};
-    --cb-height: {{ s.height | default: 380 }}px;
+    --cb-frame: {{ s.frame_color | default: '#2E7D32' }};
   "
 >
-  <div class="cb__pin-wrapper" data-pin-wrapper>
-    <div class="cb__pin-inner" data-pin-inner>
-      <div class="cb__media">
-        {%- if collection.image != blank -%}
-          <img
-            src="{{ collection.image | image_url: width: 1800 }}"
-            srcset="{{ collection.image | image_url: width: 800 }} 800w, {{ collection.image | image_url: width: 1400 }} 1400w, {{ collection.image | image_url: width: 1800 }} 1800w"
-            sizes="100vw"
-            alt="{{ collection.image.alt | default: collection.title | escape }}"
-            width="{{ collection.image.width }}"
-            height="{{ collection.image.height }}"
-            loading="eager"
-          >
-        {%- endif -%}
-        <div class="cb__scrim" aria-hidden="true"></div>
-      </div>
-
-      <div class="cb__container">
-        <nav class="cb__breadcrumb" aria-label="Breadcrumb">
+  <div class="cb__container">
+    <div class="cb__panel" data-reveal data-reveal-side="left">
+      <p class="cb__watermark" aria-hidden="true">{{ s.watermark | default: collection.title | truncate: 12, '' }}</p>
+      <div class="cb__panel-inner">
+        <nav class="cb__breadcrumb">
           <a href="{{ routes.root_url }}">Home</a>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{{ collection.title }}</span>
         </nav>
+        <p class="cb__eyebrow">{{ s.eyebrow | default: 'Collection' }}</p>
         <h1 class="cb__heading">{{ collection.title }}</h1>
         {%- if collection.description != blank -%}
           <p class="cb__description">{{ collection.description | strip_html | truncate: 190 }}</p>
         {%- endif -%}
         <p class="cb__count">{{ collection.products_count | default: collection.products.size }} products</p>
+      </div>
+    </div>
+
+    <div class="cb__media" data-reveal data-reveal-side="right">
+      <div class="cb__media-inner">
+        <div class="cb__media-frame" aria-hidden="true"></div>
+        <div class="cb__media-image" data-cb-parallax-wrap>
+          {%- if collection.image != blank -%}
+            <span class="cb__media-image-scroll" data-cb-parallax>
+              <img
+                src="{{ collection.image | image_url: width: 1200 }}"
+                srcset="{{ collection.image | image_url: width: 600 }} 600w, {{ collection.image | image_url: width: 900 }} 900w, {{ collection.image | image_url: width: 1200 }} 1200w"
+                sizes="(max-width: 899px) 100vw, 560px"
+                alt="{{ collection.image.alt | default: collection.title | escape }}"
+                width="{{ collection.image.width }}"
+                height="{{ collection.image.height }}"
+                loading="eager"
+              >
+            </span>
+          {%- else -%}
+            <span class="cb__media-placeholder" aria-hidden="true">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </span>
+          {%- endif -%}
+        </div>
       </div>
     </div>
   </div>
@@ -69,75 +78,89 @@
   #cb-{{ section_id }} {
     position: relative;
     font-family: 'Poppins', sans-serif;
+    padding: 56px 20px;
+    overflow: hidden;
   }
 
   #cb-{{ section_id }} * {
     box-sizing: border-box;
   }
 
-  #cb-{{ section_id }} .cb__pin-wrapper {
-    position: relative;
-  }
-
-  /* Pin state (static/fixed/released-to-bottom-of-wrapper) is applied by
-     JS as an inline style, not CSS `position: sticky` - this theme
-     scrolls `.page-wrapper` (not the document) on desktop with several
-     unstyled wrapper divs between sections and that scroll container, a
-     nesting depth where native sticky's containing-block resolution
-     isn't reliable (same root cause as the header's own pin, see
-     header.liquid). `width` here is a fallback for the JS-driven fixed
-     state, since fixed positioning needs an explicit width once it's
-     out of normal flow. */
-  #cb-{{ section_id }} .cb__pin-inner {
-    position: static;
-    z-index: 10;
-    width: 100%;
-    height: var(--cb-height);
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
-    background: #14210f;
-  }
-
-  #cb-{{ section_id }} .cb__media {
-    position: absolute;
-    inset: 0;
-  }
-
-  #cb-{{ section_id }} .cb__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  #cb-{{ section_id }} .cb__scrim {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), var(--cb-overlay) 85%);
-  }
-
   #cb-{{ section_id }} .cb__container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: stretch;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(20, 20, 20, 0.1);
+  }
+
+  #cb-{{ section_id }} [data-reveal] {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cb-{{ section_id }} [data-reveal-side="left"] {
+    transform: translate3d(-24px, 0, 0);
+  }
+
+  #cb-{{ section_id }} [data-reveal-side="right"] {
+    transform: translate3d(24px, 0, 0);
+  }
+
+  #cb-{{ section_id }} [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ---- Content panel ---- */
+  #cb-{{ section_id }} .cb__panel {
+    position: relative;
+    flex: 0 0 44%;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--cb-panel-bg);
+    color: var(--cb-panel-text);
+    display: flex;
+  }
+
+  #cb-{{ section_id }} .cb__watermark {
+    position: absolute;
+    inset: auto 0 -0.15em -0.05em;
+    z-index: 0;
+    margin: 0;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-size: clamp(60px, 9vw, 120px);
+    line-height: 1;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.06;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #cb-{{ section_id }} .cb__panel-inner {
     position: relative;
     z-index: 1;
-    max-width: 1300px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 32px 40px;
-    color: var(--cb-text);
+    padding: 48px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   #cb-{{ section_id }} .cb__breadcrumb {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0 0 16px;
-    font-size: 12.5px;
-    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 22px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
   }
 
   #cb-{{ section_id }} .cb__breadcrumb a {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
     transition: color 0.2s ease;
   }
@@ -146,55 +169,132 @@
     color: #fff;
   }
 
+  #cb-{{ section_id }} .cb__eyebrow {
+    margin: 0 0 10px;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--cb-accent);
+  }
+
   #cb-{{ section_id }} .cb__heading {
-    margin: 0 0 12px;
+    margin: 0 0 16px;
     font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-weight: 400;
-    font-size: clamp(38px, 6vw, 64px);
+    font-size: clamp(34px, 4.5vw, 52px);
     line-height: 1.02;
     letter-spacing: 0.4px;
     text-transform: uppercase;
   }
 
-  /* Plain text, truncated in Liquid to a fixed character count (see
-     markup above) - a long collection description must never be able
-     to push the title out of the fixed-height banner above it. The
-     line-clamp here is just a safety net for edge cases (very long
-     unbroken words, narrow viewports). */
   #cb-{{ section_id }} .cb__description {
-    max-width: 640px;
-    margin: 0;
+    max-width: 440px;
+    margin: 0 0 22px;
     font-size: 14.5px;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.85);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   #cb-{{ section_id }} .cb__count {
-    margin: 14px 0 0;
-    font-size: 12.5px;
+    display: inline-flex;
+    align-self: flex-start;
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.4px;
     text-transform: uppercase;
-    color: var(--cb-accent);
+  }
+
+  /* ---- Media ---- */
+  #cb-{{ section_id }} .cb__media {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #cb-{{ section_id }} .cb__media-inner {
+    position: relative;
+    height: 100%;
+  }
+
+  #cb-{{ section_id }} .cb__media-frame {
+    position: absolute;
+    inset: 20px 20px -20px -20px;
+    background: var(--cb-frame);
+    opacity: 0.16;
+    z-index: 0;
+  }
+
+  #cb-{{ section_id }} .cb__media-image {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    min-height: 320px;
+    overflow: hidden;
+    background: #f0f3f0;
+  }
+
+  #cb-{{ section_id }} .cb__media-image-scroll {
+    position: absolute;
+    inset: -14% 0;
+    height: 128%;
+    display: block;
+  }
+
+  #cb-{{ section_id }} .cb__media-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #cb-{{ section_id }} .cb__media-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--cb-frame);
+    opacity: 0.5;
+  }
+
+  /* ---- Tablet / Mobile ---- */
+  @media (max-width: 899px) {
+    #cb-{{ section_id }} .cb__container {
+      flex-direction: column;
+      border-radius: 22px;
+    }
+
+    #cb-{{ section_id }} .cb__panel {
+      flex: 0 0 auto;
+    }
+
+    #cb-{{ section_id }} .cb__media-image {
+      min-height: 260px;
+    }
+
+    #cb-{{ section_id }} .cb__media-frame {
+      inset: 14px 14px -14px -14px;
+    }
   }
 
   @media (max-width: 749px) {
-    #cb-{{ section_id }} .cb__pin-inner {
-      height: min(var(--cb-height), 320px);
+    #cb-{{ section_id }} {
+      padding: 40px 16px;
     }
 
-    #cb-{{ section_id }} .cb__container {
-      padding: 0 20px 28px;
+    #cb-{{ section_id }} .cb__panel-inner {
+      padding: 34px 26px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #cb-{{ section_id }} .cb__pin-inner {
-      position: relative;
+    #cb-{{ section_id }} [data-reveal] {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
     }
   }
 </style>
@@ -205,79 +305,52 @@
     var section = document.getElementById('cb-{{ section_id }}');
     if (!section) return;
 
-    var pinWrapper = section.querySelector('[data-pin-wrapper]');
-    var pinInner = section.querySelector('[data-pin-inner]');
-    if (!pinWrapper || !pinInner) return;
-
-    var enablePin = section.getAttribute('data-enable-pin') === 'true';
-    var pinDuration = parseFloat(section.getAttribute('data-pin-duration')) || 0;
-    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function isMobile() {
-      return window.innerWidth <= 749;
-    }
-
-    function pinActive() {
-      return enablePin && !prefersReducedMotion && !isMobile() && pinDuration > 0;
-    }
-
-    function clearPinStyles() {
-      pinInner.style.position = 'static';
-      pinInner.style.top = '';
-      pinInner.style.left = '';
-      pinInner.style.right = '';
-      pinWrapper.style.height = 'auto';
-    }
-
-    /* Three states, driven from the wrapper's actual on-screen position
-       (getBoundingClientRect) rather than CSS `position: sticky`:
-         1. not reached yet - normal flow (position: static)
-         2. mid-pin - position: fixed, pinned to the top of the viewport
-         3. scrolled past - position: absolute, released to sit at the
-            bottom of the wrapper so it scrolls away with it normally
-       instead of staying fixed forever. */
-    var ticking = false;
-    function updatePin() {
-      ticking = false;
-      if (!pinActive()) {
-        clearPinStyles();
-        return;
-      }
-
-      pinWrapper.style.height = 'calc(var(--cb-height) + ' + pinDuration + 'px)';
-
-      var rect = pinWrapper.getBoundingClientRect();
-      var innerHeight = pinInner.offsetHeight;
-
-      if (rect.top > 0) {
-        pinInner.style.position = 'static';
-        pinInner.style.top = '';
-        pinInner.style.left = '';
-        pinInner.style.right = '';
-      } else if (rect.bottom <= innerHeight) {
-        pinInner.style.position = 'absolute';
-        pinInner.style.top = (pinWrapper.offsetHeight - innerHeight) + 'px';
-        pinInner.style.left = '0';
-        pinInner.style.right = '0';
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+    if (revealTargets.length) {
+      if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        revealTargets.forEach(function (el) { revealObserver.observe(el); });
       } else {
-        pinInner.style.position = 'fixed';
-        pinInner.style.top = '0';
-        pinInner.style.left = '0';
-        pinInner.style.right = '0';
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
       }
     }
 
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var wrap = section.querySelector('[data-cb-parallax-wrap]');
+    var media = section.querySelector('[data-cb-parallax]');
+    if (!wrap || !media) return;
+
+    var ticking = false;
+    function updateParallax() {
+      ticking = false;
+      var rect = wrap.getBoundingClientRect();
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.bottom < 0 || rect.top > vh) return;
+      var progress = (vh - rect.top) / (vh + rect.height);
+      var offset = (progress - 0.5) * 40;
+      media.style.transform = 'translate3d(0, ' + offset.toFixed(1) + 'px, 0)';
+    }
     function onScroll() {
       if (ticking) return;
       ticking = true;
-      window.requestAnimationFrame(updatePin);
+      window.requestAnimationFrame(updateParallax);
     }
-
     var pageScroller = document.querySelector('.page-wrapper');
     window.addEventListener('scroll', onScroll, { passive: true });
     if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
-    updatePin();
+    updateParallax();
   })();
 </script>
 
@@ -286,18 +359,15 @@
   "name": "Collection - Banner",
   "tag": "section",
   "settings": [
-    { "type": "header", "content": "Pin effect" },
-    { "type": "checkbox", "id": "enable_pin", "label": "Pin banner while the product grid scrolls over it", "default": true },
-    { "type": "range", "id": "pin_duration", "label": "Pin duration (extra scroll px)", "min": 0, "max": 1000, "step": 50, "unit": "px", "default": 400 },
-
-    { "type": "header", "content": "Layout" },
-    { "type": "range", "id": "height", "label": "Banner height", "min": 260, "max": 600, "step": 20, "unit": "px", "default": 380 },
-    { "type": "color", "id": "overlay_color", "label": "Overlay color", "default": "#0B1F0F" },
-    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 90, "step": 5, "unit": "%", "default": 55 },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Collection" },
+    { "type": "text", "id": "watermark", "label": "Background watermark word", "info": "Defaults to the collection's own title if left blank." },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "text_color", "label": "Text color", "default": "#FFFFFF" },
-    { "type": "color", "id": "accent_color", "label": "Accent (product count)", "default": "#F58220" }
+    { "type": "color", "id": "panel_color", "label": "Panel background", "default": "#16311B" },
+    { "type": "color", "id": "panel_text_color", "label": "Panel text", "default": "#FFFFFF" },
+    { "type": "color", "id": "accent_color", "label": "Accent (eyebrow)", "default": "#F58220" },
+    { "type": "color", "id": "frame_color", "label": "Image frame panel", "default": "#2E7D32" }
   ],
   "presets": [
     { "name": "Collection - Banner" }
