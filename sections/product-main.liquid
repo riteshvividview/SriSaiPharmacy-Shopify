@@ -21,10 +21,11 @@
 -%}
 
 <section
-  class="pm"
+  class="pm{% if s.sync_scroll_bg %} pm--transparent-bg{% endif %}"
   id="pm-{{ section_id }}"
   data-pm
   data-enable-sticky="{{ s.enable_sticky_gallery }}"
+  {% if s.sync_scroll_bg %}data-scroll-bg-zone="{{ s.background_color | default: '#FFFFFF' }}"{% endif %}
   style="
     --pm-bg: {{ s.background_color | default: '#FFFFFF' }};
     --pm-text: {{ s.text_color | default: '#141414' }};
@@ -37,6 +38,18 @@
     --pm-padding-bottom: {{ s.padding_bottom | default: 80 }}px;
   "
 >
+  {%- if s.show_floating_elements -%}
+    <div class="pm__floaters" aria-hidden="true">
+      <span class="pm__floater pm__floater--1" data-pm-float data-float-speed="0.06"></span>
+      <span class="pm__floater pm__floater--2" data-pm-float data-float-speed="0.1"></span>
+      <span class="pm__floater pm__floater--3" data-pm-float data-float-speed="0.04"></span>
+      <svg class="pm__floater pm__floater--leaf" data-pm-float data-float-speed="0.08" width="120" height="120" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 20c8 0 14-6 16-16C10 5 4 11 4 20Z" stroke="currentColor" stroke-width="0.8"/>
+        <path d="M6 18c4-4 8-8 12-14" stroke="currentColor" stroke-width="0.8"/>
+      </svg>
+    </div>
+  {%- endif -%}
+
   <div class="pm__container" data-pm-columns>
     <div class="pm__gallery-col" data-pm-gallery-col>
       <div class="pm__gallery" data-pm-gallery>
@@ -252,6 +265,11 @@
     color: var(--pm-text);
     font-family: 'Poppins', sans-serif;
     padding: var(--pm-padding-top) 20px var(--pm-padding-bottom);
+    overflow: hidden;
+  }
+
+  #pm-{{ section_id }}.pm--transparent-bg {
+    background: transparent;
   }
 
   #pm-{{ section_id }} * {
@@ -263,12 +281,71 @@
   }
 
   #pm-{{ section_id }} .pm__container {
+    position: relative;
+    z-index: 1;
     max-width: 1300px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
     gap: 64px;
     align-items: start;
+  }
+
+  /* ---- Floating background elements ----
+     Purely decorative, sit behind the content (z-index 0, container
+     above at z-index 1) and drift slowly as the page scrolls via JS
+     (translateY at a fraction of scroll delta) for a premium ambient
+     feel rather than a flat static background. */
+  #pm-{{ section_id }} .pm__floaters {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  #pm-{{ section_id }} .pm__floater {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    filter: blur(2px);
+    will-change: transform;
+  }
+
+  #pm-{{ section_id }} .pm__floater--1 {
+    top: -6%;
+    right: 6%;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle at 30% 30%, var(--pm-accent), transparent 70%);
+    opacity: 0.08;
+  }
+
+  #pm-{{ section_id }} .pm__floater--2 {
+    top: 40%;
+    left: -8%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle at 30% 30%, var(--pm-cta), transparent 70%);
+    opacity: 0.07;
+  }
+
+  #pm-{{ section_id }} .pm__floater--3 {
+    bottom: -10%;
+    right: 18%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle at 30% 30%, var(--pm-accent), transparent 70%);
+    opacity: 0.06;
+  }
+
+  #pm-{{ section_id }} .pm__floater--leaf {
+    top: 12%;
+    left: 4%;
+    color: var(--pm-accent);
+    opacity: 0.07;
+    border-radius: 0;
+    filter: none;
   }
 
   /* ---- Gallery ---- */
@@ -291,7 +368,7 @@
     aspect-ratio: 1 / 1;
     border-radius: 20px;
     overflow: hidden;
-    background: var(--pm-card-bg);
+    background: transparent;
   }
 
   #pm-{{ section_id }} .pm__main-image-el {
@@ -299,8 +376,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    padding: 24px;
+    object-fit: cover;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.35s ease;
@@ -1001,6 +1077,31 @@
       measure();
       updateSticky();
     }
+
+    /* ---- Floating background elements ---- */
+    var floaters = Array.prototype.slice.call(section.querySelectorAll('[data-pm-float]'));
+    if (floaters.length && !prefersReducedMotion) {
+      var floatTicking = false;
+      function updateFloaters() {
+        floatTicking = false;
+        var rect = section.getBoundingClientRect();
+        floaters.forEach(function (el) {
+          var speed = parseFloat(el.getAttribute('data-float-speed')) || 0.05;
+          var offset = rect.top * speed;
+          el.style.transform = 'translate3d(0, ' + offset.toFixed(1) + 'px, 0)';
+        });
+      }
+      function onFloatScroll() {
+        if (floatTicking) return;
+        floatTicking = true;
+        window.requestAnimationFrame(updateFloaters);
+      }
+      var floatScroller = document.querySelector('.page-wrapper');
+      window.addEventListener('scroll', onFloatScroll, { passive: true });
+      if (floatScroller) floatScroller.addEventListener('scroll', onFloatScroll, { passive: true });
+      window.addEventListener('resize', onFloatScroll, { passive: true });
+      updateFloaters();
+    }
   })();
 </script>
 
@@ -1065,6 +1166,10 @@
     { "type": "checkbox", "id": "show_additional_tab", "label": "Show Additional Information tab", "default": true },
     { "type": "text", "id": "additional_tab_label", "label": "Additional Information tab label", "default": "Additional Information" },
     { "type": "richtext", "id": "additional_tab_content", "label": "Additional Information content", "default": "<p>Store in a cool, dry place away from direct sunlight. Keep out of reach of children.</p>" },
+
+    { "type": "header", "content": "Background & Effects" },
+    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "info": "Joins the whole-page background color morph shared with other sections on this template, instead of showing this section's own flat background block.", "default": true },
+    { "type": "checkbox", "id": "show_floating_elements", "label": "Show floating background elements", "info": "Soft blurred shapes that drift slowly as the page scrolls.", "default": true },
 
     { "type": "header", "content": "Colors" },
     { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
