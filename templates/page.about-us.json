@@ -69,9 +69,9 @@
         "image_alt": "Herbal research and quality testing",
         "image_position": "right",
         "frame_style": "accent-offset",
-        "frame_color": "#F58220",
+        "frame_color": "#2E7D32",
         "bg_word": "CARE",
-        "background_color": "#F7F5F0",
+        "background_color": "#F2F6F1",
         "text_color": "#141414",
         "muted_color": "#5B5B5B",
         "accent_color": "#2E7D32",
@@ -114,11 +114,147 @@
         "padding_top": 90,
         "padding_bottom": 110
       }
+    },
+    "about_featured_products": {
+      "type": "1st-featured-list",
+      "name": "Wellness Essentials",
+      "blocks": {
+        "product_X6XFAr": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.1.png",
+            "image_focal_point": "50% 50%",
+            "alt_text": "",
+            "title": "Dentex Powder",
+            "vendor": "",
+            "price": "Rs. 699.00",
+            "compare_at_price": "",
+            "unit_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "10% OFF",
+            "enable_icon": true
+          }
+        },
+        "product_VYVBfm": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.2.png",
+            "image_focal_point": "50% 50%",
+            "alt_text": "",
+            "title": "Purgin Powder",
+            "vendor": "",
+            "price": "Rs. 799.00",
+            "compare_at_price": "999",
+            "unit_price": "",
+            "link": "",
+            "enable_badge": true,
+            "badge_text": "20% OFF",
+            "enable_icon": true
+          }
+        },
+        "product_7kFHGd": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.3.png",
+            "image_focal_point": "50% 50%",
+            "alt_text": "",
+            "title": "Madhuban Powder",
+            "vendor": "",
+            "price": "Rs. 899.00",
+            "compare_at_price": "",
+            "unit_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "10% OFF",
+            "enable_icon": true
+          }
+        },
+        "product_jaqHXR": {
+          "type": "product",
+          "settings": {
+            "image": "shopify://shop_images/0.4.png",
+            "image_focal_point": "50% 50%",
+            "alt_text": "",
+            "title": "Diejena Powder",
+            "vendor": "",
+            "price": "Rs. 599.00",
+            "compare_at_price": "",
+            "unit_price": "",
+            "link": "",
+            "enable_badge": true,
+            "badge_text": "10% OFF",
+            "enable_icon": true
+          }
+        }
+      },
+      "block_order": [
+        "product_X6XFAr",
+        "product_VYVBfm",
+        "product_7kFHGd",
+        "product_jaqHXR"
+      ],
+      "settings": {
+        "heading": "Our Wellness Essentials",
+        "section_bg": "#F2F6F1",
+        "sync_scroll_bg": true,
+        "container_width": 1300,
+        "content_width": 700,
+        "padding_top": 90,
+        "padding_bottom": 90,
+        "card_gap": 24,
+        "desktop_slides_per_view": 4,
+        "tablet_slides_per_view": 2.2,
+        "mobile_slides_per_view": 1.2,
+        "card_radius": 18,
+        "card_shadow_opacity": 60,
+        "animation_speed": 340,
+        "heading_font_size": 38,
+        "heading_font_weight": "400",
+        "heading_letter_spacing": 0.5,
+        "title_font_size": 16,
+        "vendor_font_size": 13,
+        "price_font_size": 18,
+        "unit_price_font_size": 12,
+        "card_bg_color": "#ffffff",
+        "text_color": "#354630",
+        "muted_text_color": "#8a8a8a",
+        "price_color": "#141414",
+        "accent_color": "#354630",
+        "button_bg": "#354630",
+        "button_bg_hover": "#0f6a12",
+        "button_text_color": "#ffffff",
+        "arrow_color": "#141414",
+        "arrow_hover_color": "#ffffff",
+        "card_height": 440,
+        "image_size_percent": 85,
+        "image_fit": "contain",
+        "image_padding": 0,
+        "hover_zoom": 1.1,
+        "hover_lift": 6,
+        "badge_bg_color": "#f1f1f1",
+        "badge_text_color": "#141414",
+        "badge_font_size": 12,
+        "badge_radius": 8,
+        "badge_padding": 8,
+        "icon_style": "bag",
+        "icon_bg_color": "#5d7356",
+        "icon_bg_hover_color": "#3D8B40",
+        "icon_color": "#ffffff",
+        "icon_size": 36,
+        "icon_radius": 18,
+        "button_text": "Shop All Products",
+        "button_url": "/collections/all",
+        "button_radius": 26,
+        "button_padding_x": 34,
+        "button_padding_y": 14
+      }
     }
   },
   "order": [
     "about_story_founding",
     "about_story_commitment",
-    "about_story_founder"
+    "about_story_founder",
+    "about_featured_products"
   ]
 }

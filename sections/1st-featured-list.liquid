@@ -15,9 +15,12 @@
 
 <!-- HTML -->
 <section
-  class="fc"
+  class="fc{% if s.sync_scroll_bg %} fc--sync-bg{% endif %}"
   id="fc-{{ section_id }}"
   data-fc
+  {%- if s.sync_scroll_bg %}
+  data-scroll-bg-zone="{{ s.section_bg | default: '#FFFFFF' }}"
+  {%- endif %}
   data-desktop-visible="{{ s.desktop_slides_per_view }}"
   data-tablet-visible="{{ s.tablet_slides_per_view }}"
   data-mobile-visible="{{ s.mobile_slides_per_view }}"
@@ -79,7 +82,7 @@
 >
   <div class="fc__container">
     <div class="fc__header">
-      <h2 class="fc__heading">{{ s.heading }}</h2>
+      <h2 class="fc__heading"{% if s.sync_scroll_bg %} data-reveal{% endif %}>{{ s.heading }}</h2>
 
       {%- if products_count > 1 -%}
         <div class="fc__nav">
@@ -101,7 +104,7 @@
       <div class="fc__track" data-track tabindex="0" role="region" aria-label="{{ s.heading | escape }} products">
         {%- for block in products -%}
           {%- assign bs = block.settings -%}
-          <div class="fc__card" data-card {{ block.shopify_attributes }}>
+          <div class="fc__card" data-card{% if s.sync_scroll_bg %} data-reveal data-reveal-delay="{{ forloop.index0 }}"{% endif %} {{ block.shopify_attributes }}>
             <a
               href="{{ bs.link | default: '#' }}"
               class="fc__card-link"
@@ -181,6 +184,41 @@
     position: relative;
     background: var(--fc-bg);
     padding: var(--fc-padding-top) 20px var(--fc-padding-bottom);
+  }
+
+  /* "Sync background with page scroll effect": no background paint of its
+     own - it hands off to the shared whole-page background layer (see
+     about-story-block.liquid's scroll-bg controller) instead, so this
+     section reads as a continuation of that same color flow rather than a
+     hard-edged block sitting on top of it. */
+  #fc-{{ section_id }}.fc--sync-bg {
+    background: transparent;
+  }
+
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="0"] { transition-delay: 0s; }
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="1"] { transition-delay: 0.1s; }
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="2"] { transition-delay: 0.2s; }
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="3"] { transition-delay: 0.3s; }
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="4"] { transition-delay: 0.4s; }
+  #fc-{{ section_id }}.fc--sync-bg [data-reveal-delay="5"] { transition-delay: 0.5s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #fc-{{ section_id }}.fc--sync-bg [data-reveal] {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
   }
 
   #fc-{{ section_id }} * {
@@ -621,6 +659,29 @@
 
     updateCardWidth();
     updateArrows();
+
+    /* ---- "Sync background with page scroll effect": reveal heading/cards ---- */
+    if (section.classList.contains('fc--sync-bg')) {
+      var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+      if (revealTargets.length) {
+        if ('IntersectionObserver' in window) {
+          var revealObserver = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  revealObserver.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+          );
+          revealTargets.forEach(function (el) { revealObserver.observe(el); });
+        } else {
+          revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+        }
+      }
+    }
   })();
 </script>
 
@@ -633,6 +694,7 @@
     { "type": "header", "content": "General" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Featured Collection" },
     { "type": "color", "id": "section_bg", "label": "Section background", "default": "#F0F0F0" },
+    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "info": "For use alongside an \"About - Story Block\" section on the same page. When on, this section has no background of its own - the whole page tints to \"Section background\" once this block reaches the center of the screen, matching the story blocks above it, and its heading/cards fade in on scroll instead of always being visible.", "default": false },
     { "type": "range", "id": "container_width", "label": "Container width", "min": 1000, "max": 1800, "step": 20, "unit": "px", "default": 1300 },
     { "type": "range", "id": "content_width", "label": "Content width", "min": 300, "max": 900, "step": 20, "unit": "px", "default": 700 },
     { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 70 },

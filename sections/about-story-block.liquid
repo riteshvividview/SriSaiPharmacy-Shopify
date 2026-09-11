@@ -22,6 +22,7 @@
   class="asb{% if s.image_position == 'right' %} asb--image-right{% endif %}"
   id="asb-{{ section_id }}"
   data-asb
+  data-scroll-bg-zone="{{ s.background_color | default: '#FFFFFF' }}"
   style="
     --asb-bg: {{ s.background_color | default: '#FFFFFF' }};
     --asb-text: {{ s.text_color | default: '#141414' }};
@@ -45,19 +46,21 @@
         {%- endif -%}
         <div class="asb__media-image">
           {%- if s.image != blank -%}
-            <img
-              src="{{ s.image | image_url: width: 1200 }}"
-              srcset="
-                {{ s.image | image_url: width: 600 }} 600w,
-                {{ s.image | image_url: width: 900 }} 900w,
-                {{ s.image | image_url: width: 1200 }} 1200w
-              "
-              sizes="(max-width: 899px) 100vw, 560px"
-              alt="{{ s.image_alt | default: s.heading | escape }}"
-              width="{{ s.image.width }}"
-              height="{{ s.image.height }}"
-              loading="lazy"
-            >
+            <div class="asb__media-parallax" data-media-parallax>
+              <img
+                src="{{ s.image | image_url: width: 1200 }}"
+                srcset="
+                  {{ s.image | image_url: width: 600 }} 600w,
+                  {{ s.image | image_url: width: 900 }} 900w,
+                  {{ s.image | image_url: width: 1200 }} 1200w
+                "
+                sizes="(max-width: 899px) 100vw, 560px"
+                alt="{{ s.image_alt | default: s.heading | escape }}"
+                width="{{ s.image.width }}"
+                height="{{ s.image.height }}"
+                loading="lazy"
+              >
+            </div>
           {%- else -%}
             <div class="asb__media-placeholder" aria-hidden="true">
               <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -98,9 +101,12 @@
 
 {%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
 <style>
+  /* No background paint here on purpose - "Background" now sets the
+     shared, whole-page background color that fades in once this section
+     reaches the center of the viewport (see the scroll-synced controller
+     in the JS below), rather than a hard-edged color block per section. */
   #asb-{{ section_id }} {
     position: relative;
-    background: var(--asb-bg);
     color: var(--asb-text);
     font-family: 'Poppins', sans-serif;
     padding: var(--asb-padding-top) 20px var(--asb-padding-bottom);
@@ -117,7 +123,8 @@
     inset: auto 0 -0.12em 0;
     z-index: 0;
     margin: 0;
-    text-align: center;
+    text-align: left;
+    transform: translate3d(var(--asb-watermark-x, 0), 0, 0);
     font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-size: clamp(80px, 16vw, 220px);
     line-height: 1;
@@ -162,6 +169,12 @@
 
   #asb-{{ section_id }} .asb__media-inner {
     position: relative;
+    transform: perspective(1000px) rotateX(var(--asb-tilt-x, 0deg)) rotateY(var(--asb-tilt-y, 0deg));
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #asb-{{ section_id }} .asb__media-inner.is-tilting {
+    transition: transform 0.1s linear;
   }
 
   #asb-{{ section_id }} .asb__media-frame {
@@ -171,6 +184,7 @@
     background: var(--asb-frame);
     opacity: 0.16;
     z-index: 0;
+    transform: translate3d(0, var(--asb-frame-parallax, 0px), 0);
   }
 
   #asb-{{ section_id }}.asb--image-right .asb__media-frame {
@@ -180,11 +194,22 @@
   #asb-{{ section_id }} .asb__media-image {
     position: relative;
     z-index: 1;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1 / 1;
     border-radius: 22px;
     overflow: hidden;
     background: #f0f3f0;
     box-shadow: 0 24px 50px rgba(20, 20, 20, 0.12);
+  }
+
+  /* Oversized and offset so the scroll-driven translateY (JS, no
+     transition - see below) never exposes an empty edge. The reveal
+     zoom lives on the img itself, one layer deeper, so the two motions
+     (continuous scroll parallax vs. one-time reveal) never fight over
+     the same `transform` transition. */
+  #asb-{{ section_id }} .asb__media-parallax {
+    position: absolute;
+    inset: -14% 0;
+    height: 128%;
   }
 
   #asb-{{ section_id }} .asb__media-image img {
@@ -248,10 +273,26 @@
   }
 
   #asb-{{ section_id }} .asb__eyebrow-rule {
-    width: 28px;
+    width: 0;
     height: 2px;
     background: var(--asb-accent);
     flex-shrink: 0;
+    transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s;
+  }
+
+  #asb-{{ section_id }} .asb__eyebrow.is-visible .asb__eyebrow-rule {
+    width: 28px;
+  }
+
+  #asb-{{ section_id }} .asb__point {
+    position: relative;
+    padding-left: 16px;
+    border-left: 2px solid transparent;
+    transition: border-color 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.2s;
+  }
+
+  #asb-{{ section_id }} .asb__point.is-visible {
+    border-left-color: color-mix(in srgb, var(--asb-accent) 35%, transparent);
   }
 
   #asb-{{ section_id }} .asb__heading {
@@ -300,10 +341,6 @@
     #asb-{{ section_id }} .asb__container {
       gap: 48px;
     }
-
-    #asb-{{ section_id }} .asb__media-image {
-      aspect-ratio: 4 / 3.4;
-    }
   }
 
   /* ---- Mobile ---- */
@@ -323,10 +360,6 @@
       order: 0;
     }
 
-    #asb-{{ section_id }} .asb__media-image {
-      aspect-ratio: 4 / 3;
-    }
-
     #asb-{{ section_id }} .asb__media-frame {
       inset: 14px -14px -14px 14px;
     }
@@ -336,10 +369,22 @@
     }
   }
 
+  @media (hover: none) {
+    #asb-{{ section_id }} .asb__media-inner {
+      transform: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     #asb-{{ section_id }} .asb__media,
     #asb-{{ section_id }} [data-reveal],
-    #asb-{{ section_id }} .asb__media-image img {
+    #asb-{{ section_id }} .asb__media-image img,
+    #asb-{{ section_id }} .asb__media-parallax,
+    #asb-{{ section_id }} .asb__media-inner,
+    #asb-{{ section_id }} .asb__media-frame,
+    #asb-{{ section_id }} .asb__watermark,
+    #asb-{{ section_id }} .asb__eyebrow-rule,
+    #asb-{{ section_id }} .asb__point {
       transition: none !important;
       transform: none !important;
       opacity: 1 !important;
@@ -354,25 +399,142 @@
     if (!section) return;
 
     var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
-    if (!revealTargets.length) return;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if ('IntersectionObserver' in window) {
+    if (revealTargets.length) {
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+        );
+        revealTargets.forEach(function (el) { observer.observe(el); });
+      } else {
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+    }
+
+    if (reducedMotion) return;
+
+    /* ---- Media: cursor tilt (fine pointers only) ---- */
+    var mediaInner = section.querySelector('.asb__media-inner');
+    if (mediaInner && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var maxTilt = 6;
+
+      mediaInner.addEventListener('mousemove', function (e) {
+        var rect = mediaInner.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width - 0.5;
+        var py = (e.clientY - rect.top) / rect.height - 0.5;
+        mediaInner.classList.add('is-tilting');
+        mediaInner.style.setProperty('--asb-tilt-y', (px * maxTilt).toFixed(2) + 'deg');
+        mediaInner.style.setProperty('--asb-tilt-x', (py * -maxTilt).toFixed(2) + 'deg');
+      });
+
+      mediaInner.addEventListener('mouseleave', function () {
+        mediaInner.classList.remove('is-tilting');
+        mediaInner.style.setProperty('--asb-tilt-x', '0deg');
+        mediaInner.style.setProperty('--asb-tilt-y', '0deg');
+      });
+    }
+
+    /* ---- Scroll-synced parallax: frame panel + image ----
+       Both read the same scroll-progress value (0 as the section enters
+       the viewport, 1 as it leaves) so they drift together but at
+       different speeds/directions - image moves inside its fixed frame
+       (see the oversized `.asb__media-parallax` layer in CSS), frame
+       panel drifts behind it. Applied directly via inline transform (no
+       CSS transition) so it tracks the scroll position exactly, every
+       frame, with zero lag. */
+    var frame = section.querySelector('.asb__media-frame');
+    var mediaParallax = section.querySelector('[data-media-parallax]');
+    var watermark = section.querySelector('.asb__watermark');
+
+    if (frame || mediaParallax || watermark) {
+      var ticking = false;
+      function updateParallax() {
+        ticking = false;
+        var rect = section.getBoundingClientRect();
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.bottom < 0 || rect.top > vh) return;
+        var progress = (vh - rect.top) / (vh + rect.height);
+        var centered = progress - 0.5;
+        if (frame) frame.style.setProperty('--asb-frame-parallax', (centered * 36).toFixed(1) + 'px');
+        if (mediaParallax) mediaParallax.style.transform = 'translate3d(0, ' + (centered * -28).toFixed(1) + 'px, 0)';
+        /* Starts flush left (progress 0, as the section first enters the
+           viewport) and drifts rightward as you scroll through it - and
+           back left again on the way back up, since this is driven by
+           live scroll position rather than a one-shot trigger. */
+        if (watermark) watermark.style.setProperty('--asb-watermark-x', (Math.max(progress, 0) * 22).toFixed(1) + '%');
+      }
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(updateParallax);
+      }
+      /* This theme scrolls `.page-wrapper` (not window) on desktop - see
+         assets/scroll-container.js - so both are watched here. */
+      var pageScroller = document.querySelector('.page-wrapper');
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      updateParallax();
+    }
+  })();
+
+  /* ---- Whole-page background morph ----
+     Runs once total for the whole page, not once per section - any
+     section anywhere in the theme can opt in just by carrying a
+     `data-scroll-bg-zone="#hexcolor"` attribute (the Featured Collection
+     section on this page does the same thing via its own "Sync background
+     with page scroll effect" setting). The first section to execute this
+     script claims the controller via the `window.__scrollBgController`
+     guard, then waits for the full page to parse (DOMContentLoaded) so it
+     can find every zone, including ones further down the page that
+     haven't rendered yet at this point. A single fixed, full-viewport
+     layer sits behind everything and cross-fades its background-color;
+     each opted-in section's own background stays transparent, so
+     scrolling reads as one continuous page tinting through zones rather
+     than stacked color blocks. An IntersectionObserver (not a scroll
+     listener) does the zone detection, which is the cheap, browser-native
+     way to do this - no per-frame scroll math, and it costs nothing on
+     pages that don't have any opted-in section at all. */
+  if (!window.__scrollBgController) {
+    window.__scrollBgController = true;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var zones = Array.prototype.slice.call(document.querySelectorAll('[data-scroll-bg-zone]'));
+      if (!zones.length) return;
+
+      var bgLayer = document.createElement('div');
+      bgLayer.id = 'scroll-bg-layer';
+      bgLayer.setAttribute('aria-hidden', 'true');
+      bgLayer.style.cssText =
+        'position:fixed;inset:0;z-index:-1;pointer-events:none;' +
+        'background-color:' + (zones[0].getAttribute('data-scroll-bg-zone') || '#ffffff') + ';' +
+        (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : 'transition:background-color 0.8s ease;');
+      document.body.prepend(bgLayer);
+
+      if (!('IntersectionObserver' in window)) return;
+
       var observer = new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-              observer.unobserve(entry.target);
-            }
+            if (!entry.isIntersecting) return;
+            var color = entry.target.getAttribute('data-scroll-bg-zone');
+            if (color) bgLayer.style.backgroundColor = color;
           });
         },
-        { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+        { threshold: 0, rootMargin: '-50% 0px -50% 0px' }
       );
-      revealTargets.forEach(function (el) { observer.observe(el); });
-    } else {
-      revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
-    }
-  })();
+      zones.forEach(function (el) { observer.observe(el); });
+    });
+  }
 </script>
 
 {% schema %}
@@ -413,7 +575,7 @@
     { "type": "text", "id": "bg_word", "label": "Background watermark word", "info": "Optional large faint word behind the section, e.g. \"CARE\". Leave blank to disable." },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "color", "id": "background_color", "label": "Background", "info": "This section has no background of its own - the whole page smoothly tints to this color once this block reaches the center of the screen, and back again as you scroll past it.", "default": "#FFFFFF" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
     { "type": "color", "id": "accent_color", "label": "Accent (eyebrow, frame)", "default": "#2E7D32" },
