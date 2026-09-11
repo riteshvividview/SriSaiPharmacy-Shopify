@@ -476,9 +476,15 @@
     pointer-events: auto;
   }
 
+  /* Flexbox rather than a fixed `260px 1fr` grid: the intro panel is
+     `flex: 1 1 260px` so it grows to soak up whatever width the tiles
+     don't need (no dead empty space with only 2-3 tiles), while the tile
+     grid itself stays sized to its own content (`flex: 0 0 auto`) - so
+     tile size stays constant and predictable regardless of how many tiles
+     a given dropdown has, rather than stretching to fill the row. */
   #ssh-{{ section_id }} .ssh__mega-inner {
-    display: grid;
-    grid-template-columns: 260px 1fr;
+    display: flex;
+    align-items: stretch;
     min-height: 300px;
     width: calc(100% - 48px);
     max-width: 1360px;
@@ -511,6 +517,8 @@
 
   #ssh-{{ section_id }} .ssh__mega-intro {
     position: relative;
+    flex: 1 1 260px;
+    min-width: 260px;
     border-radius: 20px 0 0 20px;
     overflow: hidden;
     background-color: var(--ssh-accent);
@@ -584,27 +592,33 @@
     transform: translateX(2px);
   }
 
+  /* Fixed-size tiles (not `1fr` grid columns) on purpose: with the panel
+     now full-width, stretchy columns would blow 2-3 tiles up to fill the
+     entire row - and since tile height follows the image, that made
+     Care & Wellness/Top Picks absurdly tall and forced an internal
+     scrollbar. Tiles stay a constant, comfortable size regardless of tile
+     count; `.ssh__mega-grid` itself is `flex: 0 0 auto` (see above), sized
+     to exactly what its tiles need rather than stretching - the intro
+     panel absorbs any space this doesn't use, instead of leaving it empty. */
   #ssh-{{ section_id }} .ssh__mega-grid {
+    /* flex-shrink 1 (not 0): sized to its content when there's room, but
+       allowed to narrow - which is what lets `flex-wrap` actually kick in
+       - if a dropdown ever has enough tiles that a single row would
+       overflow the panel. */
+    flex: 0 1 auto;
+    min-width: 0;
+    align-self: flex-start;
     padding: 20px;
-    display: grid;
-    /* Fixed-size columns (not `1fr`) on purpose: with the panel now
-       full-width, a stretchy `1fr` column would blow a couple of tiles up
-       to fill the entire row - and since tile height follows the image's
-       aspect-ratio, that made 2-3-tile dropdowns (Care & Wellness, Top
-       Picks) absurdly tall and forced an internal scrollbar. Tiles now
-       stay a fixed compact size regardless of how many there are; extra
-       row width is just left empty (`justify-content: start`) rather than
-       stretching existing tiles into it. */
-    grid-template-columns: repeat(auto-fill, 128px);
-    justify-content: start;
-    gap: 16px;
-    align-content: start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
   }
 
   #ssh-{{ section_id }} .ssh__tile {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    flex: 0 0 168px;
+    gap: 12px;
     padding: 10px;
     border-radius: 12px;
     transition: background-color 0.2s ease, transform 0.2s ease;
@@ -647,19 +661,20 @@
   #ssh-{{ section_id }} .ssh__tile-body {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   #ssh-{{ section_id }} .ssh__tile-heading {
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 14px;
+    line-height: 1.3;
     color: #141414;
   }
 
   #ssh-{{ section_id }} .ssh__tile-text {
-    font-size: 12px;
+    font-size: 12.5px;
     color: #7a7a7a;
-    line-height: 1.4;
+    line-height: 1.45;
   }
 
   /* ---- Simple dropdown (e.g. "Pages") ----
