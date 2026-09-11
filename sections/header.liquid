@@ -427,8 +427,10 @@
   #ssh-{{ section_id }} .ssh__nav-link:hover,
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__nav-link,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__nav-link,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__nav-link,
   #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__nav-link,
-  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__nav-link {
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__nav-link,
+  #ssh-{{ section_id }} .ssh__nav-item--simple.is-open .ssh__nav-link {
     color: var(--ssh-accent);
     background: rgba(46, 125, 50, 0.08);
   }
@@ -439,8 +441,10 @@
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__caret,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__caret,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__caret,
   #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__caret,
-  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__caret {
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__caret,
+  #ssh-{{ section_id }} .ssh__nav-item--simple.is-open .ssh__caret {
     transform: rotate(180deg);
   }
 
@@ -466,17 +470,22 @@
     top: var(--ssh-mega-top, 76px);
     left: 0;
     right: 0;
-    /* The visible gap between the bar and the panel - this whole hit-area
-       (including the padding) becomes pointer-events:auto on hover/focus,
-       so the mouse can travel straight down through it without the
-       dropdown closing. */
-    padding-top: 22px;
+    /* Kept small on purpose: this padding is still `pointer-events: none`
+       at rest (see below), so it does NOT actually bridge hover the way
+       an old comment here used to claim - a mouse crossing it before
+       `:hover`/`:focus-within` is already true just falls through to
+       whatever's on the page underneath, breaking the hover chain and
+       closing the menu. A small gap keeps that dead zone thin enough to
+       cross before the panel's fade-out finishes; it isn't eliminated by
+       padding size alone. */
+    padding-top: 6px;
     pointer-events: none;
     z-index: 20;
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega {
     pointer-events: auto;
   }
 
@@ -516,7 +525,8 @@
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-inner,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-inner {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-inner,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega-inner {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -560,10 +570,13 @@
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-eyebrow,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-eyebrow,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega-eyebrow,
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-heading,
   #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-heading,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega-heading,
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-text,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-text {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-text,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega-text {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
@@ -625,7 +638,8 @@
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__mega-cta,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-cta {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__mega-cta,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__mega-cta {
     --cta-enter-y: 0px;
     --cta-enter-scale: 1;
     opacity: 1;
@@ -691,7 +705,8 @@
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__tile,
-  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__tile {
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__tile,
+  #ssh-{{ section_id }} .ssh__nav-item--mega.is-open .ssh__tile {
     --tile-enter-y: 0px;
     opacity: 1;
     filter: blur(0);
@@ -764,14 +779,15 @@
     position: absolute;
     top: 100%;
     right: 0;
-    padding-top: 22px;
+    padding-top: 6px;
     min-width: 220px;
     pointer-events: none;
     z-index: 20;
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__simple-dropdown,
-  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-dropdown {
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-dropdown,
+  #ssh-{{ section_id }} .ssh__nav-item--simple.is-open .ssh__simple-dropdown {
     pointer-events: auto;
   }
 
@@ -793,7 +809,8 @@
   }
 
   #ssh-{{ section_id }} .ssh__nav-item--simple:hover .ssh__simple-list,
-  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-list {
+  #ssh-{{ section_id }} .ssh__nav-item--simple:focus-within .ssh__simple-list,
+  #ssh-{{ section_id }} .ssh__nav-item--simple.is-open .ssh__simple-list {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -1103,6 +1120,49 @@
         /* content height can change on resize (text reflow) - keep it in sync while open */
         panel.style.maxHeight = panel.scrollHeight + 'px';
       }
+    });
+
+    /* Dropdown open/close is primarily CSS (:hover/:focus-within), but
+       that alone has a dead zone: the mega/simple panels are `position:
+       fixed`/`absolute` with `pointer-events: none` at rest (so they
+       never block clicks on page content while closed), and a mouse
+       crossing the small gap before reaching the panel can briefly leave
+       every hoverable element in the chain, closing the menu before it's
+       reached. `.is-open` (added to the CSS above alongside every
+       :hover/:focus-within rule) gives JS a way to keep the dropdown open
+       through a short grace period, so a normal mouse movement toward the
+       panel doesn't get cut off. */
+    var dropdownTriggers = Array.prototype.slice.call(
+      header.querySelectorAll('.ssh__nav-item--mega, .ssh__nav-item--simple')
+    );
+    var closeTimer = null;
+
+    dropdownTriggers.forEach(function (item) {
+      function open() {
+        if (closeTimer) {
+          window.clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        dropdownTriggers.forEach(function (other) {
+          if (other !== item) other.classList.remove('is-open');
+        });
+        item.classList.add('is-open');
+      }
+
+      function scheduleClose() {
+        if (closeTimer) window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(function () {
+          item.classList.remove('is-open');
+          closeTimer = null;
+        }, 300);
+      }
+
+      item.addEventListener('mouseenter', open);
+      item.addEventListener('mouseleave', scheduleClose);
+      item.addEventListener('focusin', open);
+      item.addEventListener('focusout', function (e) {
+        if (!item.contains(e.relatedTarget)) item.classList.remove('is-open');
+      });
     });
   })();
 </script>
