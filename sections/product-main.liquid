@@ -17,6 +17,7 @@
   assign s = section.settings
   assign current_variant = product.selected_or_first_available_variant
   assign images = product.images
+  assign form_id = 'ProductForm-' | append: section_id
 -%}
 
 <section
@@ -37,7 +38,7 @@
   "
 >
   <div class="pm__container" data-pm-columns>
-    <div class="pm__gallery-col">
+    <div class="pm__gallery-col" data-pm-gallery-col>
       <div class="pm__gallery" data-pm-gallery>
         <div class="pm__main-image" data-pm-main-image>
           {%- if images.size > 0 -%}
@@ -129,7 +130,7 @@
         <p class="pm__short-description">{{ s.short_description }}</p>
       {%- endif -%}
 
-      {%- form 'product', product, id: 'ProductForm-' | append: section_id, class: 'pm__form' -%}
+      {%- form 'product', product, id: form_id, class: 'pm__form' -%}
         <input type="hidden" name="id" value="{{ current_variant.id }}" data-pm-variant-id>
 
         {%- unless product.has_only_default_variant -%}
@@ -271,7 +272,13 @@
   }
 
   /* ---- Gallery ---- */
+  /* `position: relative` here is the positioning anchor for the
+     "released" (absolute) sticky state below - without it, a missing
+     positioned ancestor makes the browser fall back to the nearest one
+     up the tree (often close to full page width), which is exactly why
+     the gallery briefly went full-width mid-scroll. */
   #pm-{{ section_id }} .pm__gallery-col {
+    position: relative;
     min-width: 0;
   }
 
@@ -285,7 +292,6 @@
     border-radius: 20px;
     overflow: hidden;
     background: var(--pm-card-bg);
-    border: 1px solid var(--pm-border);
   }
 
   #pm-{{ section_id }} .pm__main-image-el {
