@@ -331,7 +331,7 @@
   #bs-{{ section_id }} .bs__featured-media {
     position: relative;
     display: block;
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: var(--bs-card-bg);
   }
@@ -437,11 +437,13 @@
   #bs-{{ section_id }} .bs__card-media {
     position: relative;
     display: block;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
     border-radius: 16px;
     overflow: hidden;
     background: var(--bs-card-bg);
     margin-bottom: 16px;
+    border: 1px solid rgba(20, 20, 20, 0.06);
+    box-shadow: 0 10px 24px rgba(20, 20, 20, 0.07);
   }
 
   #bs-{{ section_id }} .bs__card-media img {
