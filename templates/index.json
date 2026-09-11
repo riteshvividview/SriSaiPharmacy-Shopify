@@ -679,7 +679,7 @@
     },
     "featured_product_spotlight_FpS001": {
       "type": "featured-product-spotlight",
-      "name": "Featured Product Spotlight",
+      "name": "Product Spotlight",
       "settings": {
         "eyebrow": "Pure Wellness",
         "heading": "Grab Your Essentials Pack",
