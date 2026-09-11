@@ -685,41 +685,38 @@
           "type": "product",
           "settings": {
             "product": "paurusha-a-ayurvedic-supplements-for-immune-system",
-            "default_selected": true
+            "highlight_line": "",
+            "specifications": "",
+            "default_selected": true,
+            "default_quantity": 1
           }
         },
         "pack_item_2": {
           "type": "product",
           "settings": {
             "product": "ganore-ayurvedic-medicine-for-urinary-problems",
-            "default_selected": true
-          }
-        },
-        "pack_item_3": {
-          "type": "product",
-          "settings": {
-            "product": "",
-            "default_selected": true
-          }
-        },
-        "pack_item_4": {
-          "type": "product",
-          "settings": {
-            "product": "",
-            "default_selected": false
+            "highlight_line": "",
+            "specifications": "",
+            "default_selected": true,
+            "default_quantity": 1
           }
         }
       },
-      "block_order": ["pack_item_1", "pack_item_2", "pack_item_3", "pack_item_4"],
+      "block_order": ["pack_item_1", "pack_item_2"],
       "settings": {
         "eyebrow": "Build Your Pack",
         "heading": "Grab Your Essentials Pack",
         "subheading": "Pick what you need and add the whole pack to your cart in one tap.",
-        "columns_desktop": 2,
+        "product_eyebrow_source": "vendor",
+        "specifications_label": "Specifications:",
+        "sold_out_text": "Sold out",
+        "show_view_details": true,
+        "view_details_text": "View full details",
+        "show_include_toggle": true,
+        "include_label": "Include in pack",
         "items_label": "items selected",
         "add_to_cart_text": "Add Pack to Cart",
         "added_to_cart_text": "Pack added to cart",
-        "sold_out_text": "Sold out",
         "promo_note": "",
         "sync_scroll_bg": false,
         "background_color": "#F2F6F1",
