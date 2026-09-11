@@ -1,109 +1,45 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */{
+{
   "sections": {
-    "main": {
-      "type": "main-blog",
-      "blocks": {
-        "title": {
-          "type": "text",
-          "name": "t:names.title",
-          "settings": {
-            "text": "<h1>{{ closest.blog.title }}</h1>",
-            "width": "fit-content",
-            "max_width": "narrow",
-            "alignment": "left",
-            "type_preset": "h2",
-            "font": "var(--font-body--family)",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 48,
-            "padding-block-end": 48,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
-        "static-blog-post-card": {
-          "type": "_blog-post-card",
-          "static": true,
-          "settings": {
-            "alignment": "left"
-          },
-          "blocks": {
-            "heading": {
-              "type": "_heading",
-              "name": "t:names.title",
-              "static": true,
-              "settings": {
-                "type_preset": "h4",
-                "font": "var(--font-body--family)",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "read_only": true,
-                "alignment": "left",
-                "show_alignment": false,
-                "padding-block-start": 0,
-                "padding-block-end": 10,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "blog-post-details": {
-              "type": "_blog-post-info-text",
-              "name": "t:names.details",
-              "static": true,
-              "settings": {
-                "show_date": true,
-                "show_author": false,
-                "alignment": "left",
-                "show_alignment": false,
-                "padding-block-start": 0,
-                "padding-block-end": 0
-              },
-              "blocks": {}
-            },
-            "image": {
-              "type": "_blog-post-image",
-              "static": true,
-              "settings": {
-                "height": "large",
-                "border": "none",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_radius": 4
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": []
-        }
-      },
-      "block_order": [
-        "title"
-      ],
+    "blog_hero": {
+      "type": "contact-hero",
+      "name": "Blog Hero",
       "settings": {
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 0,
-        "padding-block-end": 48
+        "eyebrow": "Health & Wellness Journal",
+        "heading": "Stories, Tips & Herbal Wisdom",
+        "subheading": "Ayurvedic remedies, product deep-dives and honest advice from our pharmacists - written to help you make sense of your health, not just sell to it.",
+        "button_1_text": "",
+        "button_1_url": "",
+        "button_2_text": "",
+        "button_2_url": "",
+        "height": 380,
+        "overlay_color": "#0B1F0F",
+        "overlay_opacity": 55,
+        "text_color": "#FFFFFF",
+        "accent_color": "#F58220"
+      }
+    },
+    "blog_showcase": {
+      "type": "blog-showcase",
+      "name": "Blog Showcase",
+      "settings": {
+        "featured_label": "Latest Story",
+        "read_text": "Read the story",
+        "empty_text": "No stories here yet - check back soon.",
+        "articles_per_page": 9,
+        "background_color": "#FFFFFF",
+        "card_color": "#F2F6F1",
+        "text_color": "#141414",
+        "muted_color": "#6B6B6B",
+        "accent_color": "#2E7D32",
+        "cta_color": "#F58220",
+        "border_color": "#ECECEC",
+        "padding_top": 80,
+        "padding_bottom": 100
       }
     }
   },
   "order": [
-    "main"
+    "blog_hero",
+    "blog_showcase"
   ]
 }

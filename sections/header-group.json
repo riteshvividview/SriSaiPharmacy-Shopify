@@ -223,6 +223,13 @@
             "url": "/pages/about-us?view=about-us"
           }
         },
+        "link_blog": {
+          "type": "simple_link",
+          "settings": {
+            "label": "Blog",
+            "url": "/blogs/blog-2"
+          }
+        },
         "link_contact": {
           "type": "simple_link",
           "settings": {
@@ -257,6 +264,7 @@
         "tile_family_pack",
         "nav_pages",
         "link_our_story",
+        "link_blog",
         "link_contact",
         "link_faqs"
       ],
