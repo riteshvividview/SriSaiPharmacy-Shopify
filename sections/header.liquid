@@ -120,16 +120,8 @@
                         {%- for tile_block in section.blocks offset: tiles_offset -%}
                           {%- if tile_block.type == 'dropdown_tile' -%}
                             {%- assign ts = tile_block.settings -%}
-                            {%- case ts.image_orientation -%}
-                              {%- when 'portrait' -%}
-                                {%- assign tile_aspect_ratio = '3 / 4' -%}
-                              {%- when 'square' -%}
-                                {%- assign tile_aspect_ratio = '1 / 1' -%}
-                              {%- else -%}
-                                {%- assign tile_aspect_ratio = '4 / 3' -%}
-                            {%- endcase -%}
                             <a href="{{ ts.link | default: '#' }}" class="ssh__tile" {{ tile_block.shopify_attributes }}>
-                              <span class="ssh__tile-image" style="aspect-ratio: {{ tile_aspect_ratio }};">
+                              <span class="ssh__tile-image">
                                 {%- if ts.image != blank -%}
                                   <img
                                     src="{{ ts.image | image_url: width: 400 }}"
@@ -595,14 +587,17 @@
   #ssh-{{ section_id }} .ssh__mega-grid {
     padding: 20px;
     display: grid;
-    /* Purely width-driven: each tile gets at least 110px, and auto-fit
-       packs as many as actually fit per row (extra space is shared out via
-       the 1fr max, so 2-3 tiles sit nicely wide and 5 tiles pack into one
-       row without needing a fixed column count). Naturally reflows to
-       fewer per row as the panel narrows on smaller viewports - never a
-       forced tall wrap, never squeezed. */
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 12px;
+    /* Fixed-size columns (not `1fr`) on purpose: with the panel now
+       full-width, a stretchy `1fr` column would blow a couple of tiles up
+       to fill the entire row - and since tile height follows the image's
+       aspect-ratio, that made 2-3-tile dropdowns (Care & Wellness, Top
+       Picks) absurdly tall and forced an internal scrollbar. Tiles now
+       stay a fixed compact size regardless of how many there are; extra
+       row width is just left empty (`justify-content: start`) rather than
+       stretching existing tiles into it. */
+    grid-template-columns: repeat(auto-fill, 128px);
+    justify-content: start;
+    gap: 16px;
     align-content: start;
   }
 
@@ -623,6 +618,7 @@
   #ssh-{{ section_id }} .ssh__tile-image {
     display: block;
     width: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: 10px;
     overflow: hidden;
     background: #f0f3f0;
@@ -1072,17 +1068,6 @@
       "settings": [
         { "type": "paragraph", "content": "Place this block directly below the Nav Dropdown it belongs to." },
         { "type": "image_picker", "id": "image", "label": "Image" },
-        {
-          "type": "select",
-          "id": "image_orientation",
-          "label": "Image orientation",
-          "options": [
-            { "value": "landscape", "label": "Landscape (4:3)" },
-            { "value": "portrait", "label": "Portrait (3:4)" },
-            { "value": "square", "label": "Square (1:1)" }
-          ],
-          "default": "landscape"
-        },
         {
           "type": "select",
           "id": "image_fit",
