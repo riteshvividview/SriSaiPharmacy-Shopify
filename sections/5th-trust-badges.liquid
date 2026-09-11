@@ -37,6 +37,11 @@
 >
   {%- if s.show_top_border -%}<div class="tb__edge tb__edge--top"></div>{%- endif -%}
 
+  <div class="tb__floaters" aria-hidden="true">
+    <span class="tb__floater tb__floater--1" data-tb-parallax data-speed="0.5"></span>
+    <span class="tb__floater tb__floater--2" data-tb-parallax data-speed="0.8"></span>
+  </div>
+
   <div class="tb__inner">
     {%- if s.eyebrow != blank or s.heading != blank or s.subheading != blank -%}
       <div class="tb__header" data-tb-parallax data-speed="0.3">
@@ -128,6 +133,39 @@
     background: transparent;
   }
 
+  #tb-{{ section_id }} .tb__floaters {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  #tb-{{ section_id }} .tb__floater {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    will-change: transform;
+  }
+
+  #tb-{{ section_id }} .tb__floater--1 {
+    top: -20%;
+    left: 6%;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle at 30% 30%, var(--tb-border), transparent 70%);
+    opacity: 0.07;
+  }
+
+  #tb-{{ section_id }} .tb__floater--2 {
+    bottom: -25%;
+    right: 8%;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle at 30% 30%, var(--tb-border), transparent 70%);
+    opacity: 0.06;
+  }
+
   #tb-{{ section_id }} * {
     box-sizing: border-box;
   }
@@ -151,6 +189,7 @@
 
   #tb-{{ section_id }} .tb__inner {
     position: relative;
+    z-index: 1;
     max-width: 100%;
     margin: 0 auto;
   }
@@ -249,11 +288,32 @@
   }
 
   #tb-{{ section_id }} .tb__badge {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     height: var(--tb-badge-height);
+    padding: 10px;
+  }
+
+  /* Soft backdrop card that scales in behind a badge on hover, so it
+     reads as lifting off the page rather than just scaling in place. */
+  #tb-{{ section_id }} .tb__badge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--tb-border) 12%, transparent), transparent 72%);
+    transform: scale(0.6);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+
+  #tb-{{ section_id }} .tb__badge:hover::before {
+    transform: scale(1);
+    opacity: 1;
   }
 
   #tb-{{ section_id }} .tb__badge img {

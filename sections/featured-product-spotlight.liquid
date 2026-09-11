@@ -81,28 +81,37 @@
               data-fs-cell-drop
               data-fs-cell-index="{{ forloop.index0 }}"
               data-fs-magnetic
-              data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 14 }}"
+              data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 34 }}"
             >
               {%- if item_product != blank -%}
                 {%- assign item_variant = item_product.selected_or_first_available_variant -%}
-                {%- if item_product.featured_image != blank -%}
-                  <img
-                    src="{{ item_product.featured_image | image_url: width: 500 }}"
-                    srcset="{{ item_product.featured_image | image_url: width: 350 }} 350w, {{ item_product.featured_image | image_url: width: 500 }} 500w"
-                    sizes="(max-width: 899px) 45vw, 260px"
-                    alt="{{ item_product.featured_image.alt | default: item_product.title | escape }}"
-                    width="{{ item_product.featured_image.width }}"
-                    height="{{ item_product.featured_image.height }}"
-                    loading="lazy"
-                  >
-                {%- else -%}
-                  <span class="fs__grid-placeholder" aria-hidden="true">
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1 12H7L6 8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-                  </span>
-                {%- endif -%}
-                {%- if item_variant.available == false -%}
-                  <span class="fs__grid-ribbon">{{ s.sold_out_text | default: 'Sold out' }}</span>
-                {%- endif -%}
+                <span class="fs__grid-cell-media">
+                  {%- if item_product.featured_image != blank -%}
+                    <img
+                      src="{{ item_product.featured_image | image_url: width: 500 }}"
+                      srcset="{{ item_product.featured_image | image_url: width: 350 }} 350w, {{ item_product.featured_image | image_url: width: 500 }} 500w"
+                      sizes="(max-width: 899px) 45vw, 260px"
+                      alt="{{ item_product.featured_image.alt | default: item_product.title | escape }}"
+                      width="{{ item_product.featured_image.width }}"
+                      height="{{ item_product.featured_image.height }}"
+                      loading="lazy"
+                    >
+                  {%- else -%}
+                    <span class="fs__grid-placeholder" aria-hidden="true">
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1 12H7L6 8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    </span>
+                  {%- endif -%}
+                  {%- if item_variant.available == false -%}
+                    <span class="fs__grid-ribbon">{{ s.sold_out_text | default: 'Sold out' }}</span>
+                  {%- endif -%}
+                </span>
+                <span class="fs__cell-tip" data-fs-cell-tip aria-hidden="true">
+                  <span class="fs__cell-tip-title">{{ item_product.title }}</span>
+                  <span class="fs__cell-tip-price">{{ item_variant.price | money }}</span>
+                  {%- if block.settings.reason != blank -%}
+                    <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
+                  {%- endif -%}
+                </span>
               {%- endif -%}
             </span>
           {%- endfor -%}
@@ -271,12 +280,21 @@
     position: relative;
     display: block;
     aspect-ratio: 1 / 1;
+    cursor: default;
+    will-change: transform;
+  }
+
+  /* The visible rounded/clipped card is this inner wrapper, not the
+     cell itself - the cell stays overflow:visible so the hover tip
+     below isn't clipped when the cursor nears the top edge. */
+  #fs-{{ section_id }} .fs__grid-cell-media {
+    position: absolute;
+    inset: 0;
+    display: block;
     border-radius: 16px;
     overflow: hidden;
     background: var(--fs-card-bg);
     box-shadow: 0 16px 40px rgba(20, 20, 20, 0.08);
-    cursor: default;
-    will-change: transform;
   }
 
   /* Drop-in entrance: each cell falls into place from above and
@@ -298,7 +316,7 @@
   #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="2"] { transition-delay: 0.2s; }
   #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="3"] { transition-delay: 0.3s; }
 
-  #fs-{{ section_id }} .fs__grid-cell img {
+  #fs-{{ section_id }} .fs__grid-cell-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -307,6 +325,7 @@
 
   #fs-{{ section_id }} .fs__grid-cell--empty {
     border: 1.5px dashed var(--fs-border);
+    border-radius: 16px;
   }
 
   #fs-{{ section_id }} .fs__grid-placeholder {
@@ -330,6 +349,53 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+  }
+
+  /* ---- Cursor-following info popup ----
+     Positioned via JS to track the pointer inside the cell (left/top
+     set on mousemove), not CSS centering - it needs to follow the
+     cursor, not sit in one fixed spot. Hidden by default and faded in
+     only while actively hovered. */
+  #fs-{{ section_id }} .fs__cell-tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 200px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(20, 20, 20, 0.92);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(-50%, -120%, 0);
+    transition: opacity 0.2s ease;
+    white-space: normal;
+  }
+
+  #fs-{{ section_id }} .fs__cell-tip.is-visible {
+    opacity: 1;
+  }
+
+  #fs-{{ section_id }} .fs__cell-tip-title {
+    font-weight: 700;
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+
+  #fs-{{ section_id }} .fs__cell-tip-price {
+    font-weight: 700;
+    font-size: 12px;
+    color: #a8e0ad;
+  }
+
+  #fs-{{ section_id }} .fs__cell-tip-reason {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   /* ---- Info ---- */
@@ -656,6 +722,15 @@
 
     function registerCellEffects(el) {
       if (cellState.has(el)) return;
+      // The drop-in entrance's own CSS transition (0.75s, bouncy) is
+      // still attached to `transform` at this point - left in place,
+      // it would keep re-triggering on every mousemove-driven style
+      // change from here on, chasing a target that moves every frame
+      // and reading as heavy lag/rubber-banding instead of following
+      // the cursor. From here, JS's own eased rAF loop is the only
+      // thing that should smooth `transform`, so the CSS transition is
+      // switched off for this element for good.
+      el.style.transition = 'none';
       var st = { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, curParY: 0, dragX: 0, scale: 1, curScale: 1, ticking: false };
       cellState.set(el, st);
       activeCells.push(el);
@@ -686,15 +761,28 @@
       }
       st.startRender = startRender;
 
+      var tip = el.querySelector('[data-fs-cell-tip]');
+
       if (!prefersReducedMotion) {
         el.addEventListener('mousemove', function (e) {
           var rect = el.getBoundingClientRect();
           var relX = e.clientX - (rect.left + rect.width / 2);
           var relY = e.clientY - (rect.top + rect.height / 2);
-          st.magX = Math.max(-12, Math.min(12, relX * 0.12));
-          st.magY = Math.max(-12, Math.min(12, relY * 0.12));
+          st.magX = Math.max(-18, Math.min(18, relX * 0.16));
+          st.magY = Math.max(-18, Math.min(18, relY * 0.16));
           st.scale = 1.03;
           startRender();
+
+          if (tip) {
+            // Positioned relative to the cell, following the pointer
+            // directly rather than sitting in one fixed spot.
+            tip.style.left = (e.clientX - rect.left) + 'px';
+            tip.style.top = (e.clientY - rect.top) + 'px';
+          }
+        });
+
+        el.addEventListener('mouseenter', function () {
+          if (tip) tip.classList.add('is-visible');
         });
 
         el.addEventListener('mouseleave', function () {
@@ -702,6 +790,7 @@
           st.magY = 0;
           st.scale = 1;
           startRender();
+          if (tip) tip.classList.remove('is-visible');
         });
       }
     }
@@ -970,7 +1059,8 @@
       "name": "Product",
       "limit": 4,
       "settings": [
-        { "type": "product", "id": "product", "label": "Product" }
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "reason", "label": "Why use it?", "info": "Optional short line shown in the hover popup on this product's image, alongside its name and price." }
       ]
     }
   ],
