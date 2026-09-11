@@ -1,0 +1,279 @@
+{
+  "sections": {
+    "faqs_hero": {
+      "type": "contact-hero",
+      "name": "FAQs Hero",
+      "settings": {
+        "eyebrow": "Need A Hand?",
+        "heading": "Frequently Asked Questions",
+        "subheading": "Everything about orders, shipping, payments and our products, in one place. Can't find your answer? We're one message away.",
+        "button_1_text": "Contact Us",
+        "button_1_url": "/pages/contact?view=contact",
+        "button_2_text": "",
+        "button_2_url": "",
+        "height": 380,
+        "overlay_color": "#0B1F0F",
+        "overlay_opacity": 55,
+        "text_color": "#FFFFFF",
+        "accent_color": "#F58220"
+      }
+    },
+    "faqs_accordion": {
+      "type": "faq-accordion",
+      "name": "FAQ Accordion",
+      "blocks": {
+        "cat_order_status": {
+          "type": "category",
+          "settings": { "heading": "Order Status" }
+        },
+        "q_order_1": {
+          "type": "question",
+          "settings": {
+            "question": "How do I know my order has been confirmed?",
+            "answer": "<p>Once the payment confirmation is received, your order will be registered on our system and we will begin to process it.</p><p>You will receive an email containing the details of your order and a confirmation of the same. In this mail you will be provided with a unique Order ID (eg. 124433), a listing of the item(s) you have ordered and the expected date of dispatch.</p><p>You will also be notified when we ship the item(s) to you. Shipping details will be provided with the respective tracking number(s).</p>"
+          }
+        },
+        "q_order_2": {
+          "type": "question",
+          "settings": {
+            "question": "How do I check the current status of my order?",
+            "answer": "<p>You can review the status of your orders and other related tracking information by visiting the \"My Orders\" section. You can instantly see the status of a specific order and all your past orders.</p><p>The delivery status of the orders shipped can be checked online by entering in the tracking number for your shipment. The tracking number and the web site link for tracking your shipment will be provided in your shipment confirmation email.</p><p>Orders placed after Friday, 3:00 PM will be processed for shipment only on the following Monday.</p>"
+          }
+        },
+        "q_order_3": {
+          "type": "question",
+          "settings": {
+            "question": "Why is my order not showing?",
+            "answer": "<p>You can track all your orders by signing in to your account if you are a registered user.</p><p>If your most recent order is not showing after successful payment, you may use the below mentioned methods to contact Sri Sai Pharmaceuticals:</p><ul><li>Email us on support@srisaipharmaceuticals.com</li><li>Call us: +91-9550245472 (Available between 09:00 hrs IST to 17:30 hrs IST, Monday to Saturday)</li></ul>"
+          }
+        },
+        "q_order_4": {
+          "type": "question",
+          "settings": {
+            "question": "Can I order a product that is 'Out of Stock'?",
+            "answer": "<p>Unfortunately, products listed as 'Out of Stock' are not available for sale. Once the product is re-stocked, the product will be available for sale.</p>"
+          }
+        },
+
+        "cat_returns": {
+          "type": "category",
+          "settings": { "heading": "Cancellations, Returns & Refunds" }
+        },
+        "q_returns_1": {
+          "type": "question",
+          "settings": {
+            "question": "How do I cancel an order? Will a refund be processed if an order is cancelled?",
+            "answer": "<p>Orders once confirmed are final and cannot be cancelled by the purchaser. Refunds are not offered if an order is cancelled.</p>"
+          }
+        },
+        "q_returns_2": {
+          "type": "question",
+          "settings": {
+            "question": "Can I return a product that I bought on srisaipharmaceuticals.com?",
+            "answer": "<p>Sri Sai Pharmaceuticals does not accept returns or exchanges for its products. Refunds are not offered, and all sales are final.</p>"
+          }
+        },
+        "q_returns_3": {
+          "type": "question",
+          "settings": {
+            "question": "I have received a damaged/defective/wrong product in my order, how should I proceed?",
+            "answer": "<p>In the event that products are damaged, defective or not in accordance with the Purchaser's order, the Purchaser's exclusive remedy shall be, at Sri Sai Pharmaceuticals' option, replacement of the damaged or defective product or crediting of the Purchaser's account.</p><p>Unless the Purchaser notifies Sri Sai Pharmaceuticals in writing within three (3) days from the date of receipt that quantities are damaged, defective or not in accordance with the Purchaser's order, it shall be conclusively presumed that such products were in the proper quantity, were not damaged, and were in accordance with the Purchaser's order.</p>"
+          }
+        },
+        "q_returns_4": {
+          "type": "question",
+          "settings": {
+            "question": "What is your refund policy?",
+            "answer": "<p>Sri Sai Pharmaceuticals does not accept returns or exchanges for its products. Refunds are not offered, and all sales are final.</p>"
+          }
+        },
+
+        "cat_order_placement": {
+          "type": "category",
+          "settings": { "heading": "Order Placement" }
+        },
+        "q_placement_1": {
+          "type": "question",
+          "settings": {
+            "question": "How do I sign up for a Sri Sai Pharmaceuticals account?",
+            "answer": "<p>All you need to do is provide us with your name, email address and a password of your choice. It's that simple!</p>"
+          }
+        },
+        "q_placement_2": {
+          "type": "question",
+          "settings": {
+            "question": "Do I have to have an account to place an order at Sri Sai Pharmaceuticals?",
+            "answer": "<p>No, you do not, as you can place an order as a guest, by just providing your email address for correspondence.</p><p>However, we highly recommend that you do create a Sri Sai Pharmaceuticals account. Not only will you be able to rate and review products, but also obtain details regarding upcoming discounts on our featured products. After all, shopping more for less is always fun!</p>"
+          }
+        },
+        "q_placement_3": {
+          "type": "question",
+          "settings": {
+            "question": "How do I place an order on www.srisaipharmaceuticals.com?",
+            "answer": "<p>You can place your order in a few simple steps:</p><p><strong>Step 1:</strong> Click the 'Add to Cart' button on the products you wish to purchase and they will be added to your shopping cart.</p><p><strong>Step 2:</strong> Register with Sri Sai Pharmaceuticals by clicking on the \"Account\" button on the top right-hand corner of the page and clicking on \"Sign Up\". When you sign up, you can enter all your details including your address and phone number onto your account page and it will be recorded for future purposes! While this sign-up step is optional, we highly recommend it - you'll be able to rate and review products, and get details on upcoming discounts.</p><p><strong>Step 3:</strong> Either \"Continue shopping\" or click on the \"Checkout\" button to proceed to the next steps.</p><p><strong>Step 4:</strong> Provide us with your email address, shipping address and payment details. Finally, click \"Place Order\" to go ahead.</p><p><strong>Step 5:</strong> Once the order is placed, you will see a confirmation page with an order number, and we will send you an email confirming your order.</p><p>If you have any further questions, you can write to us at support@srisaipharmaceuticals.com.</p>"
+          }
+        },
+        "q_placement_4": {
+          "type": "question",
+          "settings": {
+            "question": "Can I edit my order after confirmation?",
+            "answer": "<p>Unfortunately, you cannot add or remove any product from the order after confirmation.</p>"
+          }
+        },
+        "q_placement_5": {
+          "type": "question",
+          "settings": {
+            "question": "Can I ship the products to an address that is different from my billing address?",
+            "answer": "<p>Yes, definitely! You can do so by filling in your address as the 'billing address' and the address you wish to ship your order to as the 'shipping address'.</p>"
+          }
+        },
+        "q_placement_6": {
+          "type": "question",
+          "settings": {
+            "question": "Can I leave items in my shopping bag for future purchase?",
+            "answer": "<p>Yes, you can leave items in your shopping bag, however the price and availability of these products will be reflected on a real-time basis. Hence, there is a possibility that the product may get sold out or the offer on the product may expire from the time you added it to your shopping bag.</p>"
+          }
+        },
+
+        "cat_account": {
+          "type": "category",
+          "settings": { "heading": "My Account" }
+        },
+        "q_account_1": {
+          "type": "question",
+          "settings": {
+            "question": "How can I make a Sri Sai Pharmaceuticals account?",
+            "answer": "<p>Just click on the \"Account\" button on the top right-hand corner of the page and click on \"Sign Up\". Fill in your name, email address and password. You can even sign up using your Facebook or Google+ account - yes, it is that simple!</p>"
+          }
+        },
+        "q_account_2": {
+          "type": "question",
+          "settings": {
+            "question": "How can I save my address on Sri Sai Pharmaceuticals?",
+            "answer": "<p>When you sign up for your Sri Sai Pharmaceuticals account, you can enter all your details including your address and phone number onto your account page and it will be recorded for future purposes - so you don't have to keep filling in your details for every new order.</p><p>To manage your address(es), visit the \"My Account\" page and click the \"Address Book\" tab.</p>"
+          }
+        },
+        "q_account_3": {
+          "type": "question",
+          "settings": {
+            "question": "What if I have forgotten my account password?",
+            "answer": "<p>When signing in you can click on the forgotten password link below the sign-up area. You will be redirected to a new page where you will be instructed to fill in your registered email address. You will then receive an email with a link to reset your password.</p>"
+          }
+        },
+
+        "cat_payments": {
+          "type": "category",
+          "settings": { "heading": "Payments" }
+        },
+        "q_payments_1": {
+          "type": "question",
+          "settings": {
+            "question": "How do I pay for purchases made?",
+            "answer": "<p>Sri Sai Pharmaceuticals offers you multiple ways to pay securely, including:</p><ul><li>Debit and Credit Cards - American Express, PayPal, Mastercard, Visa, Discover</li><li>Net banking</li><li>Paytm</li><li>PhonePe</li><li>G Pay</li></ul>"
+          }
+        },
+        "q_payments_2": {
+          "type": "question",
+          "settings": {
+            "question": "How safe is it to use my debit/credit card or make an online payment on srisaipharmaceuticals.com?",
+            "answer": "<p>We use the 3D Secure payment gateway for card payments. These are industry-standard secure payment methods so that we can ensure that all your online transactions at www.srisaipharmaceuticals.com are processed in an extremely secure environment.</p>"
+          }
+        },
+        "q_payments_3": {
+          "type": "question",
+          "settings": {
+            "question": "What steps does Sri Sai Pharmaceuticals take to prevent card fraud?",
+            "answer": "<p>Our trusted online payment partners monitor transactions continuously for suspicious activity and flag potentially fraudulent transactions for manual verification by our team.</p><p>When our team is unable to rule out the possibility of fraud categorically, the transaction is kept on hold, and the customer is requested to provide identity documents. The ID documents help us ensure that the purchases were indeed made by a genuine card holder.</p>"
+          }
+        },
+        "q_payments_4": {
+          "type": "question",
+          "settings": {
+            "question": "What is the 3D Secure Password?",
+            "answer": "<p>The 3D Secure password is an additional password that you'll be asked to enter after entering your card details on the payment page. You'll be redirected to your individual bank's page where you'll have to enter the Verified by Visa password for Visa cards or the Secure Code password for MasterCard cards. Your card-issuing bank will give this password to you, and you should have it prior to shopping on www.srisaipharmaceuticals.com.</p><p>Note: the 3D Secure password has been made mandatory by the Reserve Bank of India to ensure safer online shopping. It adds an additional layer of security and prevents misuse of a lost or stolen card, as the user will be unable to proceed unless they enter the password associated with their card, created by themselves and known only to them.</p>"
+          }
+        },
+        "q_payments_5": {
+          "type": "question",
+          "settings": {
+            "question": "Can I place a Cash on Delivery (COD) order?",
+            "answer": "<p>Currently we don't accept orders on a Cash on Delivery basis. The available payment options are:</p><ul><li>Debit and Credit Cards - American Express, PayPal, Mastercard, Visa, Discover</li><li>Net banking</li><li>Paytm</li><li>PhonePe</li><li>G Pay</li></ul>"
+          }
+        },
+
+        "cat_authenticity": {
+          "type": "category",
+          "settings": { "heading": "Authenticity & Genuineness" }
+        },
+        "q_auth_1": {
+          "type": "question",
+          "settings": {
+            "question": "How does Sri Sai Pharmaceuticals ensure efficacy of its products?",
+            "answer": "<p>Sri Sai Pharmaceuticals follows the principles of Good Manufacturing Practices (GMP) at our manufacturing facility. This enables us to produce herbal products with uniform batch-to-batch consistency and ensures that the customer receives the same high-quality product regardless of where it is purchased. We strive to meet customer health needs through well-researched, effective and safe remedies.</p>"
+          }
+        },
+        "q_auth_2": {
+          "type": "question",
+          "settings": {
+            "question": "Do Sri Sai Pharmaceutical products have side effects?",
+            "answer": "<p>All our products are clinically tested for safety and efficacy and are completely free from side effects when used in the dosage according to the instructions on the product pack. Each product undergoes extensive research for safety and efficacy and has to meet stringent regulatory requirements before being made available to the customer. The pharmaceutical range products are best taken in consultation with your family physician.</p>"
+          }
+        },
+        "q_auth_3": {
+          "type": "question",
+          "settings": {
+            "question": "Where can I get information on ingredients used in Sri Sai Pharmaceutical products?",
+            "answer": "<p>You can get detailed information on ingredients used in Sri Sai Pharmaceuticals products at our official website: www.srisaipharmaceuticals.com. You can also reach out to us at support@srisaipharmaceuticals.com or call us at +91-9550245472 (Available between 09:00 hrs IST to 17:30 hrs IST, Monday to Saturday).</p>"
+          }
+        },
+        "q_auth_4": {
+          "type": "question",
+          "settings": {
+            "question": "Where can I get information on dosage for Sri Sai Pharmaceutical products?",
+            "answer": "<p>The dosage to be followed is detailed out in the \"Dosage\" section as a part of the product information.</p>"
+          }
+        },
+        "q_auth_5": {
+          "type": "question",
+          "settings": {
+            "question": "What measures does Sri Sai Pharmaceuticals take to ensure the products are not damaged during delivery?",
+            "answer": "<p>We at Sri Sai Pharmaceuticals maintain a very high level of quality control and ensure the highest quality of our packaging. To ensure your products remain undamaged during the shipping process, we package our products in boxes and each individual product is packaged in bubble wrap, while fragile items like bottles are safely secured with additional bubble wrap.</p>"
+          }
+        },
+        "q_auth_6": {
+          "type": "question",
+          "settings": {
+            "question": "Does Sri Sai Pharmaceuticals deliver products internationally?",
+            "answer": "<p>We do not deliver items internationally. You will be able to make purchases on our site only if the delivery address is in India.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "cat_order_status", "q_order_1", "q_order_2", "q_order_3", "q_order_4",
+        "cat_returns", "q_returns_1", "q_returns_2", "q_returns_3", "q_returns_4",
+        "cat_order_placement", "q_placement_1", "q_placement_2", "q_placement_3", "q_placement_4", "q_placement_5", "q_placement_6",
+        "cat_account", "q_account_1", "q_account_2", "q_account_3",
+        "cat_payments", "q_payments_1", "q_payments_2", "q_payments_3", "q_payments_4", "q_payments_5",
+        "cat_authenticity", "q_auth_1", "q_auth_2", "q_auth_3", "q_auth_4", "q_auth_5", "q_auth_6"
+      ],
+      "settings": {
+        "cta_heading": "Still have a question?",
+        "cta_text": "Contact Us",
+        "cta_url": "/pages/contact?view=contact",
+        "background_color": "#FFFFFF",
+        "card_color": "#F7F5F0",
+        "text_color": "#141414",
+        "muted_color": "#6B6B6B",
+        "accent_color": "#2E7D32",
+        "cta_color": "#F58220",
+        "border_color": "#ECECEC",
+        "padding_top": 80,
+        "padding_bottom": 100
+      }
+    }
+  },
+  "order": [
+    "faqs_hero",
+    "faqs_accordion"
+  ]
+}

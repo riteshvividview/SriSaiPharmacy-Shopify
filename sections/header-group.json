@@ -229,6 +229,13 @@
             "label": "Contact",
             "url": "/pages/contact?view=contact"
           }
+        },
+        "link_faqs": {
+          "type": "simple_link",
+          "settings": {
+            "label": "FAQs",
+            "url": "/pages/faqs?view=faqs"
+          }
         }
       },
       "block_order": [
@@ -250,7 +257,8 @@
         "tile_family_pack",
         "nav_pages",
         "link_our_story",
-        "link_contact"
+        "link_contact",
+        "link_faqs"
       ],
       "settings": {
         "logo": "shopify://shop_images/SRI-SAI-LOGO_540x_ef454a46-8814-4316-b941-6562611158e6.avif",
