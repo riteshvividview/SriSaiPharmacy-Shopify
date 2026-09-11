@@ -616,6 +616,14 @@
     gap: 20px;
   }
 
+  /* Cards enter one after another on open: blurred, translated down and
+     invisible at rest, resolving to sharp/in-place/opaque once the parent
+     dropdown is hovered or focused - staggered per tile via nth-child
+     below so they cascade in rather than all appearing at once. The
+     entrance offset and the tile's own hover-lift both animate
+     `transform`, so they're composed via custom properties (added
+     together in one `translateY`) rather than each rule fighting the
+     other's `transform` value outright. */
   #ssh-{{ section_id }} .ssh__tile {
     display: flex;
     flex-direction: column;
@@ -623,13 +631,35 @@
     gap: 14px;
     padding: 12px;
     border-radius: 12px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    --tile-enter-y: 18px;
+    --tile-hover-y: 0px;
+    opacity: 0;
+    filter: blur(7px);
+    transform: translateY(calc(var(--tile-enter-y) + var(--tile-hover-y)));
+    transition: background-color 0.2s ease, transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+      opacity 0.5s ease, filter 0.5s ease;
   }
 
   #ssh-{{ section_id }} .ssh__tile:hover {
     background: #f4f7f4;
-    transform: translateY(-2px);
+    --tile-hover-y: -2px;
   }
+
+  #ssh-{{ section_id }} .ssh__nav-item--mega:hover .ssh__tile,
+  #ssh-{{ section_id }} .ssh__nav-item--mega:focus-within .ssh__tile {
+    --tile-enter-y: 0px;
+    opacity: 1;
+    filter: blur(0);
+  }
+
+  #ssh-{{ section_id }} .ssh__tile:nth-child(1) { transition-delay: 0.03s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(2) { transition-delay: 0.08s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(3) { transition-delay: 0.13s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(4) { transition-delay: 0.18s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(5) { transition-delay: 0.23s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(6) { transition-delay: 0.28s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(7) { transition-delay: 0.33s; }
+  #ssh-{{ section_id }} .ssh__tile:nth-child(8) { transition-delay: 0.38s; }
 
   #ssh-{{ section_id }} .ssh__tile-image {
     display: block;
@@ -932,6 +962,13 @@
     #ssh-{{ section_id }} .ssh__burger-open,
     #ssh-{{ section_id }} .ssh__burger-close {
       transition: none;
+    }
+
+    #ssh-{{ section_id }} .ssh__tile {
+      transition: none !important;
+      opacity: 1;
+      filter: none;
+      --tile-enter-y: 0px;
     }
   }
 </style>
