@@ -735,8 +735,8 @@
         "buy_now_text": "Buy it now",
         "show_share": true,
         "share_label": "Share",
-        "sync_scroll_bg": false,
-        "background_color": "#f2f6f1",
+        "sync_scroll_bg": true,
+        "background_color": "#ffffff",
         "card_color": "#ffffff",
         "text_color": "#141414",
         "muted_color": "#6b6b6b",
@@ -752,15 +752,21 @@
       "blocks": {
         "badge_1": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/gmp-logo-png_360x_48fb80a2-533d-42cc-af8d-9cc380b31ea3.webp"
+          }
         },
         "badge_2": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/ayush-logo-png_360x_24cfe3a3-1bba-4f55-b8f7-1a0c91473dfe.webp"
+          }
         },
         "badge_3": {
           "type": "badge",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/1971_360x_19cda67c-9f0a-4484-9d3e-9c97f1766af7.webp"
+          }
         }
       },
       "block_order": [
@@ -777,12 +783,13 @@
         "badge_gap": 64,
         "grayscale_until_hover": false,
         "enable_marquee": true,
-        "marquee_speed": 28,
-        "parallax_amount": 16,
+        "marquee_speed": 60,
+        "parallax_amount": 60,
         "padding_block": 64,
         "show_top_border": true,
         "show_bottom_border": true,
-        "background_color": "#f7f5f0",
+        "sync_scroll_bg": true,
+        "background_color": "#ffffff",
         "accent_color": "#2e7d32",
         "heading_color": "#141414",
         "subtext_color": "#5b5b5b"
@@ -794,73 +801,61 @@
         "review_1": {
           "type": "review",
           "settings": {
+            "image_1": "shopify://shop_images/testimags_4.png",
+            "image_2": "shopify://shop_images/testimags_6.jpg",
+            "image_3": "shopify://shop_images/testimags_2.jpg",
+            "pull_quote": "An excerpt from the testimonial goes right here to highlight the best part.",
+            "review_text": "Ordered my mother's diabetes medicines here for over a year now. Always genuine, always on time. Never had a single issue.",
             "reviewer_name": "Priya Ramesh",
-            "rating": 5,
-            "pull_quote": "Always genuine, always on time. Never had a single issue.",
-            "review_text": "Ordered my mother's diabetes medicines here for over a year now. The whole family trusts them completely."
+            "rating": 5
           }
         },
         "review_2": {
           "type": "review",
           "settings": {
+            "image_1": "shopify://shop_images/testimags_6.jpg",
+            "image_2": "shopify://shop_images/testimags_2.jpg",
+            "image_3": "shopify://shop_images/testimags_3.jpg",
+            "pull_quote": "An excerpt from the testimonial goes right here to highlight the best part.",
+            "review_text": "The immunity combo pack actually works — fewer sick days this monsoon for the whole family. Fast delivery too.",
             "reviewer_name": "Arun Kumar",
-            "rating": 5,
-            "pull_quote": "Fewer sick days this monsoon for the whole family.",
-            "review_text": "The immunity combo pack actually works, and fast delivery every single time."
+            "rating": 5
           }
         },
         "review_3": {
           "type": "review",
           "settings": {
+            "image_1": "shopify://shop_images/testimags_2.jpg",
+            "image_2": "shopify://shop_images/testimags_3.jpg",
+            "image_3": "shopify://shop_images/testimags_1.jpg",
+            "pull_quote": "An excerpt from the testimonial goes right here to highlight the best part.",
+            "review_text": "Love that they have a whole section for women's health. Found exactly what my doctor recommended in two minutes.",
             "reviewer_name": "Meena Sundaram",
-            "rating": 4,
-            "pull_quote": "Found exactly what my doctor recommended in two minutes.",
-            "review_text": "Love that they have a whole dedicated section for women's health."
+            "rating": 4
           }
         },
         "review_4": {
           "type": "review",
           "settings": {
+            "image_1": "shopify://shop_images/testimags_3.jpg",
+            "image_2": "shopify://shop_images/testimags_1.jpg",
+            "image_3": "shopify://shop_images/testimags_4.png",
+            "pull_quote": "An excerpt from the testimonial goes right here to highlight the best part.",
+            "review_text": "Customer support actually picks up the phone and knows what they're talking about. Rare these days.",
             "reviewer_name": "Karthik Raja",
-            "rating": 5,
-            "pull_quote": "Rare these days to find support that actually knows what they're talking about.",
-            "review_text": "Customer support actually picks up the phone and answers real questions, not a script."
+            "rating": 5
           }
         },
-        "review_5": {
+        "review_kdFGf4": {
           "type": "review",
           "settings": {
-            "reviewer_name": "Divya Prakash",
-            "rating": 5,
-            "pull_quote": "Now a permanent fixture in our house.",
-            "review_text": "The pain relief balm from the joint care range worked so well, I'm already ordering my third bottle."
-          }
-        },
-        "review_6": {
-          "type": "review",
-          "settings": {
-            "reviewer_name": "Suresh Babu",
-            "rating": 4,
-            "pull_quote": "Switched from my old pharmacy for good.",
-            "review_text": "Clean website, easy checkout, and the packaging keeps everything intact every time."
-          }
-        },
-        "review_7": {
-          "type": "review",
-          "settings": {
-            "reviewer_name": "Lakshmi Narayanan",
-            "rating": 5,
-            "pull_quote": "Wish I'd found them sooner.",
-            "review_text": "Their digestive care combo sorted out my acidity issues within just a week."
-          }
-        },
-        "review_8": {
-          "type": "review",
-          "settings": {
-            "reviewer_name": "Vikram Anand",
-            "rating": 5,
-            "pull_quote": "Prices are fair and everything ships fast.",
-            "review_text": "Been buying my supplements here for months, even during festival season rush."
+            "image_1": "shopify://shop_images/testimags_1.jpg",
+            "image_2": "shopify://shop_images/testimags_4.png",
+            "image_3": "shopify://shop_images/testimags_6.jpg",
+            "pull_quote": "An excerpt from the testimonial goes right here to highlight the best part.",
+            "review_text": "Customer support actually picks up the phone and knows what they're talking about. Rare these days.",
+            "reviewer_name": "Karthik Raja",
+            "rating": 5
           }
         }
       },
@@ -869,10 +864,7 @@
         "review_2",
         "review_3",
         "review_4",
-        "review_5",
-        "review_6",
-        "review_7",
-        "review_8"
+        "review_kdFGf4"
       ],
       "name": "Testimonials",
       "settings": {
@@ -882,14 +874,14 @@
         "view_all_link": "/pages/reviews",
         "side_image_size": 190,
         "center_image_size": 320,
-        "padding_block": 100,
+        "padding_block": 88,
         "sync_scroll_bg": true,
-        "background_color": "#F2F6F1",
-        "image_bg_color": "#F2F6F1",
-        "border_color": "#ECECEC",
+        "background_color": "#ffffff",
+        "image_bg_color": "#f2f6f1",
+        "border_color": "#ececec",
         "text_color": "#141414",
         "muted_color": "#6b6b6b",
-        "accent_color": "#2e7d32"
+        "accent_color": "#f58220"
       }
     }
   },

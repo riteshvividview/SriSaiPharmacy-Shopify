@@ -72,10 +72,17 @@
       {%- endif -%}
     {%- else -%}
       <div class="fs__panel" data-reveal>
-        <div class="fs__grid">
+        <div class="fs__grid" data-fs-grid>
           {%- for block in items limit: 4 -%}
             {%- assign item_product = block.settings.product -%}
-            <span class="fs__grid-cell{% if forloop.first %} fs__grid-cell--primary{% endif %}{% if item_product == blank %} fs__grid-cell--empty{% endif %}">
+            <span
+              class="fs__grid-cell{% if forloop.first %} fs__grid-cell--primary{% endif %}{% if item_product == blank %} fs__grid-cell--empty{% endif %}"
+              data-fs-cell
+              data-fs-cell-drop
+              data-fs-cell-index="{{ forloop.index0 }}"
+              data-fs-magnetic
+              data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 14 }}"
+            >
               {%- if item_product != blank -%}
                 {%- assign item_variant = item_product.selected_or_first_available_variant -%}
                 {%- if item_product.featured_image != blank -%}
@@ -250,10 +257,6 @@
     grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
     gap: 56px;
     align-items: start;
-    background: var(--fs-card-bg);
-    border-radius: 28px;
-    padding: 32px;
-    box-shadow: 0 30px 70px rgba(20, 20, 20, 0.08);
   }
 
   /* ---- 2x2 image grid: 4 different products ---- */
@@ -261,6 +264,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+    perspective: 1200px;
   }
 
   #fs-{{ section_id }} .fs__grid-cell {
@@ -269,8 +273,30 @@
     aspect-ratio: 1 / 1;
     border-radius: 16px;
     overflow: hidden;
-    background: var(--fs-bg);
+    background: var(--fs-card-bg);
+    box-shadow: 0 16px 40px rgba(20, 20, 20, 0.08);
+    cursor: default;
+    will-change: transform;
   }
+
+  /* Drop-in entrance: each cell falls into place from above and
+     settles with a slight overshoot, staggered cell-by-cell rather
+     than the whole grid appearing at once. */
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-drop] {
+    opacity: 0;
+    transform: translate3d(0, -60px, 0) rotateX(12deg) scale(0.92);
+    transition: transform 0.75s cubic-bezier(0.22, 1.15, 0.32, 1), opacity 0.55s ease;
+  }
+
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-drop].is-dropped {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0) scale(1);
+  }
+
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="0"] { transition-delay: 0s; }
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="1"] { transition-delay: 0.1s; }
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="2"] { transition-delay: 0.2s; }
+  #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-index="3"] { transition-delay: 0.3s; }
 
   #fs-{{ section_id }} .fs__grid-cell img {
     width: 100%;
@@ -572,7 +598,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #fs-{{ section_id }} [data-reveal] {
+    #fs-{{ section_id }} [data-reveal],
+    #fs-{{ section_id }} .fs__grid-cell[data-fs-cell-drop] {
       transition: none !important;
       transform: none !important;
       opacity: 1 !important;
@@ -604,6 +631,167 @@
       } else {
         revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
       }
+    }
+
+    /* ---- Grid cells: staggered drop-in, then magnetic hover + scroll
+       parallax once dropped ----
+       The drop-in entrance and the magnetic/parallax drift both end up
+       writing this same element's `transform`, so a cell's magnetic +
+       parallax state (and its listeners) are only registered AFTER its
+       drop-in transition finishes - never both at once fighting over
+       the same style property. Everything shares one composed
+       transform per cell (translate + rotateX + scale) via elState,
+       same pattern as the testimonials section. */
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var cellState = new Map();
+    var activeCells = [];
+
+    function composeCellTransform(el) {
+      var st = cellState.get(el);
+      if (!st) return;
+      el.style.transform =
+        'translate3d(' + (st.curMagX + st.dragX).toFixed(2) + 'px, ' + (st.curMagY + st.curParY).toFixed(2) + 'px, 0) ' +
+        'scale(' + st.curScale.toFixed(3) + ')';
+    }
+
+    function registerCellEffects(el) {
+      if (cellState.has(el)) return;
+      var st = { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, curParY: 0, dragX: 0, scale: 1, curScale: 1, ticking: false };
+      cellState.set(el, st);
+      activeCells.push(el);
+
+      function render() {
+        st.curMagX += (st.magX - st.curMagX) * 0.2;
+        st.curMagY += (st.magY - st.curMagY) * 0.2;
+        st.curScale += (st.scale - st.curScale) * 0.25;
+        st.curParY += (st.parY - st.curParY) * 0.09;
+        composeCellTransform(el);
+        if (
+          Math.abs(st.magX - st.curMagX) > 0.1 ||
+          Math.abs(st.magY - st.curMagY) > 0.1 ||
+          Math.abs(st.scale - st.curScale) > 0.002 ||
+          Math.abs(st.parY - st.curParY) > 0.05
+        ) {
+          window.requestAnimationFrame(render);
+        } else {
+          st.ticking = false;
+        }
+      }
+
+      function startRender() {
+        if (!st.ticking) {
+          st.ticking = true;
+          window.requestAnimationFrame(render);
+        }
+      }
+      st.startRender = startRender;
+
+      if (!prefersReducedMotion) {
+        el.addEventListener('mousemove', function (e) {
+          var rect = el.getBoundingClientRect();
+          var relX = e.clientX - (rect.left + rect.width / 2);
+          var relY = e.clientY - (rect.top + rect.height / 2);
+          st.magX = Math.max(-12, Math.min(12, relX * 0.12));
+          st.magY = Math.max(-12, Math.min(12, relY * 0.12));
+          st.scale = 1.03;
+          startRender();
+        });
+
+        el.addEventListener('mouseleave', function () {
+          st.magX = 0;
+          st.magY = 0;
+          st.scale = 1;
+          startRender();
+        });
+      }
+    }
+
+    var dropCells = Array.prototype.slice.call(section.querySelectorAll('[data-fs-cell-drop]'));
+    if (dropCells.length) {
+      if ('IntersectionObserver' in window) {
+        var dropObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              var el = entry.target;
+              el.classList.add('is-dropped');
+              dropObserver.unobserve(el);
+              if (prefersReducedMotion) return;
+              var delayMs = parseFloat(window.getComputedStyle(el).transitionDelay) * 1000 || 0;
+              var durationMs = parseFloat(window.getComputedStyle(el).transitionDuration) * 1000 || 750;
+              window.setTimeout(function () { registerCellEffects(el); }, delayMs + durationMs + 30);
+            });
+          },
+          { threshold: 0.15 }
+        );
+        dropCells.forEach(function (el) { dropObserver.observe(el); });
+      } else {
+        dropCells.forEach(function (el) {
+          el.classList.add('is-dropped');
+          if (!prefersReducedMotion) registerCellEffects(el);
+        });
+      }
+    }
+
+    /* ---- Scroll parallax for dropped cells (differential per cell,
+       via data-fs-parallax amount) ---- */
+    var grid = section.querySelector('[data-fs-grid]');
+    if (grid && !prefersReducedMotion) {
+      var parallaxTicking = false;
+      function updateGridParallax() {
+        parallaxTicking = false;
+        var rect = grid.getBoundingClientRect();
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.bottom < 0 || rect.top > vh) return;
+        var progress = (vh - rect.top) / (vh + rect.height);
+        activeCells.forEach(function (el) {
+          var amount = parseFloat(el.getAttribute('data-fs-parallax')) || 0;
+          var st = cellState.get(el);
+          if (!st) return;
+          st.parY = (progress - 0.5) * amount;
+          if (st.startRender) st.startRender();
+        });
+      }
+      function onGridScroll() {
+        if (parallaxTicking) return;
+        parallaxTicking = true;
+        window.requestAnimationFrame(updateGridParallax);
+      }
+      var pageScroller = document.querySelector('.page-wrapper');
+      window.addEventListener('scroll', onGridScroll, { passive: true });
+      if (pageScroller) pageScroller.addEventListener('scroll', onGridScroll, { passive: true });
+      window.addEventListener('resize', onGridScroll, { passive: true });
+    }
+
+    /* ---- Magnetic hover on the CTA buttons ---- */
+    if (!prefersReducedMotion) {
+      var magneticButtons = Array.prototype.slice.call(section.querySelectorAll('.fs__add-btn, .fs__buy-now-btn'));
+      magneticButtons.forEach(function (btn) {
+        var bx = 0, by = 0, cbx = 0, cby = 0, ticking = false;
+        function render() {
+          cbx += (bx - cbx) * 0.2;
+          cby += (by - cby) * 0.2;
+          btn.style.transform = 'translate3d(' + cbx.toFixed(2) + 'px, ' + cby.toFixed(2) + 'px, 0)';
+          if (Math.abs(bx - cbx) > 0.1 || Math.abs(by - cby) > 0.1) {
+            window.requestAnimationFrame(render);
+          } else {
+            ticking = false;
+          }
+        }
+        function startRender() {
+          if (!ticking) { ticking = true; window.requestAnimationFrame(render); }
+        }
+        btn.addEventListener('mousemove', function (e) {
+          var rect = btn.getBoundingClientRect();
+          bx = Math.max(-6, Math.min(6, (e.clientX - (rect.left + rect.width / 2)) * 0.25));
+          by = Math.max(-6, Math.min(6, (e.clientY - (rect.top + rect.height / 2)) * 0.25));
+          startRender();
+        });
+        btn.addEventListener('mouseleave', function () {
+          bx = 0; by = 0;
+          startRender();
+        });
+      });
     }
 
     var itemsScript = section.querySelector('[data-fs-pack-items]');
@@ -761,7 +949,7 @@
     { "type": "text", "id": "share_label", "label": "Share label", "default": "Share" },
 
     { "type": "header", "content": "Background" },
-    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "default": false },
+    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "info": "Joins the whole-page background color morph shared with other sections that opt in, instead of showing this section's own flat background block.", "default": true },
 
     { "type": "header", "content": "Colors" },
     { "type": "color", "id": "background_color", "label": "Section background", "default": "#F2F6F1" },

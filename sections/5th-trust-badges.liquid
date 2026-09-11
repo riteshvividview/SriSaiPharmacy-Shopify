@@ -18,12 +18,13 @@
 -%}
 
 <section
-  class="tb"
+  class="tb{% if s.sync_scroll_bg %} tb--transparent-bg{% endif %}"
   id="tb-{{ section_id }}"
   data-tb
   data-parallax-amount="{{ s.parallax_amount | default: 16 }}"
+  {% if s.sync_scroll_bg %}data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"{% endif %}
   style="
-    --tb-bg: {{ s.background_color | default: '#F7F5F0' }};
+    --tb-bg: {{ s.background_color | default: '#F2F6F1' }};
     --tb-border: {{ s.accent_color | default: '#2E7D32' }};
     --tb-heading-color: {{ s.heading_color | default: '#141414' }};
     --tb-eyebrow-color: {{ s.accent_color | default: '#2E7D32' }};
@@ -39,9 +40,9 @@
   <div class="tb__inner">
     {%- if s.eyebrow != blank or s.heading != blank or s.subheading != blank -%}
       <div class="tb__header" data-tb-parallax data-speed="0.3">
-        {%- if s.eyebrow != blank -%}<p class="tb__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
-        {%- if s.heading != blank -%}<h2 class="tb__heading">{{ s.heading }}</h2>{%- endif -%}
-        {%- if s.subheading != blank -%}<p class="tb__subheading">{{ s.subheading }}</p>{%- endif -%}
+        {%- if s.eyebrow != blank -%}<p class="tb__eyebrow" data-tb-drop style="transition-delay:0s;">{{ s.eyebrow }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="tb__heading" data-tb-drop style="transition-delay:0.08s;">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.subheading != blank -%}<p class="tb__subheading" data-tb-drop style="transition-delay:0.16s;">{{ s.subheading }}</p>{%- endif -%}
       </div>
     {%- endif -%}
 
@@ -60,7 +61,7 @@
         {%- for block in badges -%}
           {%- assign bs = block.settings -%}
           {%- if bs.image != blank -%}
-            <span class="tb__badge">
+            <span class="tb__badge" data-tb-drop data-tb-magnetic style="transition-delay: {{ forloop.index0 | times: 0.08 }}s;">
               <img
                 src="{{ bs.image | image_url: width: 400 }}"
                 srcset="{{ bs.image | image_url: width: 200 }} 200w, {{ bs.image | image_url: width: 400 }} 400w"
@@ -123,6 +124,10 @@
     font-family: 'Poppins', sans-serif;
   }
 
+  #tb-{{ section_id }}.tb--transparent-bg {
+    background: transparent;
+  }
+
   #tb-{{ section_id }} * {
     box-sizing: border-box;
   }
@@ -156,6 +161,21 @@
     max-width: 640px;
     margin: 0 auto 40px;
     padding: 0 24px;
+  }
+
+  /* Drop-in entrance, staggered line by line via inline transition-delay
+     set in Liquid. Lands on the header's children, not the header
+     itself, since the header already carries its own scroll-driven
+     parallax transform - the two never touch the same element. */
+  #tb-{{ section_id }} [data-tb-drop] {
+    opacity: 0;
+    transform: translate3d(0, -34px, 0);
+    transition: transform 0.7s cubic-bezier(0.22, 1.15, 0.32, 1), opacity 0.5s ease;
+  }
+
+  #tb-{{ section_id }} [data-tb-drop].is-dropped {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   #tb-{{ section_id }} .tb__eyebrow {
@@ -285,6 +305,12 @@
     #tb-{{ section_id }} .tb__row--marquee .tb__set:nth-child(2) {
       display: none;
     }
+
+    #tb-{{ section_id }} [data-tb-drop] {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
   }
 </style>
 
@@ -294,6 +320,70 @@
     if (!section) return;
 
     var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Drop-in entrance (header lines + badges), then magnetic
+       hover on badges once dropped ----
+       Registering the magnetic mousemove listener only after a badge's
+       own drop-in transition finishes avoids the same transform-
+       property fight seen elsewhere in this project: the entrance and
+       the hover pull would otherwise both try to own `style.transform`
+       on the same element at the same time. */
+    function registerBadgeMagnetic(el) {
+      if (prefersReducedMotion || el.__tbMagneticBound) return;
+      el.__tbMagneticBound = true;
+      var mx = 0, my = 0, cmx = 0, cmy = 0, ticking = false;
+      function render() {
+        cmx += (mx - cmx) * 0.22;
+        cmy += (my - cmy) * 0.22;
+        el.style.transform = 'translate3d(' + cmx.toFixed(2) + 'px, ' + cmy.toFixed(2) + 'px, 0)';
+        if (Math.abs(mx - cmx) > 0.1 || Math.abs(my - cmy) > 0.1) {
+          window.requestAnimationFrame(render);
+        } else {
+          ticking = false;
+        }
+      }
+      function startRender() {
+        if (!ticking) { ticking = true; window.requestAnimationFrame(render); }
+      }
+      el.addEventListener('mousemove', function (e) {
+        var rect = el.getBoundingClientRect();
+        mx = Math.max(-8, Math.min(8, (e.clientX - (rect.left + rect.width / 2)) * 0.3));
+        my = Math.max(-8, Math.min(8, (e.clientY - (rect.top + rect.height / 2)) * 0.3));
+        startRender();
+      });
+      el.addEventListener('mouseleave', function () {
+        mx = 0; my = 0;
+        startRender();
+      });
+    }
+
+    var dropTargets = Array.prototype.slice.call(section.querySelectorAll('[data-tb-drop]'));
+    if (dropTargets.length) {
+      if (prefersReducedMotion) {
+        dropTargets.forEach(function (el) { el.classList.add('is-dropped'); });
+      } else if ('IntersectionObserver' in window) {
+        var dropObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              var el = entry.target;
+              el.classList.add('is-dropped');
+              dropObserver.unobserve(el);
+              if (el.hasAttribute('data-tb-magnetic')) {
+                var delayMs = parseFloat(window.getComputedStyle(el).transitionDelay) * 1000 || 0;
+                var durationMs = parseFloat(window.getComputedStyle(el).transitionDuration) * 1000 || 700;
+                window.setTimeout(function () { registerBadgeMagnetic(el); }, delayMs + durationMs + 30);
+              }
+            });
+          },
+          { threshold: 0.2, rootMargin: '0px 100px 0px 100px' }
+        );
+        dropTargets.forEach(function (el) { dropObserver.observe(el); });
+      } else {
+        dropTargets.forEach(function (el) { el.classList.add('is-dropped'); });
+      }
+    }
+
     var parallaxItems = Array.prototype.slice.call(section.querySelectorAll('[data-tb-parallax]'));
     if (prefersReducedMotion || !parallaxItems.length) return;
 
@@ -366,8 +456,11 @@
     { "type": "checkbox", "id": "show_top_border", "label": "Show top accent line", "default": true },
     { "type": "checkbox", "id": "show_bottom_border", "label": "Show bottom accent line", "default": true },
 
+    { "type": "header", "content": "Background" },
+    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "info": "Joins the whole-page background color morph shared with other sections that opt in, instead of showing this section's own flat background block.", "default": true },
+
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "background_color", "label": "Background", "default": "#F7F5F0" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#F2F6F1" },
     { "type": "color", "id": "accent_color", "label": "Accent (eyebrow, edge lines)", "default": "#2E7D32" },
     { "type": "color", "id": "heading_color", "label": "Heading", "default": "#141414" },
     { "type": "color", "id": "subtext_color", "label": "Subheading text", "default": "#5B5B5B" }
