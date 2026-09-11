@@ -39,15 +39,15 @@
     --tsm-muted: {{ s.muted_color | default: '#6B6B6B' }};
     --tsm-accent: {{ s.accent_color | default: '#2E7D32' }};
     --tsm-side-size: {{ s.side_image_size | default: 190 }}px;
-    --tsm-center-size: {{ s.center_image_size | default: 280 }}px;
+    --tsm-center-size: {{ s.center_image_size | default: 320 }}px;
     --tsm-padding-block: {{ s.padding_block | default: 100 }}px;
   "
 >
   <div class="tsm__inner">
     <div class="tsm__panel" data-reveal>
-      {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
-
       {%- if review_count > 0 -%}
+        {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
+
         <div class="tsm__images" data-tsm-images>
           <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="18">
             {%- for block in reviews -%}
@@ -95,34 +95,41 @@
           </div>
         {%- endif -%}
 
+        {%- assign first_review = reviews.first.settings -%}
         <div class="tsm__quotes" data-tsm-quotes>
-          <div class="tsm__quote-col tsm__quote-col--left" data-tsm-quote-col="0">
-            {%- for block in reviews -%}
-              {%- assign rs = block.settings -%}
-              <div class="tsm__quote-item{% if forloop.first %} is-active{% endif %}" data-tsm-quote-item data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
-                {%- if s.show_rating and rs.rating -%}
-                  <div class="tsm__stars" aria-label="{{ rs.rating }} out of 5 stars">
+          <div class="tsm__quote-col tsm__quote-col--left">
+            <div class="tsm__quote-mask">
+              <div class="tsm__quote-inner" data-tsm-quote-inner="left">
+                {%- if s.show_rating -%}
+                  <div class="tsm__stars" data-tsm-stars aria-label="{{ first_review.rating | default: 5 }} out of 5 stars">
                     {%- for i in (1..5) -%}
-                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > rs.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > first_review.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
                     {%- endfor -%}
                   </div>
                 {%- endif -%}
-                {%- if rs.pull_quote != blank -%}
-                  <p class="tsm__pull-quote">&ldquo;{{ rs.pull_quote }}&rdquo;</p>
-                {%- endif -%}
+                <p class="tsm__pull-quote" data-tsm-pull-quote>&ldquo;{{ first_review.pull_quote }}&rdquo;</p>
               </div>
-            {%- endfor -%}
+            </div>
           </div>
-          <div class="tsm__quote-col tsm__quote-col--right" data-tsm-quote-col="1">
-            {%- for block in reviews -%}
-              {%- assign rs = block.settings -%}
-              <div class="tsm__quote-item{% if forloop.first %} is-active{% endif %}" data-tsm-quote-item data-index="{{ forloop.index0 }}">
-                {%- if rs.review_text != blank -%}<p class="tsm__review-text">{{ rs.review_text }}</p>{%- endif -%}
-                {%- if rs.reviewer_name != blank -%}<p class="tsm__client-name">{{ rs.reviewer_name }}</p>{%- endif -%}
+          <div class="tsm__quote-col tsm__quote-col--right">
+            <div class="tsm__quote-mask">
+              <div class="tsm__quote-inner" data-tsm-quote-inner="right">
+                <p class="tsm__review-text" data-tsm-review-text>{{ first_review.review_text }}</p>
+                <p class="tsm__client-name" data-tsm-client-name>{{ first_review.reviewer_name }}</p>
               </div>
-            {%- endfor -%}
+            </div>
           </div>
         </div>
+
+        <script type="application/json" data-tsm-reviews-data>
+          [
+            {%- for block in reviews -%}
+              {%- assign rs = block.settings -%}
+              {%- unless forloop.first -%},{%- endunless -%}
+              { "pullQuote": {{ rs.pull_quote | json }}, "reviewText": {{ rs.review_text | json }}, "name": {{ rs.reviewer_name | json }}, "rating": {{ rs.rating | default: 0 | json }} }
+            {%- endfor -%}
+          ]
+        </script>
       {%- endif -%}
 
       {%- if s.view_all_text != blank -%}
@@ -159,6 +166,7 @@
   }
 
   #tsm-{{ section_id }} .tsm__panel {
+    position: relative;
     background: var(--tsm-panel-bg);
     border-radius: 28px;
     padding: 56px 48px;
@@ -173,16 +181,29 @@
     transform: translate3d(0, 0, 0);
   }
 
+  /* Sits behind the image row as a large, pale watermark rather than
+     a normal heading in flow - the center image overlaps and covers
+     part of it. Bebas Neue only ships one (regular) weight, so the
+     "lighter" look comes from wide letter-spacing plus low opacity
+     rather than an actual font-weight change. */
   #tsm-{{ section_id }} .tsm__heading {
-    margin: 0 0 44px;
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 0;
+    margin: 0;
     font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-weight: 400;
-    font-size: clamp(30px, 4vw, 46px);
+    font-size: clamp(52px, 8.5vw, 128px);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    line-height: 1.05;
+    letter-spacing: 3px;
+    line-height: 1;
     text-align: center;
     color: var(--tsm-text);
+    opacity: 0.07;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   /* ---- Image row ----
@@ -201,11 +222,13 @@
      gives the requested springy "jerk" snap as each card settles. */
   #tsm-{{ section_id }} .tsm__images {
     position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: clamp(16px, 3vw, 40px);
     height: var(--tsm-center-size);
+    margin-top: clamp(30px, 5vw, 56px);
     margin-bottom: 26px;
     perspective: 1400px;
   }
@@ -215,7 +238,7 @@
     display: block;
     flex-shrink: 0;
     aspect-ratio: 1 / 1;
-    border-radius: 14px;
+    border-radius: 0;
     overflow: hidden;
     background: var(--tsm-image-bg);
     transform-style: preserve-3d;
@@ -352,6 +375,23 @@
      the script) so the two clearly read as separate movements. Each
      column measures and sets its own height from JS so the row never
      jumps between testimonials of different lengths. */
+  /* ---- Quotes ----
+     A single set of text elements (not one per review) whose content
+     is swapped by JS - this sidesteps the earlier bug entirely, where
+     a JS-measured pixel height (needed because multiple reviews' text
+     were all stacked absolutely at once) got locked in before the
+     webfont had finished loading, permanently clipping the text.
+     There's nothing to measure now: each column just sizes to its own
+     content, normally, in flow.
+
+     Each column is a "mask" (overflow:hidden, fixed to the content's
+     own natural size) wrapping an inner element that transforms for
+     the reveal - left rises up from below (fades out revealed at the top,
+     hidden by the mask before/after), right wipes in from the left
+     edge via clip-path. The two are genuinely different techniques,
+     not just mirrored timing. JS runs this as outgoing text
+     animating out, THEN swaps the copy, THEN animates the new copy
+     in - see transitionQuoteText() below. */
   #tsm-{{ section_id }} .tsm__quotes {
     position: relative;
     max-width: 900px;
@@ -361,61 +401,49 @@
     gap: 40px;
   }
 
-  #tsm-{{ section_id }} .tsm__quote-col {
-    position: relative;
+  #tsm-{{ section_id }} .tsm__quote-mask {
     overflow: hidden;
-    transition: height 0.4s ease;
   }
 
-  #tsm-{{ section_id }} .tsm__quote-item {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #tsm-{{ section_id }} .tsm__quote-item.no-transition {
+  #tsm-{{ section_id }} .tsm__quote-inner.no-transition {
     transition: none !important;
   }
 
-  #tsm-{{ section_id }} .tsm__quote-item.is-active {
+  /* Left column: rises up from below the mask, fading in; exits by
+     continuing to rise further up while fading out. */
+  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-inner {
+    padding-top: 2px;
+    transform: translate3d(0, 0, 0);
     opacity: 1;
-    pointer-events: auto;
-    transform: translate3d(0, 0, 0);
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
   }
 
-  /* Left column: fade + gentle vertical rise. */
-  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-item {
-    transform: translate3d(0, 14px, 0);
-    transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
-  }
-
-  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-item.is-enter-from-right,
-  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-item.is-enter-from-left,
-  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-item.is-exit-to-right,
-  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-item.is-exit-to-left {
+  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-inner.is-exiting {
+    transform: translate3d(0, -20px, 0);
     opacity: 0;
-    transform: translate3d(0, 14px, 0);
   }
 
-  /* Right column: horizontal slide, matching the images' direction. */
-  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-item {
-    transform: translate3d(0, 0, 0);
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.45s ease;
-  }
-
-  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-item.is-enter-from-right,
-  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-item.is-exit-to-right {
+  #tsm-{{ section_id }} .tsm__quote-col--left .tsm__quote-inner.is-pre-enter {
+    transform: translate3d(0, 28px, 0);
     opacity: 0;
-    transform: translate3d(30px, 0, 0);
   }
 
-  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-item.is-enter-from-left,
-  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-item.is-exit-to-left {
+  /* Right column: a curtain wipe via clip-path - closes toward the
+     right on exit, opens from the left on entry. */
+  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-inner {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    transition: clip-path 0.48s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-inner.is-exiting {
+    clip-path: inset(0 0 0 100%);
     opacity: 0;
-    transform: translate3d(-30px, 0, 0);
+  }
+
+  #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-inner.is-pre-enter {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
   }
 
   #tsm-{{ section_id }} .tsm__stars {
@@ -567,8 +595,7 @@
        on top of each other instead of just disabling the animation. */
     #tsm-{{ section_id }} .tsm__panel,
     #tsm-{{ section_id }} .tsm__slot-image,
-    #tsm-{{ section_id }} .tsm__quote-item,
-    #tsm-{{ section_id }} .tsm__quote-col,
+    #tsm-{{ section_id }} .tsm__quote-inner,
     #tsm-{{ section_id }} .tsm__nav-btn {
       transition: none !important;
     }
@@ -621,27 +648,38 @@
     var slotImages = slots.map(function (slot) {
       return Array.prototype.slice.call(slot.querySelectorAll('[data-tsm-slot-image]'));
     });
-    var quoteCols = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-quote-col]'));
-    var quoteColItems = quoteCols.map(function (col) {
-      return Array.prototype.slice.call(col.querySelectorAll('[data-tsm-quote-item]'));
-    });
     var prevBtn = section.querySelector('[data-tsm-prev]');
     var nextBtn = section.querySelector('[data-tsm-next]');
-    var total = quoteColItems[0] ? quoteColItems[0].length : 0;
+
+    var reviewsDataScript = section.querySelector('[data-tsm-reviews-data]');
+    var reviewsData = [];
+    if (reviewsDataScript) {
+      try { reviewsData = JSON.parse(reviewsDataScript.textContent); } catch (e) { reviewsData = []; }
+    }
+
+    var leftInner = section.querySelector('[data-tsm-quote-inner="left"]');
+    var rightInner = section.querySelector('[data-tsm-quote-inner="right"]');
+    var pullQuoteEl = section.querySelector('[data-tsm-pull-quote]');
+    var reviewTextEl = section.querySelector('[data-tsm-review-text]');
+    var clientNameEl = section.querySelector('[data-tsm-client-name]');
+    var starEls = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-stars] .tsm__star'));
+
+    var total = reviewsData.length;
     var current = 0;
     var isAnimating = false;
     var TRANSITION_MS = 750;
     var STAGGER_MS = 110;
     var SLOT_ORDER = [0, 1, 2]; // left, center, right image slots - one after another
-    var QUOTE_STAGGER_MS = 90; // right column starts just after the left one
+    var QUOTE_EXIT_MS = 320;
+    var QUOTE_ENTER_MS = 420;
 
-    function setColHeight(col, items, index) {
-      if (!col || !items[index]) return;
-      col.style.height = items[index].scrollHeight + 'px';
-    }
-
-    function setAllQuoteHeights(index) {
-      quoteCols.forEach(function (col, c) { setColHeight(col, quoteColItems[c], index); });
+    function applyReviewContent(index) {
+      var data = reviewsData[index];
+      if (!data) return;
+      if (pullQuoteEl) pullQuoteEl.textContent = '“' + data.pullQuote + '”';
+      if (reviewTextEl) reviewTextEl.textContent = data.reviewText;
+      if (clientNameEl) clientNameEl.textContent = data.name;
+      starEls.forEach(function (star, i) { star.classList.toggle('tsm__star--empty', i + 1 > data.rating); });
     }
 
     function transitionEl(outgoingEl, incomingEl, enterClass, exitClass) {
@@ -658,6 +696,23 @@
       }, TRANSITION_MS);
     }
 
+    function transitionQuoteText(index) {
+      if (leftInner) leftInner.classList.add('is-exiting');
+      if (rightInner) rightInner.classList.add('is-exiting');
+
+      window.setTimeout(function () {
+        applyReviewContent(index);
+
+        [leftInner, rightInner].forEach(function (el) {
+          if (!el) return;
+          el.classList.remove('is-exiting');
+          el.classList.add('no-transition', 'is-pre-enter');
+          void el.offsetWidth; // commit the pre-enter pose before animating
+          el.classList.remove('no-transition', 'is-pre-enter');
+        });
+      }, QUOTE_EXIT_MS);
+    }
+
     function animateSlide(index, direction) {
       if (isAnimating || index === current) return;
       isAnimating = true;
@@ -670,16 +725,11 @@
         slotImages.forEach(function (images) {
           images.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
         });
-        quoteColItems.forEach(function (items) {
-          items.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
-        });
+        applyReviewContent(index);
         current = index;
-        setAllQuoteHeights(current);
         isAnimating = false;
         return;
       }
-
-      setAllQuoteHeights(index);
 
       SLOT_ORDER.forEach(function (slotIndex, i) {
         var images = slotImages[slotIndex];
@@ -689,19 +739,14 @@
         }, i * STAGGER_MS);
       });
 
-      quoteColItems.forEach(function (items, c) {
-        if (!items[fromIndex] || !items[index]) return;
-        window.setTimeout(function () {
-          transitionEl(items[fromIndex], items[index], enterClass, exitClass);
-        }, c * QUOTE_STAGGER_MS);
-      });
+      transitionQuoteText(index);
 
       current = index;
 
-      var maxDelay = Math.max((SLOT_ORDER.length - 1) * STAGGER_MS, (quoteColItems.length - 1) * QUOTE_STAGGER_MS);
+      var maxDelay = Math.max((SLOT_ORDER.length - 1) * STAGGER_MS + TRANSITION_MS, QUOTE_EXIT_MS + QUOTE_ENTER_MS);
       window.setTimeout(function () {
         isAnimating = false;
-      }, maxDelay + TRANSITION_MS);
+      }, maxDelay);
     }
 
     function goTo(index, direction) {
@@ -712,9 +757,6 @@
 
     if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1, 'prev'); });
     if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1, 'next'); });
-
-    setAllQuoteHeights(0);
-    window.addEventListener('resize', function () { setAllQuoteHeights(current); }, { passive: true });
 
     /* ---- Drag / swipe the image row to navigate ----
        Works even under prefers-reduced-motion (goTo() itself already
@@ -928,7 +970,7 @@
 
     { "type": "header", "content": "Layout" },
     { "type": "range", "id": "side_image_size", "label": "Side image size", "min": 120, "max": 260, "step": 10, "unit": "px", "default": 190 },
-    { "type": "range", "id": "center_image_size", "label": "Center image size", "min": 180, "max": 360, "step": 10, "unit": "px", "default": 280 },
+    { "type": "range", "id": "center_image_size", "label": "Center image size", "min": 180, "max": 380, "step": 10, "unit": "px", "default": 320 },
     { "type": "range", "id": "padding_block", "label": "Vertical padding", "min": 20, "max": 160, "step": 4, "unit": "px", "default": 100 },
 
     { "type": "header", "content": "Colors" },

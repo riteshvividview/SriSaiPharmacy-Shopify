@@ -881,7 +881,7 @@
         "view_all_text": "View all reviews",
         "view_all_link": "/pages/reviews",
         "side_image_size": 190,
-        "center_image_size": 280,
+        "center_image_size": 320,
         "padding_block": 100,
         "background_color": "#F2F6F1",
         "panel_color": "#FFFFFF",
