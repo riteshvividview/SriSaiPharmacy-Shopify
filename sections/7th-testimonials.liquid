@@ -28,11 +28,11 @@
 -%}
 
 <section
-  class="tsm"
+  class="tsm{% if s.sync_scroll_bg %} tsm--transparent-bg{% endif %}"
   id="tsm-{{ section_id }}"
+  {% if s.sync_scroll_bg %}data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"{% endif %}
   style="
     --tsm-bg: {{ s.background_color | default: '#F2F6F1' }};
-    --tsm-panel-bg: {{ s.panel_color | default: '#FFFFFF' }};
     --tsm-image-bg: {{ s.image_bg_color | default: '#F2F6F1' }};
     --tsm-border: {{ s.border_color | default: '#ECECEC' }};
     --tsm-text: {{ s.text_color | default: '#141414' }};
@@ -46,9 +46,17 @@
   <div class="tsm__inner">
     <div class="tsm__panel" data-reveal>
       {%- if review_count > 0 -%}
+        {%- assign first_review = reviews.first.settings -%}
         {%- if s.heading != blank -%}<h2 class="tsm__heading">{{ s.heading }}</h2>{%- endif -%}
 
         <div class="tsm__images" data-tsm-images>
+          {%- if s.show_rating -%}
+            <div class="tsm__stars-top" data-tsm-stars aria-label="{{ first_review.rating | default: 5 }} out of 5 stars">
+              {%- for i in (1..5) -%}
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > first_review.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
           <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="18">
             {%- for block in reviews -%}
               {%- assign rs = block.settings -%}
@@ -95,18 +103,10 @@
           </div>
         {%- endif -%}
 
-        {%- assign first_review = reviews.first.settings -%}
         <div class="tsm__quotes" data-tsm-quotes>
           <div class="tsm__quote-col tsm__quote-col--left">
             <div class="tsm__quote-mask">
               <div class="tsm__quote-inner" data-tsm-quote-inner="left">
-                {%- if s.show_rating -%}
-                  <div class="tsm__stars" data-tsm-stars aria-label="{{ first_review.rating | default: 5 }} out of 5 stars">
-                    {%- for i in (1..5) -%}
-                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" class="tsm__star{% if i > first_review.rating %} tsm__star--empty{% endif %}"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9L10 15l-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L10 1.5Z" fill="currentColor"/></svg>
-                    {%- endfor -%}
-                  </div>
-                {%- endif -%}
                 <p class="tsm__pull-quote" data-tsm-pull-quote>&ldquo;{{ first_review.pull_quote }}&rdquo;</p>
               </div>
             </div>
@@ -154,6 +154,10 @@
     font-family: 'Poppins', sans-serif;
   }
 
+  #tsm-{{ section_id }}.tsm--transparent-bg {
+    background: transparent;
+  }
+
   #tsm-{{ section_id }} *,
   #tsm-{{ section_id }} *::before,
   #tsm-{{ section_id }} *::after {
@@ -167,10 +171,7 @@
 
   #tsm-{{ section_id }} .tsm__panel {
     position: relative;
-    background: var(--tsm-panel-bg);
-    border-radius: 28px;
     padding: 56px 48px;
-    box-shadow: 0 30px 70px rgba(20, 20, 20, 0.07);
     opacity: 0;
     transform: translate3d(0, 28px, 0);
     transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -253,6 +254,23 @@
 
   #tsm-{{ section_id }} .tsm__slot--center {
     width: var(--tsm-center-size);
+  }
+
+  #tsm-{{ section_id }} .tsm__slot--center img {
+    filter: grayscale(1);
+  }
+
+  /* Stars sit above the center card, centered over the watermark
+     heading behind it. */
+  #tsm-{{ section_id }} .tsm__stars-top {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
   }
 
   #tsm-{{ section_id }} .tsm__slot-image {
@@ -444,12 +462,6 @@
   #tsm-{{ section_id }} .tsm__quote-col--right .tsm__quote-inner.is-pre-enter {
     clip-path: inset(0 100% 0 0);
     opacity: 0;
-  }
-
-  #tsm-{{ section_id }} .tsm__stars {
-    display: flex;
-    gap: 3px;
-    margin-bottom: 12px;
   }
 
   #tsm-{{ section_id }} .tsm__star {
@@ -962,7 +974,7 @@
   "settings": [
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Real Stories, Real Relief" },
-    { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": false },
+    { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
 
     { "type": "header", "content": "View all button" },
     { "type": "text", "id": "view_all_text", "label": "Button text", "default": "View all reviews" },
@@ -973,9 +985,11 @@
     { "type": "range", "id": "center_image_size", "label": "Center image size", "min": 180, "max": 380, "step": 10, "unit": "px", "default": 320 },
     { "type": "range", "id": "padding_block", "label": "Vertical padding", "min": 20, "max": 160, "step": 4, "unit": "px", "default": 100 },
 
+    { "type": "header", "content": "Background" },
+    { "type": "checkbox", "id": "sync_scroll_bg", "label": "Sync background with page scroll effect", "info": "Joins the whole-page background color morph shared with other sections that opt in, instead of showing this section's own flat background block.", "default": true },
+
     { "type": "header", "content": "Colors" },
     { "type": "color", "id": "background_color", "label": "Page background", "default": "#F2F6F1" },
-    { "type": "color", "id": "panel_color", "label": "Panel background", "default": "#FFFFFF" },
     { "type": "color", "id": "image_bg_color", "label": "Image placeholder background", "default": "#F2F6F1" },
     { "type": "color", "id": "border_color", "label": "Border", "default": "#ECECEC" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
