@@ -1,0 +1,239 @@
+{%- comment -%}
+  Section: Collection - Banner
+  Premium replacement for the default plain collection title/description.
+  Pins in place for a short scroll distance (reusing the same
+  position:sticky-in-a-tall-wrapper technique as
+  2nd-energy-countdown-banner.liquid) while the product grid section
+  right after it scrolls up and covers it - a combined "pin + cover"
+  reveal. Falls back to a normal (non-pinned) banner on mobile and for
+  reduced-motion users.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign overlay_opacity = s.overlay_opacity | default: 55 | divided_by: 100.0
+  assign overlay_color = s.overlay_color | default: '#0B1F0F' | color_modify: 'alpha', overlay_opacity
+-%}
+
+<section
+  class="cb"
+  id="cb-{{ section_id }}"
+  data-cb
+  data-enable-pin="{{ s.enable_pin }}"
+  data-pin-duration="{{ s.pin_duration | default: 400 }}"
+  style="
+    --cb-text: {{ s.text_color | default: '#FFFFFF' }};
+    --cb-accent: {{ s.accent_color | default: '#F58220' }};
+    --cb-overlay: {{ overlay_color }};
+    --cb-height: {{ s.height | default: 380 }}px;
+  "
+>
+  <div class="cb__pin-wrapper" data-pin-wrapper>
+    <div class="cb__pin-inner" data-pin-inner>
+      <div class="cb__media">
+        {%- if collection.image != blank -%}
+          <img
+            src="{{ collection.image | image_url: width: 1800 }}"
+            srcset="{{ collection.image | image_url: width: 800 }} 800w, {{ collection.image | image_url: width: 1400 }} 1400w, {{ collection.image | image_url: width: 1800 }} 1800w"
+            sizes="100vw"
+            alt="{{ collection.image.alt | default: collection.title | escape }}"
+            width="{{ collection.image.width }}"
+            height="{{ collection.image.height }}"
+            loading="eager"
+          >
+        {%- endif -%}
+        <div class="cb__scrim" aria-hidden="true"></div>
+      </div>
+
+      <div class="cb__container">
+        <nav class="cb__breadcrumb" aria-label="Breadcrumb">
+          <a href="{{ routes.root_url }}">Home</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{{ collection.title }}</span>
+        </nav>
+        <h1 class="cb__heading">{{ collection.title }}</h1>
+        {%- if collection.description != blank -%}
+          <div class="cb__description">{{ collection.description }}</div>
+        {%- endif -%}
+        <p class="cb__count">{{ collection.products_count | default: collection.products.size }} products</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #cb-{{ section_id }} {
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  #cb-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #cb-{{ section_id }} .cb__pin-wrapper {
+    position: relative;
+  }
+
+  #cb-{{ section_id }} .cb__pin-inner {
+    position: sticky;
+    top: 0;
+    height: var(--cb-height);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: #14210f;
+  }
+
+  #cb-{{ section_id }} .cb__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  #cb-{{ section_id }} .cb__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #cb-{{ section_id }} .cb__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), var(--cb-overlay) 85%);
+  }
+
+  #cb-{{ section_id }} .cb__container {
+    position: relative;
+    z-index: 1;
+    max-width: 1300px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 32px 40px;
+    color: var(--cb-text);
+  }
+
+  #cb-{{ section_id }} .cb__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  #cb-{{ section_id }} .cb__breadcrumb a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  #cb-{{ section_id }} .cb__breadcrumb a:hover {
+    color: #fff;
+  }
+
+  #cb-{{ section_id }} .cb__heading {
+    margin: 0 0 12px;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(38px, 6vw, 64px);
+    line-height: 1.02;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  #cb-{{ section_id }} .cb__description {
+    max-width: 640px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  #cb-{{ section_id }} .cb__description p {
+    margin: 0 0 0.8em;
+  }
+
+  #cb-{{ section_id }} .cb__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  #cb-{{ section_id }} .cb__count {
+    margin: 14px 0 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--cb-accent);
+  }
+
+  @media (max-width: 749px) {
+    #cb-{{ section_id }} .cb__pin-inner {
+      height: min(var(--cb-height), 320px);
+    }
+
+    #cb-{{ section_id }} .cb__container {
+      padding: 0 20px 28px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cb-{{ section_id }} .cb__pin-inner {
+      position: relative;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('cb-{{ section_id }}');
+    if (!section) return;
+
+    var pinWrapper = section.querySelector('[data-pin-wrapper]');
+    if (!pinWrapper) return;
+
+    var enablePin = section.getAttribute('data-enable-pin') === 'true';
+    var pinDuration = parseFloat(section.getAttribute('data-pin-duration')) || 0;
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function isMobile() {
+      return window.innerWidth <= 749;
+    }
+
+    function applyHeight() {
+      var active = enablePin && !prefersReducedMotion && !isMobile() && pinDuration > 0;
+      pinWrapper.style.height = active ? 'calc(var(--cb-height) + ' + pinDuration + 'px)' : 'auto';
+    }
+
+    applyHeight();
+    window.addEventListener('resize', applyHeight, { passive: true });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection - Banner",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Pin effect" },
+    { "type": "checkbox", "id": "enable_pin", "label": "Pin banner while the product grid scrolls over it", "default": true },
+    { "type": "range", "id": "pin_duration", "label": "Pin duration (extra scroll px)", "min": 0, "max": 1000, "step": 50, "unit": "px", "default": 400 },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "height", "label": "Banner height", "min": 260, "max": 600, "step": 20, "unit": "px", "default": 380 },
+    { "type": "color", "id": "overlay_color", "label": "Overlay color", "default": "#0B1F0F" },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 90, "step": 5, "unit": "%", "default": 55 },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#FFFFFF" },
+    { "type": "color", "id": "accent_color", "label": "Accent (product count)", "default": "#F58220" }
+  ],
+  "presets": [
+    { "name": "Collection - Banner" }
+  ]
+}
+{% endschema %}

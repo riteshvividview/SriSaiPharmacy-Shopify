@@ -1,0 +1,769 @@
+{%- comment -%}
+  Section: Collection - Product Grid
+  Real, working faceted filters (collection.filters) + sort
+  (collection.sort_options) + paginated product grid, restyled to match
+  the theme. Sits right after collection-banner.liquid in the template -
+  its opaque background is what visually "covers" the pinned banner as
+  the page scrolls. Cards swap to a product's second image on hover
+  (falls back to a zoom if there's only one image) instead of the
+  default swatch/badge-only treatment.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign per_row = s.products_per_row | default: 4
+  assign per_page = s.products_per_page | default: 12
+-%}
+
+<section
+  class="cg"
+  id="cg-{{ section_id }}"
+  data-cg
+  style="
+    --cg-bg: {{ s.background_color | default: '#FFFFFF' }};
+    --cg-card-bg: {{ s.card_color | default: '#FFFFFF' }};
+    --cg-text: {{ s.text_color | default: '#141414' }};
+    --cg-muted: {{ s.muted_color | default: '#6B6B6B' }};
+    --cg-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --cg-cta: {{ s.cta_color | default: '#F58220' }};
+    --cg-border: {{ s.border_color | default: '#ECECEC' }};
+    --cg-per-row: {{ per_row }};
+    --cg-padding-top: {{ s.padding_top | default: 40 }}px;
+    --cg-padding-bottom: {{ s.padding_bottom | default: 90 }}px;
+  "
+>
+  <div class="cg__container">
+    {%- paginate collection.products by per_page -%}
+      <form id="CollectionFilterForm-{{ section_id }}" class="cg__toolbar" data-cg-filter-form>
+        {%- if collection.filters.size > 0 -%}
+          <div class="cg__filters">
+            {%- for filter in collection.filters -%}
+              <details class="cg__filter" {% if filter.active_values.size > 0 %}open{% endif %}>
+                <summary class="cg__filter-summary">
+                  {{ filter.label }}
+                  {%- if filter.active_values.size > 0 -%}<span class="cg__filter-count">{{ filter.active_values.size }}</span>{%- endif -%}
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M11 5.5L7 9.5L3 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </summary>
+                <div class="cg__filter-panel">
+                  {%- if filter.type == 'price_range' -%}
+                    <div class="cg__price-range">
+                      <label class="cg__price-field">
+                        <span>Min</span>
+                        <input type="number" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value }}" placeholder="{{ filter.range_min | money_without_currency }}" min="0">
+                      </label>
+                      <label class="cg__price-field">
+                        <span>Max</span>
+                        <input type="number" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value }}" placeholder="{{ filter.range_max | money_without_currency }}" min="0">
+                      </label>
+                      <button type="submit" class="cg__price-apply">Apply</button>
+                    </div>
+                  {%- else -%}
+                    <ul class="cg__filter-list">
+                      {%- for value in filter.values -%}
+                        <li>
+                          <label class="cg__filter-option{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                            <input
+                              type="checkbox"
+                              name="{{ value.param_name }}"
+                              value="{{ value.value }}"
+                              {% if value.active %}checked{% endif %}
+                              {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                              data-cg-auto-submit
+                            >
+                            <span>{{ value.label }}</span>
+                            <span class="cg__filter-option-count">{{ value.count }}</span>
+                          </label>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+              </details>
+            {%- endfor -%}
+
+            {%- if collection.current_vendor or collection.current_type or current_tags -%}
+              <a href="{{ collection.url }}" class="cg__clear-filters">Clear all</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="cg__toolbar-right">
+          <span class="cg__count">{{ collection.products_count | default: collection.products.size }} products</span>
+          <label class="cg__sort">
+            <span>Sort by</span>
+            <select name="sort_by" data-cg-auto-submit>
+              {%- for option in collection.sort_options -%}
+                <option value="{{ option.value }}" {% if option.value == collection.sort_by or option.value == sort_by %}selected{% endif %}>{{ option.name }}</option>
+              {%- endfor -%}
+            </select>
+          </label>
+        </div>
+      </form>
+
+      {%- if collection.products.size == 0 -%}
+        <div class="cg__empty" data-reveal>
+          <p>{{ s.empty_text | default: 'No products match these filters yet.' }}</p>
+          <a href="{{ collection.url }}" class="cg__empty-reset">Reset filters</a>
+        </div>
+      {%- else -%}
+        <div class="cg__grid">
+          {%- for product in collection.products -%}
+            {%- assign delay = forloop.index0 | modulo: per_row -%}
+            <a href="{{ product.url }}" class="cg__card" data-reveal data-reveal-delay="{{ delay }}">
+              <span class="cg__card-media">
+                {%- if product.compare_at_price > product.price -%}
+                  {%- assign discount = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round -%}
+                  <span class="cg__badge">{{ discount }}% OFF</span>
+                {%- elsif product.available == false -%}
+                  <span class="cg__badge cg__badge--muted">Sold Out</span>
+                {%- endif -%}
+
+                {%- if product.featured_image != blank -%}
+                  <img
+                    class="cg__card-image cg__card-image--primary"
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    srcset="{{ product.featured_image | image_url: width: 400 }} 400w, {{ product.featured_image | image_url: width: 600 }} 600w"
+                    sizes="(max-width: 749px) 45vw, 300px"
+                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                    width="{{ product.featured_image.width }}"
+                    height="{{ product.featured_image.height }}"
+                    loading="lazy"
+                  >
+                  {%- if product.images.size > 1 -%}
+                    <img
+                      class="cg__card-image cg__card-image--cover"
+                      src="{{ product.images[1] | image_url: width: 600 }}"
+                      alt=""
+                      aria-hidden="true"
+                      width="{{ product.images[1].width }}"
+                      height="{{ product.images[1].height }}"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                {%- else -%}
+                  <span class="cg__card-placeholder" aria-hidden="true">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1 12H7L6 8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.4"/></svg>
+                  </span>
+                {%- endif -%}
+
+                <span class="cg__quick-add" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 8h12l-1 12H7L6 8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+                </span>
+              </span>
+              <span class="cg__card-body">
+                {%- if product.vendor != blank and s.show_vendor -%}<span class="cg__card-vendor">{{ product.vendor }}</span>{%- endif -%}
+                <span class="cg__card-title">{{ product.title }}</span>
+                <span class="cg__card-price">
+                  <span class="cg__price-now">{{ product.price | money }}</span>
+                  {%- if product.compare_at_price > product.price -%}
+                    <span class="cg__price-compare">{{ product.compare_at_price | money }}</span>
+                  {%- endif -%}
+                </span>
+              </span>
+            </a>
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav class="cg__pagination" data-reveal aria-label="Pagination">
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}" class="cg__page-btn cg__page-btn--nav" aria-label="Previous page">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            {%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}
+                <a href="{{ part.url }}" class="cg__page-btn">{{ part.title }}</a>
+              {%- elsif part.title == paginate.current_page -%}
+                <span class="cg__page-btn is-current">{{ part.title }}</span>
+              {%- else -%}
+                <span class="cg__page-btn cg__page-btn--dots">{{ part.title }}</span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}" class="cg__page-btn cg__page-btn--nav" aria-label="Next page">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
+<style>
+  #cg-{{ section_id }} {
+    position: relative;
+    z-index: 2;
+    background: var(--cg-bg);
+    color: var(--cg-text);
+    font-family: 'Poppins', sans-serif;
+    padding: var(--cg-padding-top) 20px var(--cg-padding-bottom);
+    border-radius: 28px 28px 0 0;
+  }
+
+  #cg-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #cg-{{ section_id }} a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #cg-{{ section_id }} .cg__container {
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  #cg-{{ section_id }} [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+    transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cg-{{ section_id }} [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  #cg-{{ section_id }} [data-reveal-delay="1"] { transition-delay: 0.06s; }
+  #cg-{{ section_id }} [data-reveal-delay="2"] { transition-delay: 0.12s; }
+  #cg-{{ section_id }} [data-reveal-delay="3"] { transition-delay: 0.18s; }
+
+  /* ---- Toolbar: filters + sort ---- */
+  #cg-{{ section_id }} .cg__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--cg-border);
+  }
+
+  #cg-{{ section_id }} .cg__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #cg-{{ section_id }} .cg__filter {
+    position: relative;
+  }
+
+  #cg-{{ section_id }} .cg__filter-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--cg-border);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  #cg-{{ section_id }} .cg__filter-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #cg-{{ section_id }} .cg__filter[open] .cg__filter-summary {
+    border-color: var(--cg-accent);
+    color: var(--cg-accent);
+  }
+
+  #cg-{{ section_id }} .cg__filter-summary svg {
+    transition: transform 0.2s ease;
+  }
+
+  #cg-{{ section_id }} .cg__filter[open] .cg__filter-summary svg {
+    transform: rotate(180deg);
+  }
+
+  #cg-{{ section_id }} .cg__filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--cg-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  #cg-{{ section_id }} .cg__filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 5;
+    min-width: 220px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 14px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid var(--cg-border);
+    box-shadow: 0 20px 40px rgba(20, 20, 20, 0.12);
+  }
+
+  #cg-{{ section_id }} .cg__filter-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #cg-{{ section_id }} .cg__filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 6px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  #cg-{{ section_id }} .cg__filter-option:hover {
+    background: var(--cg-card-bg);
+  }
+
+  #cg-{{ section_id }} .cg__filter-option.is-disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  #cg-{{ section_id }} .cg__filter-option input {
+    accent-color: var(--cg-accent);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  #cg-{{ section_id }} .cg__filter-option span:nth-child(2) {
+    flex: 1;
+  }
+
+  #cg-{{ section_id }} .cg__filter-option-count {
+    color: var(--cg-muted);
+    font-size: 12px;
+  }
+
+  #cg-{{ section_id }} .cg__price-range {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  #cg-{{ section_id }} .cg__price-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--cg-muted);
+  }
+
+  #cg-{{ section_id }} .cg__price-field input {
+    width: 76px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--cg-border);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+  }
+
+  #cg-{{ section_id }} .cg__price-apply {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--cg-accent);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #cg-{{ section_id }} .cg__clear-filters {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cg-cta);
+    text-decoration: underline;
+  }
+
+  #cg-{{ section_id }} .cg__toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+  }
+
+  #cg-{{ section_id }} .cg__count {
+    font-size: 13px;
+    color: var(--cg-muted);
+    white-space: nowrap;
+  }
+
+  #cg-{{ section_id }} .cg__sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--cg-muted);
+  }
+
+  #cg-{{ section_id }} .cg__sort select {
+    padding: 9px 30px 9px 12px;
+    border-radius: 999px;
+    border: 1.5px solid var(--cg-border);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--cg-text);
+    background: #fff;
+    cursor: pointer;
+  }
+
+  /* ---- Grid ---- */
+  #cg-{{ section_id }} .cg__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cg-per-row), 1fr);
+    gap: 28px 24px;
+  }
+
+  #cg-{{ section_id }} .cg__card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #cg-{{ section_id }} .cg__card-media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--cg-card-bg);
+    border: 1px solid var(--cg-border);
+    margin-bottom: 14px;
+    transition: box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cg-{{ section_id }} .cg__card:hover .cg__card-media {
+    box-shadow: 0 18px 34px rgba(20, 20, 20, 0.12);
+    transform: translateY(-3px);
+  }
+
+  #cg-{{ section_id }} .cg__card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 14px;
+    display: block;
+    transition: opacity 0.4s ease;
+  }
+
+  #cg-{{ section_id }} .cg__card-image--primary {
+    position: relative;
+    z-index: 1;
+  }
+
+  #cg-{{ section_id }} .cg__card-image--cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0;
+  }
+
+  #cg-{{ section_id }} .cg__card:hover .cg__card-image--cover {
+    opacity: 1;
+  }
+
+  #cg-{{ section_id }} .cg__card-placeholder {
+    color: var(--cg-accent);
+    opacity: 0.4;
+  }
+
+  #cg-{{ section_id }} .cg__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--cg-cta);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  #cg-{{ section_id }} .cg__badge--muted {
+    background: #8a8a8a;
+  }
+
+  #cg-{{ section_id }} .cg__quick-add {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 3;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--cg-accent);
+    color: #fff;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #cg-{{ section_id }} .cg__card:hover .cg__quick-add {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #cg-{{ section_id }} .cg__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  #cg-{{ section_id }} .cg__card-vendor {
+    font-size: 11.5px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--cg-muted);
+  }
+
+  #cg-{{ section_id }} .cg__card-title {
+    font-weight: 500;
+    font-size: 14.5px;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+  }
+
+  #cg-{{ section_id }} .cg__card:hover .cg__card-title {
+    color: var(--cg-accent);
+  }
+
+  #cg-{{ section_id }} .cg__card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  #cg-{{ section_id }} .cg__price-now {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  #cg-{{ section_id }} .cg__price-compare {
+    font-size: 12.5px;
+    color: var(--cg-muted);
+    text-decoration: line-through;
+  }
+
+  #cg-{{ section_id }} .cg__empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--cg-muted);
+  }
+
+  #cg-{{ section_id }} .cg__empty-reset {
+    display: inline-block;
+    margin-top: 12px;
+    font-weight: 600;
+    color: var(--cg-accent);
+    text-decoration: underline;
+  }
+
+  /* ---- Pagination ---- */
+  #cg-{{ section_id }} .cg__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 56px;
+  }
+
+  #cg-{{ section_id }} .cg__page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--cg-border);
+    color: var(--cg-text);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  #cg-{{ section_id }} a.cg__page-btn:hover {
+    background: var(--cg-accent);
+    border-color: var(--cg-accent);
+    color: #fff;
+  }
+
+  #cg-{{ section_id }} .cg__page-btn.is-current {
+    background: var(--cg-text);
+    border-color: var(--cg-text);
+    color: #fff;
+  }
+
+  #cg-{{ section_id }} .cg__page-btn--dots {
+    border-color: transparent;
+    color: var(--cg-muted);
+  }
+
+  /* ---- Tablet / Mobile ---- */
+  @media (max-width: 999px) {
+    #cg-{{ section_id }} {
+      --cg-per-row: 3;
+    }
+  }
+
+  @media (max-width: 749px) {
+    #cg-{{ section_id }} {
+      --cg-per-row: 2;
+      padding-left: 16px;
+      padding-right: 16px;
+      border-radius: 20px 20px 0 0;
+    }
+
+    #cg-{{ section_id }} .cg__toolbar {
+      gap: 12px;
+    }
+
+    #cg-{{ section_id }} .cg__toolbar-right {
+      width: 100%;
+      justify-content: space-between;
+      margin-left: 0;
+    }
+
+    #cg-{{ section_id }} .cg__grid {
+      gap: 20px 14px;
+    }
+
+    #cg-{{ section_id }} .cg__quick-add {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cg-{{ section_id }} [data-reveal],
+    #cg-{{ section_id }} .cg__card-media,
+    #cg-{{ section_id }} .cg__card-image,
+    #cg-{{ section_id }} .cg__quick-add {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
+
+{%- comment -%} ---------------- JS ---------------- {%- endcomment -%}
+<script>
+  (function () {
+    var section = document.getElementById('cg-{{ section_id }}');
+    if (!section) return;
+
+    var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
+    if (revealTargets.length) {
+      if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -6% 0px' }
+        );
+        revealTargets.forEach(function (el) { revealObserver.observe(el); });
+      } else {
+        revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+      }
+    }
+
+    /* Auto-submit the filter form when a checkbox/sort value changes,
+       so filtering feels instant rather than needing an explicit
+       "Apply" click (the price range keeps its own Apply button since
+       typing a number shouldn't submit on every keystroke). */
+    var form = section.querySelector('[data-cg-filter-form]');
+    if (!form) return;
+    var autoInputs = Array.prototype.slice.call(form.querySelectorAll('[data-cg-auto-submit]'));
+    autoInputs.forEach(function (input) {
+      input.addEventListener('change', function () { form.submit(); });
+    });
+
+    /* Close other open filter <details> when one opens, so only one
+       filter panel shows at a time. */
+    var details = Array.prototype.slice.call(form.querySelectorAll('.cg__filter'));
+    details.forEach(function (el) {
+      el.addEventListener('toggle', function () {
+        if (!el.open) return;
+        details.forEach(function (other) {
+          if (other !== el) other.open = false;
+        });
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      details.forEach(function (el) {
+        if (el.open && !el.contains(e.target)) el.open = false;
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection - Product Grid",
+  "settings": [
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "products_per_row", "label": "Products per row (desktop)", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 4, "max": 48, "step": 4, "default": 12 },
+    { "type": "checkbox", "id": "show_vendor", "label": "Show vendor", "default": false },
+    { "type": "text", "id": "empty_text", "label": "Empty state text", "default": "No products match these filters yet." },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "color", "id": "card_color", "label": "Card image background", "default": "#F7F5F0" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#6B6B6B" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" },
+    { "type": "color", "id": "cta_color", "label": "CTA / badge color", "default": "#F58220" },
+    { "type": "color", "id": "border_color", "label": "Border", "default": "#ECECEC" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 5, "unit": "px", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 160, "step": 5, "unit": "px", "default": 90 }
+  ],
+  "presets": [
+    { "name": "Collection - Product Grid" }
+  ]
+}
+{% endschema %}
