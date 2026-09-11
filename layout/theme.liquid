@@ -152,5 +152,65 @@
       {% render 'quick-add-modal' %}
     {% endif %}
 
+    {%- comment -%}
+      Homepage-only smooth scroll (Lenis). Scoped to `template == 'index'`
+      so it never touches other pages - added back per explicit request
+      after being fully removed earlier in the project.
+
+      This theme scrolls `.page-wrapper` (not window/document) at desktop
+      widths (>=990px) - see assets/scroll-container.js - while mobile
+      scrolls the document natively so the browser chrome can hide/show.
+      Lenis is instantiated against whichever one is actually the real
+      scroll container for the current width, and re-created on any
+      desktop/mobile breakpoint crossing. Because Lenis drives the real
+      element's scrollTop (not a transform-based fake scroll), every
+      existing `.page-wrapper` / window scroll listener in this theme's
+      custom sections keeps receiving genuine native scroll events and
+      needs no changes.
+    {%- endcomment -%}
+    {% if template == 'index' %}
+      <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+      <script>
+        (function () {
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (typeof Lenis === 'undefined') return;
+
+          var DESKTOP_QUERY = window.matchMedia('(min-width: 990px)');
+          var lenisInstance = null;
+
+          function createLenis() {
+            var isDesktop = DESKTOP_QUERY.matches;
+            var wrapper = isDesktop ? document.querySelector('.page-wrapper') : window;
+            var options = { duration: 1.1, smoothWheel: true, syncTouch: false };
+            if (wrapper && wrapper !== window) {
+              options.wrapper = wrapper;
+              options.content = wrapper;
+            }
+            lenisInstance = new Lenis(options);
+          }
+
+          function destroyLenis() {
+            if (lenisInstance) {
+              lenisInstance.destroy();
+              lenisInstance = null;
+            }
+          }
+
+          function raf(time) {
+            if (lenisInstance) lenisInstance.raf(time);
+            window.requestAnimationFrame(raf);
+          }
+
+          createLenis();
+          window.requestAnimationFrame(raf);
+
+          DESKTOP_QUERY.addEventListener('change', function () {
+            destroyLenis();
+            createLenis();
+          });
+        })();
+      </script>
+    {% endif %}
+
   </body>
 </html>
