@@ -56,7 +56,7 @@
         </nav>
         <h1 class="cb__heading">{{ collection.title }}</h1>
         {%- if collection.description != blank -%}
-          <div class="cb__description">{{ collection.description }}</div>
+          <p class="cb__description">{{ collection.description | strip_html | truncate: 190 }}</p>
         {%- endif -%}
         <p class="cb__count">{{ collection.products_count | default: collection.products.size }} products</p>
       </div>
@@ -79,9 +79,19 @@
     position: relative;
   }
 
+  /* Pin state (static/fixed/released-to-bottom-of-wrapper) is applied by
+     JS as an inline style, not CSS `position: sticky` - this theme
+     scrolls `.page-wrapper` (not the document) on desktop with several
+     unstyled wrapper divs between sections and that scroll container, a
+     nesting depth where native sticky's containing-block resolution
+     isn't reliable (same root cause as the header's own pin, see
+     header.liquid). `width` here is a fallback for the JS-driven fixed
+     state, since fixed positioning needs an explicit width once it's
+     out of normal flow. */
   #cb-{{ section_id }} .cb__pin-inner {
-    position: sticky;
-    top: 0;
+    position: static;
+    z-index: 10;
+    width: 100%;
     height: var(--cb-height);
     display: flex;
     align-items: flex-end;
@@ -146,19 +156,21 @@
     text-transform: uppercase;
   }
 
+  /* Plain text, truncated in Liquid to a fixed character count (see
+     markup above) - a long collection description must never be able
+     to push the title out of the fixed-height banner above it. The
+     line-clamp here is just a safety net for edge cases (very long
+     unbroken words, narrow viewports). */
   #cb-{{ section_id }} .cb__description {
     max-width: 640px;
+    margin: 0;
     font-size: 14.5px;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.85);
-  }
-
-  #cb-{{ section_id }} .cb__description p {
-    margin: 0 0 0.8em;
-  }
-
-  #cb-{{ section_id }} .cb__description p:last-child {
-    margin-bottom: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   #cb-{{ section_id }} .cb__count {
@@ -194,7 +206,8 @@
     if (!section) return;
 
     var pinWrapper = section.querySelector('[data-pin-wrapper]');
-    if (!pinWrapper) return;
+    var pinInner = section.querySelector('[data-pin-inner]');
+    if (!pinWrapper || !pinInner) return;
 
     var enablePin = section.getAttribute('data-enable-pin') === 'true';
     var pinDuration = parseFloat(section.getAttribute('data-pin-duration')) || 0;
@@ -204,13 +217,67 @@
       return window.innerWidth <= 749;
     }
 
-    function applyHeight() {
-      var active = enablePin && !prefersReducedMotion && !isMobile() && pinDuration > 0;
-      pinWrapper.style.height = active ? 'calc(var(--cb-height) + ' + pinDuration + 'px)' : 'auto';
+    function pinActive() {
+      return enablePin && !prefersReducedMotion && !isMobile() && pinDuration > 0;
     }
 
-    applyHeight();
-    window.addEventListener('resize', applyHeight, { passive: true });
+    function clearPinStyles() {
+      pinInner.style.position = 'static';
+      pinInner.style.top = '';
+      pinInner.style.left = '';
+      pinInner.style.right = '';
+      pinWrapper.style.height = 'auto';
+    }
+
+    /* Three states, driven from the wrapper's actual on-screen position
+       (getBoundingClientRect) rather than CSS `position: sticky`:
+         1. not reached yet - normal flow (position: static)
+         2. mid-pin - position: fixed, pinned to the top of the viewport
+         3. scrolled past - position: absolute, released to sit at the
+            bottom of the wrapper so it scrolls away with it normally
+       instead of staying fixed forever. */
+    var ticking = false;
+    function updatePin() {
+      ticking = false;
+      if (!pinActive()) {
+        clearPinStyles();
+        return;
+      }
+
+      pinWrapper.style.height = 'calc(var(--cb-height) + ' + pinDuration + 'px)';
+
+      var rect = pinWrapper.getBoundingClientRect();
+      var innerHeight = pinInner.offsetHeight;
+
+      if (rect.top > 0) {
+        pinInner.style.position = 'static';
+        pinInner.style.top = '';
+        pinInner.style.left = '';
+        pinInner.style.right = '';
+      } else if (rect.bottom <= innerHeight) {
+        pinInner.style.position = 'absolute';
+        pinInner.style.top = (pinWrapper.offsetHeight - innerHeight) + 'px';
+        pinInner.style.left = '0';
+        pinInner.style.right = '0';
+      } else {
+        pinInner.style.position = 'fixed';
+        pinInner.style.top = '0';
+        pinInner.style.left = '0';
+        pinInner.style.right = '0';
+      }
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(updatePin);
+    }
+
+    var pageScroller = document.querySelector('.page-wrapper');
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updatePin();
   })();
 </script>
 
