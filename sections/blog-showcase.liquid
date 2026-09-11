@@ -2,12 +2,10 @@
   Section: Blog - Showcase
   One continuous blog listing page (no separate generic hero banner -
   the intro lives here): eyebrow/heading/subheading, an optional trust
-  strip, the latest article as a landscape-image feature, then the rest
-  in a landscape-image grid (all article photos here are landscape
-  source images, so every crop stays landscape rather than forcing them
-  into tall/square frames), with a staggered scroll reveal and a slow
-  parallax on the featured image. Uses `blog.articles` directly, so
-  this only renders meaningfully inside a blog template.
+  strip, the latest article as a large feature, then the rest in a
+  grid - grayscale-until-hover on every image, with a staggered scroll
+  reveal. Uses `blog.articles` directly, so this only renders
+  meaningfully inside a blog template.
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
@@ -83,10 +81,10 @@
       {%- else -%}
         {%- if paginate.current_page == 1 -%}
           {%- assign featured = blog.articles.first -%}
-          <a href="{{ featured.url }}" class="bs__featured" data-reveal data-bs-parallax-wrap>
+          <a href="{{ featured.url }}" class="bs__featured" data-reveal>
             <span class="bs__featured-media">
               {%- if featured.image != blank -%}
-                <span class="bs__featured-media-inner" data-bs-parallax>
+                <span class="bs__featured-media-inner">
                   <img
                     src="{{ featured.image | image_url: width: 1400 }}"
                     srcset="{{ featured.image | image_url: width: 700 }} 700w, {{ featured.image | image_url: width: 1100 }} 1100w, {{ featured.image | image_url: width: 1400 }} 1400w"
@@ -338,15 +336,26 @@
 
   #bs-{{ section_id }} .bs__featured-media-inner {
     position: absolute;
-    inset: -12% 0;
-    height: 124%;
+    inset: 0;
+    height: 100%;
   }
 
+  /* `contain` (not `cover`) on purpose: these article photos often have
+     the title baked into the design itself, so cropping any edge risks
+     cutting into that text - this always shows the whole image,
+     letterboxed against the card background if its ratio doesn't
+     exactly match the frame. */
   #bs-{{ section_id }} .bs__featured-media img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+
+  #bs-{{ section_id }} .bs__featured:hover .bs__featured-media img {
+    filter: grayscale(0%);
   }
 
   #bs-{{ section_id }} .bs__featured-body {
@@ -417,16 +426,11 @@
     gap: 13px;
   }
 
-  #bs-{{ section_id }} .bs__featured:hover .bs__featured-media img {
-    transition: transform 6s ease;
-    transform: scale(1.06);
-  }
-
   /* ---- Grid (landscape cards throughout) ---- */
   #bs-{{ section_id }} .bs__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 32px 28px;
+    gap: 56px 40px;
   }
 
   #bs-{{ section_id }} .bs__card {
@@ -451,11 +455,12 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+    filter: grayscale(100%);
+    transition: filter 0.4s ease;
   }
 
   #bs-{{ section_id }} .bs__card:hover .bs__card-media img {
-    transform: scale(1.08);
+    filter: grayscale(0%);
   }
 
   #bs-{{ section_id }} .bs__card-placeholder {
@@ -622,33 +627,6 @@
       }
     }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    /* ---- Featured image parallax ---- */
-    var wrap = section.querySelector('[data-bs-parallax-wrap]');
-    var media = section.querySelector('[data-bs-parallax]');
-    if (!wrap || !media) return;
-
-    var ticking = false;
-    function updateParallax() {
-      ticking = false;
-      var rect = wrap.getBoundingClientRect();
-      var vh = window.innerHeight || document.documentElement.clientHeight;
-      if (rect.bottom < 0 || rect.top > vh) return;
-      var progress = (vh - rect.top) / (vh + rect.height);
-      var offset = (progress - 0.5) * 50;
-      media.style.transform = 'translate3d(0, ' + offset.toFixed(1) + 'px, 0)';
-    }
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(updateParallax);
-    }
-    var pageScroller = document.querySelector('.page-wrapper');
-    window.addEventListener('scroll', onScroll, { passive: true });
-    if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateParallax();
   })();
 </script>
 
