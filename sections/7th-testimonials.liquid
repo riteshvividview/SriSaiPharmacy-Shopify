@@ -61,7 +61,7 @@
         {%- endif -%}
 
         <div class="tsm__images" data-tsm-images>
-          <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="18">
+          <span class="tsm__slot tsm__slot--side" data-tsm-slot="0" data-tsm-magnetic data-tsm-parallax="42">
             {%- for block in reviews -%}
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
@@ -73,7 +73,7 @@
               </span>
             {%- endfor -%}
           </span>
-          <span class="tsm__slot tsm__slot--center" data-tsm-slot="1" data-tsm-magnetic data-tsm-parallax="32">
+          <span class="tsm__slot tsm__slot--center" data-tsm-slot="1" data-tsm-magnetic data-tsm-parallax="-68">
             {%- for block in reviews -%}
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
@@ -85,7 +85,7 @@
               </span>
             {%- endfor -%}
           </span>
-          <span class="tsm__slot tsm__slot--side" data-tsm-slot="2" data-tsm-magnetic data-tsm-parallax="18">
+          <span class="tsm__slot tsm__slot--side" data-tsm-slot="2" data-tsm-magnetic data-tsm-parallax="42">
             {%- for block in reviews -%}
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
@@ -843,12 +843,12 @@
     var elState = new Map();
 
     magneticEls.forEach(function (el) {
-      elState.set(el, { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, dragX: 0, scale: 1, curScale: 1, ticking: false });
+      elState.set(el, { magX: 0, magY: 0, curMagX: 0, curMagY: 0, parY: 0, curParY: 0, dragX: 0, scale: 1, curScale: 1, ticking: false });
     });
 
     function composeTransform(el) {
       var st = elState.get(el);
-      el.style.transform = 'translate3d(' + (st.curMagX + st.dragX).toFixed(2) + 'px, ' + (st.curMagY + st.parY).toFixed(2) + 'px, 0) scale(' + st.curScale.toFixed(3) + ')';
+      el.style.transform = 'translate3d(' + (st.curMagX + st.dragX).toFixed(2) + 'px, ' + (st.curMagY + st.curParY).toFixed(2) + 'px, 0) scale(' + st.curScale.toFixed(3) + ')';
     }
 
     magneticEls.forEach(function (el) {
@@ -861,11 +861,16 @@
         st.curMagX += (st.magX - st.curMagX) * 0.2;
         st.curMagY += (st.magY - st.curMagY) * 0.2;
         st.curScale += (st.scale - st.curScale) * 0.25;
+        // Eased toward the scroll-driven parallax target too, so the
+        // image drifts smoothly frame-to-frame rather than snapping
+        // straight to whatever the scroll position dictates.
+        st.curParY += (st.parY - st.curParY) * 0.09;
         composeTransform(el);
         if (
           Math.abs(st.magX - st.curMagX) > 0.1 ||
           Math.abs(st.magY - st.curMagY) > 0.1 ||
-          Math.abs(st.scale - st.curScale) > 0.002
+          Math.abs(st.scale - st.curScale) > 0.002 ||
+          Math.abs(st.parY - st.curParY) > 0.05
         ) {
           window.requestAnimationFrame(render);
         } else {
@@ -879,6 +884,7 @@
           window.requestAnimationFrame(render);
         }
       }
+      st.startRender = startRender;
 
       el.addEventListener('mousemove', function (e) {
         var rect = el.getBoundingClientRect();
@@ -952,9 +958,35 @@
       });
     }
 
-    /* ---- Slow parallax drift on the three images while scrolling ---- */
+    /* ---- Slow parallax drift on the three images (and a lighter
+       drift on the heading) while scrolling ----
+       Sets a target (`parY`) and lets each element's own eased render
+       loop (above) glide toward it, rather than snapping the
+       transform straight to the scroll position every frame - that
+       easing is what makes the drift read as smooth rather than
+       jittery/linear. */
     var parallaxEls = Array.prototype.slice.call(section.querySelectorAll('[data-tsm-parallax]'));
-    if (parallaxEls.length) {
+    var headingEl = section.querySelector('.tsm__heading');
+    var headingState = { parY: 0, curParY: 0, ticking: false };
+
+    function renderHeadingParallax() {
+      headingState.curParY += (headingState.parY - headingState.curParY) * 0.09;
+      headingEl.style.transform = 'translateX(-50%) translate3d(0, ' + headingState.curParY.toFixed(2) + 'px, 0)';
+      if (Math.abs(headingState.parY - headingState.curParY) > 0.05) {
+        window.requestAnimationFrame(renderHeadingParallax);
+      } else {
+        headingState.ticking = false;
+      }
+    }
+
+    function startHeadingRender() {
+      if (!headingState.ticking) {
+        headingState.ticking = true;
+        window.requestAnimationFrame(renderHeadingParallax);
+      }
+    }
+
+    if (parallaxEls.length || headingEl) {
       var scrollTicking = false;
       function updateParallax() {
         scrollTicking = false;
@@ -962,13 +994,19 @@
         var vh = window.innerHeight || document.documentElement.clientHeight;
         if (rect.bottom < 0 || rect.top > vh) return;
         var progress = (vh - rect.top) / (vh + rect.height);
+
         parallaxEls.forEach(function (el) {
           var amount = parseFloat(el.getAttribute('data-tsm-parallax')) || 20;
           var st = elState.get(el);
           if (!st) return;
           st.parY = (progress - 0.5) * amount;
-          composeTransform(el);
+          if (st.startRender) st.startRender();
         });
+
+        if (headingEl) {
+          headingState.parY = (progress - 0.5) * 16; // noticeably subtler than the images
+          startHeadingRender();
+        }
       }
       function onScroll() {
         if (scrollTicking) return;
