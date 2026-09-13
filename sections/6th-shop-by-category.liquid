@@ -654,7 +654,7 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     line-height: 1;
-    color: var(--stc-accent);
+    color: #6b6b6b;
     opacity: 0.14;
     pointer-events: none;
     user-select: none;
@@ -1248,7 +1248,9 @@
         var targetY = phoneHeight / 2;
         watermark.style.left = (targetX - rect.width / 2) + 'px';
         watermark.style.top = (targetY - rect.height / 2) + 'px';
-        watermark.style.transform = 'rotate(-90deg)';
+        /* -95deg instead of a plain -90 so the text's edge lines up
+           flush with the phone body, which is itself tilted -5deg. */
+        watermark.style.transform = 'rotate(-95deg)';
       }
       sizeWatermark();
       window.addEventListener('resize', function () {
