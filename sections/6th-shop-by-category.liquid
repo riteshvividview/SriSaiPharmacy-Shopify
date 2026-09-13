@@ -359,33 +359,32 @@
     position: absolute;
     inset: -60px;
     z-index: 0;
-    overflow: hidden;
     pointer-events: none;
   }
 
   #stc-{{ section_id }} .stc__blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(36px);
+    filter: blur(60px);
   }
 
   #stc-{{ section_id }} .stc__blob--1 {
-    top: 0;
-    left: -6%;
+    top: 6%;
+    left: 4%;
     width: 260px;
     height: 260px;
-    background: radial-gradient(circle at 30% 30%, var(--stc-accent), transparent 70%);
-    opacity: 0.22;
+    background: radial-gradient(circle, var(--stc-accent), transparent 72%);
+    opacity: 0.2;
     animation: stc-blob-drift 9s ease-in-out infinite;
   }
 
   #stc-{{ section_id }} .stc__blob--2 {
-    bottom: -10%;
-    right: -10%;
+    bottom: 8%;
+    right: 6%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle at 30% 30%, var(--stc-cta), transparent 70%);
-    opacity: 0.18;
+    background: radial-gradient(circle, var(--stc-cta), transparent 72%);
+    opacity: 0.16;
     animation: stc-blob-drift 11s ease-in-out infinite reverse;
   }
 
@@ -1267,10 +1266,13 @@
     if (!prefersReducedMotion) {
       var cards = Array.prototype.slice.call(section.querySelectorAll('[data-stc-card]'));
       cards.forEach(function (card) {
-        /* Once the entrance animation finishes, drop it so its fill-mode
-           stops holding `transform` and the JS tilt below becomes the
-           sole writer of that property. */
+        /* Once the entrance animation finishes, lock in its resting
+           state directly on the element, then drop the animation so
+           its fill-mode stops holding `transform`/`opacity` and the
+           JS tilt below becomes the sole writer of `transform`. */
         card.addEventListener('animationend', function () {
+          card.style.opacity = '1';
+          card.style.transform = 'none';
           card.style.animation = 'none';
         });
 
