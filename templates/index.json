@@ -670,6 +670,7 @@
         "subheading": "Browse our range by concern, life stage or everyday need - every product, one tap away.",
         "columns_desktop": 4,
         "padding_block": 32,
+        "sync_scroll_bg": true,
         "background_color": "#ffffff",
         "card_color": "#f7f5f0",
         "text_color": "#141414",
