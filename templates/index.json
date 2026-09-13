@@ -452,6 +452,19 @@
             "badge_text": "New"
           }
         },
+        "product_concern_4": {
+          "type": "product",
+          "settings": {
+            "alt_text": "",
+            "title": "Herbal Digestive Tonic",
+            "vendor": "",
+            "price": "Rs. 429.00",
+            "compare_at_price": "",
+            "link": "",
+            "enable_badge": false,
+            "badge_text": "New"
+          }
+        },
         "tab_mens": {
           "type": "tab",
           "settings": {
@@ -646,6 +659,7 @@
         "product_concern_1",
         "product_concern_2",
         "product_concern_3",
+        "product_concern_4",
         "tab_mens",
         "product_mens_1",
         "product_mens_2",
