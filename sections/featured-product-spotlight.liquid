@@ -311,9 +311,8 @@
     pointer-events: none;
     /* left/top (set from JS) target where the dot itself should sit,
        not this flex container's own top-left corner - shift back by
-       half the dot's size so the dot lands exactly on that point,
-       with the label flowing to the right of it. */
-    transform: translate3d(-11px, -11px, 0);
+       half the dot's size so the dot lands exactly on that point. */
+    transform: translate3d(-7px, -7px, 0);
     transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
   }
 
@@ -322,11 +321,11 @@
   }
 
   #fs-{{ section_id }} .fs__ghost-cursor-dot {
-    width: 22px;
-    height: 22px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: var(--fs-text);
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--fs-text) 12%, transparent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
     animation: fs-ghost-pulse 1.1s ease-in-out infinite;
   }
 
@@ -1024,14 +1023,28 @@
         return id;
       }
 
+      // A different landing spot per card (as a fraction of its own
+      // width/height) rather than the same point every time, keyed by
+      // the card's own grid position so it stays consistent across
+      // demo runs regardless of which cards are enabled.
+      var GHOST_SPOTS = [
+        { x: 0.25, y: 0.32 },
+        { x: 0.7, y: 0.58 },
+        { x: 0.35, y: 0.7 },
+        { x: 0.68, y: 0.28 }
+      ];
+
+      function getGhostSpot(cellEl) {
+        var index = parseInt(cellEl.getAttribute('data-fs-cell-index'), 10) || 0;
+        return GHOST_SPOTS[index % GHOST_SPOTS.length];
+      }
+
       function moveGhostTo(cellEl) {
         var gridRect = grid.getBoundingClientRect();
         var cellRect = cellEl.getBoundingClientRect();
-        // A little in from the left, not flush against the edge -
-        // close enough to read as "pointing at this card" without
-        // sitting on top of the image border.
-        var x = cellRect.left - gridRect.left + cellRect.width * 0.22;
-        var y = cellRect.top - gridRect.top + cellRect.height / 2;
+        var spot = getGhostSpot(cellEl);
+        var x = cellRect.left - gridRect.left + cellRect.width * spot.x;
+        var y = cellRect.top - gridRect.top + cellRect.height * spot.y;
         ghostCursor.style.left = x + 'px';
         ghostCursor.style.top = y + 'px';
       }
@@ -1040,10 +1053,11 @@
         cellEl.classList.add('is-ghost-hover');
         if (dimOthers) grid.classList.add('is-ghost-dimming');
         var cellRect = cellEl.getBoundingClientRect();
+        var spot = getGhostSpot(cellEl);
         var tip = cellEl.querySelector('.fs__cell-tip');
         // Same relative point the ghost cursor itself sits at, so the
         // card appears to open from right where the "cursor" is.
-        positionTip(cellEl, tip, cellRect.width * 0.22, cellRect.height / 2);
+        positionTip(cellEl, tip, cellRect.width * spot.x, cellRect.height * spot.y);
         // Hide the cursor dot itself the moment the card opens - left
         // visible, it sits exactly on top of the tooltip's anchor
         // point and covers the text.
