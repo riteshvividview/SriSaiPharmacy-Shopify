@@ -60,6 +60,8 @@
     --fs-border: {{ s.border_color | default: '#ECECEC' }};
     --fs-padding-top: {{ s.padding_top | default: 90 }}px;
     --fs-padding-bottom: {{ s.padding_bottom | default: 90 }}px;
+    --fs-glow-opacity: {{ s.ghost_glow_intensity | default: 60 | divided_by: 100.0 }};
+    --fs-dim-brightness: {{ s.ghost_dim_amount | default: 45 | divided_by: 100.0 }};
   "
 >
   <div class="fs__container">
@@ -72,10 +74,12 @@
       {%- endif -%}
     {%- else -%}
       <div class="fs__panel" data-reveal>
-        <div class="fs__grid" data-fs-grid>
-          <span class="fs__ghost-cursor" data-fs-ghost-cursor aria-hidden="true">
-            <span class="fs__ghost-cursor-dot"></span>
-          </span>
+        <div class="fs__grid" data-fs-grid data-fs-dim-others="{{ s.ghost_dim_other_cards }}">
+          {%- if s.enable_ghost_cursor_demo -%}
+            <span class="fs__ghost-cursor" data-fs-ghost-cursor aria-hidden="true">
+              <span class="fs__ghost-cursor-dot"></span>
+            </span>
+          {%- endif -%}
           {%- for block in items limit: 4 -%}
             {%- assign item_product = block.settings.product -%}
             {%- if item_product != blank -%}
@@ -88,7 +92,9 @@
                 data-fs-cell-index="{{ forloop.index0 }}"
                 data-fs-magnetic
                 data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 34 }}"
+                {% if block.settings.show_in_ghost_demo %}data-fs-ghost-eligible{% endif %}
               >
+                <span class="fs__grid-cell-glow" aria-hidden="true"></span>
                 <span class="fs__grid-cell-media">
                   {%- if item_product.featured_image != blank -%}
                     <img
@@ -109,14 +115,16 @@
                     <span class="fs__grid-ribbon">{{ s.sold_out_text | default: 'Sold out' }}</span>
                   {%- endif -%}
                 </span>
-                <span class="fs__cell-tip" data-fs-cell-tip aria-hidden="true">
-                  <span class="fs__cell-tip-title">{{ item_product.title }}</span>
-                  <span class="fs__cell-tip-price">{{ item_variant.price | money }}</span>
-                  {%- if block.settings.reason != blank -%}
-                    <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
-                  {%- endif -%}
-                  <span class="fs__cell-tip-cta">{{ s.tip_cta_text | default: 'Click to view →' }}</span>
-                </span>
+                {%- if s.enable_hover_tooltip -%}
+                  <span class="fs__cell-tip" aria-hidden="true">
+                    <span class="fs__cell-tip-title">{{ item_product.title }}</span>
+                    <span class="fs__cell-tip-price">{{ item_variant.price | money }}</span>
+                    {%- if block.settings.reason != blank -%}
+                      <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
+                    {%- endif -%}
+                    <span class="fs__cell-tip-cta">{{ s.tip_cta_text | default: 'View product →' }}</span>
+                  </span>
+                {%- endif -%}
               </a>
             {%- else -%}
               <span class="fs__grid-cell fs__grid-cell--empty"></span>
@@ -328,16 +336,44 @@
     50% { transform: scale(1.15); }
   }
 
-  /* Ghost-triggered hover preview - a CSS-only nudge on the inner
-     media wrapper (never the cell itself, whose transform belongs to
-     the JS magnetic/parallax system), so the demo can never fight
-     real hover/scroll interactions for the same property. The same
-     highlight ring also applies on genuine mouse hover, so the "this
-     is interactive" cue isn't limited to the one-time demo. */
-  #fs-{{ section_id }} .fs__grid-cell:hover .fs__grid-cell-media,
+  /* Real mouse hover: just a subtle lift, no ring/glow - that
+     treatment is reserved for the ghost-cursor demo only, per
+     feedback that normal hovering shouldn't be highlighted the same
+     way. */
+  #fs-{{ section_id }} .fs__grid-cell:hover .fs__grid-cell-media {
+    transform: scale(1.04);
+  }
+
+  /* Ghost-cursor demo highlight: a soft colorful glow behind the card
+     (not a border/ring) plus every OTHER card dimming down, so the
+     one being demonstrated visually pops out from the rest - a
+     spotlight rather than an outline. Colors/amount come from schema
+     (accent/CTA colors, dim_amount). The glow sits on its own
+     ::before-like sibling behind the media (not a pseudo-element on
+     the media itself), so it can extend past the media's own
+     overflow:hidden edge. */
+  #fs-{{ section_id }} .fs__grid-cell-glow {
+    position: absolute;
+    inset: -22px;
+    z-index: -1;
+    border-radius: 26px;
+    background: radial-gradient(circle, var(--fs-cta), var(--fs-accent) 55%, transparent 78%);
+    filter: blur(20px);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+
+  #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-glow {
+    opacity: var(--fs-glow-opacity, 0.6);
+  }
+
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-media {
     transform: scale(1.04);
-    box-shadow: 0 0 0 3px var(--fs-cta), 0 16px 40px rgba(20, 20, 20, 0.16);
+  }
+
+  #fs-{{ section_id }} .fs__grid.is-ghost-dimming .fs__grid-cell:not(.is-ghost-hover) .fs__grid-cell-media {
+    filter: brightness(var(--fs-dim-brightness, 0.55)) saturate(0.75);
+    transition: filter 0.45s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell {
@@ -365,7 +401,7 @@
     overflow: hidden;
     background: var(--fs-card-bg);
     box-shadow: 0 16px 40px rgba(20, 20, 20, 0.08);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.45s ease;
   }
 
   /* Drop-in entrance: each cell falls into place from above and
@@ -422,42 +458,41 @@
     letter-spacing: 0.4px;
   }
 
-  /* ---- Cursor-following info popup ----
-     Positioned via JS to track the pointer inside the cell (left/top
-     set on mousemove), not CSS centering - it needs to follow the
-     cursor, not sit in one fixed spot. Sits to the right of its
-     anchor point (not above it) so it never gets clipped/cramped
-     against the top of the viewport or the panel; on narrow screens
-     there isn't room to the right, so it flips to sit below instead.
-     Hidden by default and faded in only while actively hovered. */
+  /* ---- Info popup, as a caption bar contained within its own card ----
+     Anchored to the bottom of the card and exactly as wide as it,
+     rather than a floating box that follows the cursor - that
+     previous approach could spill into the neighbouring card (no
+     room for a wide box between two ~200px-wide cells) and got its
+     width squeezed inconsistently depending on content length. A
+     fixed-width bar that lives entirely inside its own card can never
+     overlap a sibling or get clipped by the viewport. Revealed by
+     plain CSS :hover (no JS needed for real hovering) and by
+     `.is-ghost-hover` for the demo. */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
-    top: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 5;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    max-width: 200px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(20, 20, 20, 0.92);
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: 0 0 16px 16px;
+    background: rgba(20, 20, 20, 0.88);
     color: #fff;
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(16px, -50%, 0);
-    transition: opacity 0.2s ease;
-    white-space: normal;
+    transform: translate3d(0, 100%, 0);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
   }
 
-  @media (max-width: 520px) {
-    #fs-{{ section_id }} .fs__cell-tip {
-      transform: translate3d(-50%, 16px, 0);
-    }
-  }
-
-  #fs-{{ section_id }} .fs__cell-tip.is-visible {
+  #fs-{{ section_id }} .fs__grid-cell:hover .fs__cell-tip,
+  #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__cell-tip {
     opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 
   #fs-{{ section_id }} .fs__cell-tip-title {
@@ -849,8 +884,9 @@
       }
       st.startRender = startRender;
 
-      var tip = el.querySelector('[data-fs-cell-tip]');
-
+      // The info popup itself is pure CSS now (:hover reveals it as a
+      // caption bar contained within the card - see .fs__cell-tip),
+      // so this listener only drives the magnetic pull.
       if (!prefersReducedMotion) {
         el.addEventListener('mousemove', function (e) {
           var rect = el.getBoundingClientRect();
@@ -860,17 +896,6 @@
           st.magY = Math.max(-18, Math.min(18, relY * 0.16));
           st.scale = 1.03;
           startRender();
-
-          if (tip) {
-            // Positioned relative to the cell, following the pointer
-            // directly rather than sitting in one fixed spot.
-            tip.style.left = (e.clientX - rect.left) + 'px';
-            tip.style.top = (e.clientY - rect.top) + 'px';
-          }
-        });
-
-        el.addEventListener('mouseenter', function () {
-          if (tip) tip.classList.add('is-visible');
         });
 
         el.addEventListener('mouseleave', function () {
@@ -878,7 +903,6 @@
           st.magY = 0;
           st.scale = 1;
           startRender();
-          if (tip) tip.classList.remove('is-visible');
         });
       }
     }
@@ -954,14 +978,14 @@
        and shouldn't have it fighting for attention. */
     var ghostCursor = section.querySelector('[data-fs-ghost-cursor]');
     if (grid && ghostCursor && dropCells.length && !prefersReducedMotion) {
-      // First and third cells - the two left-column cards in the 2x2
-      // grid - so the cursor sits near each card's left side and the
-      // popup opens to the right into open space, rather than over
-      // the neighbouring card.
-      var demoCells = dropCells.filter(function (el) {
-        var i = el.getAttribute('data-fs-cell-index');
-        return i === '0' || i === '2';
-      });
+      // Only cards the merchant left "Show in hover demo" checked
+      // (per-block schema setting), in the order they appear, capped
+      // to two - fully merchant-controlled rather than a hardcoded
+      // position.
+      var demoCells = dropCells
+        .filter(function (el) { return el.hasAttribute('data-fs-ghost-eligible'); })
+        .slice(0, 2);
+      var dimOthers = grid.getAttribute('data-fs-dim-others') === 'true';
 
       var ghostTimeouts = [];
       var ghostCancelled = false;
@@ -978,9 +1002,9 @@
       function moveGhostTo(cellEl) {
         var gridRect = grid.getBoundingClientRect();
         var cellRect = cellEl.getBoundingClientRect();
-        // A quarter of the way in from the left, not flush against
-        // the edge - close enough to read as "pointing at this card"
-        // without sitting on top of the image border.
+        // A little in from the left, not flush against the edge -
+        // close enough to read as "pointing at this card" without
+        // sitting on top of the image border.
         var x = cellRect.left - gridRect.left + cellRect.width * 0.22;
         var y = cellRect.top - gridRect.top + cellRect.height / 2;
         ghostCursor.style.left = x + 'px';
@@ -989,18 +1013,11 @@
 
       function showCellPreview(cellEl) {
         cellEl.classList.add('is-ghost-hover');
-        var tip = cellEl.querySelector('[data-fs-cell-tip]');
-        if (tip) {
-          tip.style.left = '22%';
-          tip.style.top = '50%';
-          tip.classList.add('is-visible');
-        }
+        if (dimOthers) grid.classList.add('is-ghost-dimming');
       }
 
       function hideCellPreview(cellEl) {
         cellEl.classList.remove('is-ghost-hover');
-        var tip = cellEl.querySelector('[data-fs-cell-tip]');
-        if (tip) tip.classList.remove('is-visible');
       }
 
       function cancelGhostDemo() {
@@ -1009,6 +1026,7 @@
         ghostTimeouts.forEach(function (id) { window.clearTimeout(id); });
         ghostTimeouts.length = 0;
         ghostCursor.classList.remove('is-active');
+        grid.classList.remove('is-ghost-dimming');
         demoCells.forEach(hideCellPreview);
         ['mousemove', 'touchstart', 'pointerdown'].forEach(function (evt) {
           grid.removeEventListener(evt, cancelGhostDemo);
@@ -1035,6 +1053,7 @@
 
         ghostSetTimeout(function () {
           ghostCursor.classList.remove('is-active');
+          grid.classList.remove('is-ghost-dimming');
         }, demoCells[1] ? 3300 : 1600);
       }
 
@@ -1238,8 +1257,15 @@
     { "type": "text", "id": "specifications_label", "label": "Specifications label", "default": "Specifications:" },
     { "type": "text", "id": "specifications", "label": "Specifications", "info": "e.g. 4 products | Ships together" },
     { "type": "text", "id": "sold_out_text", "label": "Sold-out ribbon text", "default": "Sold out" },
-    { "type": "text", "id": "tip_cta_text", "label": "Hover popup call-to-action text", "default": "Click to view →" },
     { "type": "text", "id": "all_sold_out_text", "label": "All-sold-out message", "default": "All items in this pack are currently sold out." },
+
+    { "type": "header", "content": "Image Hover & Walkthrough Demo" },
+    { "type": "checkbox", "id": "enable_hover_tooltip", "label": "Show name/price popup on hover", "info": "Turns off the entire hover popup feature - the images will just show their subtle zoom with no info card.", "default": true },
+    { "type": "text", "id": "tip_cta_text", "label": "Hover popup call-to-action text", "default": "View product →" },
+    { "type": "checkbox", "id": "enable_ghost_cursor_demo", "label": "Show the one-time \"ghost cursor\" walkthrough", "info": "A small animated cursor that demonstrates hovering on page load, so first-time visitors discover the popup above. Pick which products it uses per product block below.", "default": true },
+    { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": true },
+    { "type": "range", "id": "ghost_dim_amount", "label": "Dim strength", "min": 10, "max": 90, "step": 5, "unit": "%", "info": "Lower = darker for the non-highlighted images.", "default": 45 },
+    { "type": "range", "id": "ghost_glow_intensity", "label": "Highlight glow strength", "min": 10, "max": 100, "step": 5, "unit": "%", "default": 60 },
 
     { "type": "header", "content": "Buttons" },
     { "type": "text", "id": "add_to_cart_text", "label": "Add-to-cart button text", "default": "Add Pack to Cart" },
@@ -1274,7 +1300,8 @@
       "limit": 4,
       "settings": [
         { "type": "product", "id": "product", "label": "Product" },
-        { "type": "text", "id": "reason", "label": "Why use it?", "info": "Optional short line shown in the hover popup on this product's image, alongside its name and price." }
+        { "type": "text", "id": "reason", "label": "Why use it?", "info": "Optional short line shown in the hover popup on this product's image, alongside its name and price." },
+        { "type": "checkbox", "id": "show_in_ghost_demo", "label": "Include in the hover walkthrough demo", "info": "The demo uses the first 2 products (in block order) with this checked.", "default": true }
       ]
     }
   ],
