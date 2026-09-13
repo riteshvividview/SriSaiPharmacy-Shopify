@@ -122,7 +122,6 @@
                     {%- if block.settings.reason != blank -%}
                       <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
                     {%- endif -%}
-                    <span class="fs__cell-tip-cta">{{ s.tip_cta_text | default: 'View product →' }}</span>
                   </span>
                 {%- endif -%}
               </a>
@@ -476,8 +475,12 @@
      mousemove (see registerCellEffects/positionTip) with no clamping
      at all - it's free to extend past the card's own edges and over
      neighbouring cards, exactly like the cursor itself isn't bounded
-     to one card. `.fs__grid-cell` is overflow:visible so nothing
-     clips it. Revealed by plain CSS :hover/`.is-ghost-hover`. */
+     to one card. Centered directly on that point (not offset to a
+     fixed side) so which way it visually spills - left, right, up,
+     down - depends purely on where within the image the cursor is,
+     rather than always opening the same direction. `.fs__grid-cell`
+     is overflow:visible so nothing clips it. Revealed by plain CSS
+     :hover/`.is-ghost-hover`. */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
     left: 0;
@@ -496,14 +499,14 @@
     opacity: 0;
     pointer-events: none;
     white-space: normal;
-    transform: translate3d(16px, -50%, 0) scale(0.85);
+    transform: translate3d(-50%, -50%, 0) scale(0.85);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell:hover .fs__cell-tip,
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__cell-tip {
     opacity: 1;
-    transform: translate3d(16px, -50%, 0) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
 
   #fs-{{ section_id }} .fs__cell-tip-title {
@@ -522,14 +525,6 @@
     font-size: 11px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.8);
-  }
-
-  #fs-{{ section_id }} .fs__cell-tip-cta {
-    margin-top: 2px;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    color: var(--fs-cta);
   }
 
   /* ---- Info ---- */
@@ -1300,7 +1295,6 @@
 
     { "type": "header", "content": "Image Hover & Walkthrough Demo" },
     { "type": "checkbox", "id": "enable_hover_tooltip", "label": "Show name/price popup on hover", "info": "Turns off the entire hover popup feature - the images will just show their subtle zoom with no info card.", "default": true },
-    { "type": "text", "id": "tip_cta_text", "label": "Hover popup call-to-action text", "default": "View product →" },
     { "type": "checkbox", "id": "enable_ghost_cursor_demo", "label": "Show the one-time \"ghost cursor\" walkthrough", "info": "A small animated cursor that demonstrates hovering on page load, so first-time visitors discover the popup above. Pick which products it uses per product block below.", "default": true },
     { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": true },
     { "type": "range", "id": "ghost_dim_amount", "label": "Dim strength", "min": 10, "max": 90, "step": 5, "unit": "%", "info": "Lower = darker for the non-highlighted images.", "default": 45 },
