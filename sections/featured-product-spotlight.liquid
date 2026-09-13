@@ -458,25 +458,24 @@
     letter-spacing: 0.4px;
   }
 
-  /* ---- Info popup, a floating card centered over its own image ----
-     A raised, rounded-all-round card that pops up in place (scale +
-     fade) rather than a bar flush against the card's edge - but still
-     anchored to the CENTER of its own cell rather than following the
-     cursor, so its fixed width can never spill into a neighbouring
-     card or get clipped near a viewport/panel edge (both real
-     problems with the earlier cursor-following version). Revealed by
-     plain CSS :hover (no JS needed for real hovering) and by
-     `.is-ghost-hover` for the demo. */
+  /* ---- Info popup, a floating card that follows the cursor ----
+     JS sets `left`/`top` on every mousemove (see registerCellEffects/
+     positionTip), but clamps the result so the card's fixed width/
+     height always stay fully inside its own cell - it tracks the
+     cursor without ever being able to spill into a neighbouring card
+     or get clipped near an edge, which is what actually went wrong
+     with the earlier cursor-following version (nothing clamped it).
+     Revealed by plain CSS :hover/`.is-ghost-hover` (a fixed-size box,
+     so this never fights the JS-driven left/top). */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: 0;
+    top: 0;
     z-index: 5;
     display: flex;
     flex-direction: column;
     gap: 3px;
-    width: 82%;
-    max-width: 210px;
+    width: 172px;
     box-sizing: border-box;
     padding: 12px 14px;
     border-radius: 14px;
@@ -485,14 +484,14 @@
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(-50%, -50%, 0) scale(0.85);
-    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    transform: scale(0.85);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell:hover .fs__cell-tip,
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__cell-tip {
     opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(1);
+    transform: scale(1);
   }
 
   #fs-{{ section_id }} .fs__cell-tip-title {
@@ -835,6 +834,24 @@
     var cellState = new Map();
     var activeCells = [];
 
+    // Positions the tip so it follows (localX, localY) - a point
+    // relative to the cell's own top-left corner - while clamping the
+    // result so the tip's own fixed width/height always stay fully
+    // inside the cell. That clamp is what actually stops it spilling
+    // into a neighbouring card or getting clipped near an edge; the
+    // cursor-following itself was never the problem.
+    function positionTip(cellEl, tip, localX, localY) {
+      if (!tip) return;
+      var cellRect = cellEl.getBoundingClientRect();
+      var w = tip.offsetWidth;
+      var h = tip.offsetHeight;
+      var pad = 8;
+      var left = Math.max(pad, Math.min(cellRect.width - w - pad, localX - w / 2));
+      var top = Math.max(pad, Math.min(cellRect.height - h - pad, localY - h - 18));
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+
     function composeCellTransform(el) {
       var st = cellState.get(el);
       if (!st) return;
@@ -884,9 +901,12 @@
       }
       st.startRender = startRender;
 
-      // The info popup itself is pure CSS now (:hover reveals it as a
-      // caption bar contained within the card - see .fs__cell-tip),
-      // so this listener only drives the magnetic pull.
+      // CSS (:hover/.is-ghost-hover) owns whether the tip is visible;
+      // this only drives the magnetic pull and, while visible, keeps
+      // the tip tracking the cursor (position only - the reveal
+      // itself stays CSS-driven so it can never get out of sync).
+      var tip = el.querySelector('.fs__cell-tip');
+
       if (!prefersReducedMotion) {
         el.addEventListener('mousemove', function (e) {
           var rect = el.getBoundingClientRect();
@@ -896,6 +916,16 @@
           st.magY = Math.max(-18, Math.min(18, relY * 0.16));
           st.scale = 1.03;
           startRender();
+
+          positionTip(el, tip, e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        el.addEventListener('mouseenter', function (e) {
+          // Positions the tip at the entry point immediately, so it
+          // doesn't flash at its default top-left corner for one
+          // frame before the first mousemove updates it.
+          var rect = el.getBoundingClientRect();
+          positionTip(el, tip, e.clientX - rect.left, e.clientY - rect.top);
         });
 
         el.addEventListener('mouseleave', function () {
@@ -1014,6 +1044,11 @@
       function showCellPreview(cellEl) {
         cellEl.classList.add('is-ghost-hover');
         if (dimOthers) grid.classList.add('is-ghost-dimming');
+        var cellRect = cellEl.getBoundingClientRect();
+        var tip = cellEl.querySelector('.fs__cell-tip');
+        // Same relative point the ghost cursor itself sits at, so the
+        // card appears to open from right where the "cursor" is.
+        positionTip(cellEl, tip, cellRect.width * 0.22, cellRect.height / 2);
       }
 
       function hideCellPreview(cellEl) {
