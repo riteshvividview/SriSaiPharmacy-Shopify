@@ -66,7 +66,7 @@
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_1 != blank -%}
-                  <img src="{{ rs.image_1 | image_url: width: 400 }}" alt="{{ rs.image_1.alt | escape }}" width="{{ rs.image_1.width }}" height="{{ rs.image_1.height }}" loading="lazy">
+                  <img src="{{ rs.image_1 | image_url: width: 400 }}" alt="{{ rs.image_1.alt | escape }}" width="{{ rs.image_1.width }}" height="{{ rs.image_1.height }}" loading="lazy" draggable="false">
                 {%- else -%}
                   <span class="tsm__slot-placeholder" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 10l4 5 3-3.5L20 16.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/></svg></span>
                 {%- endif -%}
@@ -78,7 +78,7 @@
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_2 != blank -%}
-                  <img src="{{ rs.image_2 | image_url: width: 560 }}" alt="{{ rs.image_2.alt | escape }}" width="{{ rs.image_2.width }}" height="{{ rs.image_2.height }}" loading="lazy">
+                  <img src="{{ rs.image_2 | image_url: width: 560 }}" alt="{{ rs.image_2.alt | escape }}" width="{{ rs.image_2.width }}" height="{{ rs.image_2.height }}" loading="lazy" draggable="false">
                 {%- else -%}
                   <span class="tsm__slot-placeholder" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 10l4 5 3-3.5L20 16.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/></svg></span>
                 {%- endif -%}
@@ -90,7 +90,7 @@
               {%- assign rs = block.settings -%}
               <span class="tsm__slot-image{% if forloop.first %} is-active{% endif %}" data-tsm-slot-image data-index="{{ forloop.index0 }}">
                 {%- if rs.image_3 != blank -%}
-                  <img src="{{ rs.image_3 | image_url: width: 400 }}" alt="{{ rs.image_3.alt | escape }}" width="{{ rs.image_3.width }}" height="{{ rs.image_3.height }}" loading="lazy">
+                  <img src="{{ rs.image_3 | image_url: width: 400 }}" alt="{{ rs.image_3.alt | escape }}" width="{{ rs.image_3.width }}" height="{{ rs.image_3.height }}" loading="lazy" draggable="false">
                 {%- else -%}
                   <span class="tsm__slot-placeholder" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 10l4 5 3-3.5L20 16.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/></svg></span>
                 {%- endif -%}
@@ -239,6 +239,16 @@
     margin-top: clamp(30px, 5vw, 56px);
     margin-bottom: 26px;
     perspective: 1400px;
+    /* Suppresses the browser's native image-drag/text-selection
+       behavior (the blue highlight + dimmed drag-ghost image) so only
+       the custom drag-to-swipe JS below ever responds to dragging. */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  #tsm-{{ section_id }} .tsm__images img {
+    -webkit-user-drag: none;
+    user-drag: none;
   }
 
   #tsm-{{ section_id }} .tsm__slot {
