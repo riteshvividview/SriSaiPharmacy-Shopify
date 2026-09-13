@@ -1113,7 +1113,16 @@
         grid.addEventListener(evt, cancelGhostDemo, { passive: true });
       });
 
-      if ('IntersectionObserver' in window) {
+      // Only starts watching for the grid scrolling into view AFTER
+      // the visitor has actually scrolled at least once. Without this,
+      // an IntersectionObserver fires its very first check the moment
+      // .observe() is called - if the section happened to already be
+      // inside the initial viewport (a short homepage, a tall
+      // window), that first check would fire immediately on page
+      // load, before any real scrolling happened, which is exactly
+      // what was being reported.
+      function beginWatchingForGrid() {
+        if (!('IntersectionObserver' in window)) return;
         var demoObserver = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (entry) {
@@ -1129,6 +1138,20 @@
         );
         demoObserver.observe(grid);
       }
+
+      var hasStartedWatching = false;
+      function onFirstRealScroll() {
+        if (hasStartedWatching || ghostCancelled) return;
+        hasStartedWatching = true;
+        window.removeEventListener('scroll', onFirstRealScroll);
+        var pageScroller = document.querySelector('.page-wrapper');
+        if (pageScroller) pageScroller.removeEventListener('scroll', onFirstRealScroll);
+        beginWatchingForGrid();
+      }
+
+      window.addEventListener('scroll', onFirstRealScroll, { passive: true });
+      var pageScroller = document.querySelector('.page-wrapper');
+      if (pageScroller) pageScroller.addEventListener('scroll', onFirstRealScroll, { passive: true });
     }
 
     /* ---- Magnetic hover on the CTA buttons ---- */
