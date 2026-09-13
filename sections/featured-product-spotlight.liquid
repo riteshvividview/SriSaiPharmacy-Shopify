@@ -75,7 +75,6 @@
         <div class="fs__grid" data-fs-grid>
           <span class="fs__ghost-cursor" data-fs-ghost-cursor aria-hidden="true">
             <span class="fs__ghost-cursor-dot"></span>
-            <span class="fs__ghost-cursor-label" data-fs-ghost-label>Hover to explore</span>
           </span>
           {%- for block in items limit: 4 -%}
             {%- assign item_product = block.settings.product -%}
@@ -116,6 +115,7 @@
                   {%- if block.settings.reason != blank -%}
                     <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
                   {%- endif -%}
+                  <span class="fs__cell-tip-cta">{{ s.tip_cta_text | default: 'Click to view →' }}</span>
                 </span>
               </a>
             {%- else -%}
@@ -323,24 +323,6 @@
     animation: fs-ghost-pulse 1.1s ease-in-out infinite;
   }
 
-  #fs-{{ section_id }} .fs__ghost-cursor-label {
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: var(--fs-text);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translate3d(-6px, 0, 0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  #fs-{{ section_id }} .fs__ghost-cursor-label.is-visible {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
   @keyframes fs-ghost-pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.15); }
@@ -349,9 +331,13 @@
   /* Ghost-triggered hover preview - a CSS-only nudge on the inner
      media wrapper (never the cell itself, whose transform belongs to
      the JS magnetic/parallax system), so the demo can never fight
-     real hover/scroll interactions for the same property. */
+     real hover/scroll interactions for the same property. The same
+     highlight ring also applies on genuine mouse hover, so the "this
+     is interactive" cue isn't limited to the one-time demo. */
+  #fs-{{ section_id }} .fs__grid-cell:hover .fs__grid-cell-media,
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-media {
     transform: scale(1.04);
+    box-shadow: 0 0 0 3px var(--fs-cta), 0 16px 40px rgba(20, 20, 20, 0.16);
   }
 
   #fs-{{ section_id }} .fs__grid-cell {
@@ -379,7 +365,7 @@
     overflow: hidden;
     background: var(--fs-card-bg);
     box-shadow: 0 16px 40px rgba(20, 20, 20, 0.08);
-    transition: transform 0.4s ease;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
   }
 
   /* Drop-in entrance: each cell falls into place from above and
@@ -490,6 +476,14 @@
     font-size: 11px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.8);
+  }
+
+  #fs-{{ section_id }} .fs__cell-tip-cta {
+    margin-top: 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--fs-cta);
   }
 
   /* ---- Info ---- */
@@ -948,17 +942,20 @@
 
     /* ---- Ghost-cursor onboarding demo ----
        Plays once, the first time the grid scrolls into view: glides a
-       small cursor-like dot to the first two product images in turn
-       and briefly shows each one's own hover state (tooltip + a CSS-
-       only image scale), teaching visitors that these images are
-       hoverable before they'd otherwise have to discover it. Timed to
-       start only after the last cell's drop-in entrance has settled,
-       and skipped entirely under reduced motion. */
+       small cursor-like dot to two product images in turn and briefly
+       shows each one's own hover state (tooltip + highlight ring),
+       teaching visitors these images are hoverable AND clickable
+       before they'd otherwise have to discover it. Timed to start
+       only after the last cell's drop-in entrance has settled, and
+       skipped entirely under reduced motion. Any real interaction
+       (mouse move, touch, scroll/wheel, or an actual click) cancels
+       and hides it immediately, on the assumption that a visitor
+       who's already interacting doesn't need the tutorial anymore
+       and shouldn't have it fighting for attention. */
     var ghostCursor = section.querySelector('[data-fs-ghost-cursor]');
-    var ghostLabel = section.querySelector('[data-fs-ghost-label]');
     if (grid && ghostCursor && dropCells.length && !prefersReducedMotion) {
       // First and third cells - the two left-column cards in the 2x2
-      // grid - so the cursor sits at each card's left edge and the
+      // grid - so the cursor sits near each card's left side and the
       // popup opens to the right into open space, rather than over
       // the neighbouring card.
       var demoCells = dropCells.filter(function (el) {
@@ -966,10 +963,25 @@
         return i === '0' || i === '2';
       });
 
+      var ghostTimeouts = [];
+      var ghostCancelled = false;
+
+      function ghostSetTimeout(fn, delay) {
+        var id = window.setTimeout(function () {
+          if (ghostCancelled) return;
+          fn();
+        }, delay);
+        ghostTimeouts.push(id);
+        return id;
+      }
+
       function moveGhostTo(cellEl) {
         var gridRect = grid.getBoundingClientRect();
         var cellRect = cellEl.getBoundingClientRect();
-        var x = cellRect.left - gridRect.left;
+        // A quarter of the way in from the left, not flush against
+        // the edge - close enough to read as "pointing at this card"
+        // without sitting on top of the image border.
+        var x = cellRect.left - gridRect.left + cellRect.width * 0.22;
         var y = cellRect.top - gridRect.top + cellRect.height / 2;
         ghostCursor.style.left = x + 'px';
         ghostCursor.style.top = y + 'px';
@@ -979,7 +991,7 @@
         cellEl.classList.add('is-ghost-hover');
         var tip = cellEl.querySelector('[data-fs-cell-tip]');
         if (tip) {
-          tip.style.left = '0';
+          tip.style.left = '22%';
           tip.style.top = '50%';
           tip.classList.add('is-visible');
         }
@@ -991,32 +1003,49 @@
         if (tip) tip.classList.remove('is-visible');
       }
 
+      function cancelGhostDemo() {
+        if (ghostCancelled) return;
+        ghostCancelled = true;
+        ghostTimeouts.forEach(function (id) { window.clearTimeout(id); });
+        ghostTimeouts.length = 0;
+        ghostCursor.classList.remove('is-active');
+        demoCells.forEach(hideCellPreview);
+        ['mousemove', 'touchstart', 'pointerdown'].forEach(function (evt) {
+          grid.removeEventListener(evt, cancelGhostDemo);
+        });
+      }
+
       function runGhostDemo() {
-        if (demoCells.length === 0) return;
+        if (demoCells.length === 0 || ghostCancelled) return;
 
         moveGhostTo(demoCells[0]);
         ghostCursor.classList.add('is-active');
 
-        window.setTimeout(function () {
-          showCellPreview(demoCells[0]);
-          if (ghostLabel) ghostLabel.classList.add('is-visible');
-        }, 500);
+        ghostSetTimeout(function () { showCellPreview(demoCells[0]); }, 500);
 
-        window.setTimeout(function () {
+        ghostSetTimeout(function () {
           hideCellPreview(demoCells[0]);
-          if (ghostLabel) ghostLabel.classList.remove('is-visible');
           if (demoCells[1]) moveGhostTo(demoCells[1]);
         }, 1500);
 
         if (demoCells[1]) {
-          window.setTimeout(function () { showCellPreview(demoCells[1]); }, 2200);
-          window.setTimeout(function () { hideCellPreview(demoCells[1]); }, 3200);
+          ghostSetTimeout(function () { showCellPreview(demoCells[1]); }, 2200);
+          ghostSetTimeout(function () { hideCellPreview(demoCells[1]); }, 3200);
         }
 
-        window.setTimeout(function () {
+        ghostSetTimeout(function () {
           ghostCursor.classList.remove('is-active');
         }, demoCells[1] ? 3300 : 1600);
       }
+
+      // Scoped to the grid itself (not the whole window/page) so
+      // ordinary scrolling - including the scroll that just brought
+      // this section into view - never counts as "interacting" and
+      // cancels the demo before it plays. Passive so cancelling never
+      // blocks whatever real interaction triggered it.
+      ['mousemove', 'touchstart', 'pointerdown'].forEach(function (evt) {
+        grid.addEventListener(evt, cancelGhostDemo, { passive: true });
+      });
 
       if ('IntersectionObserver' in window) {
         var demoObserver = new IntersectionObserver(
@@ -1027,7 +1056,7 @@
               // Give the staggered drop-in entrance (up to ~1.05s for
               // the last cell) time to finish before layering the
               // demo on top of it.
-              window.setTimeout(runGhostDemo, 1300);
+              ghostSetTimeout(runGhostDemo, 1300);
             });
           },
           { threshold: 0.4 }
@@ -1209,6 +1238,7 @@
     { "type": "text", "id": "specifications_label", "label": "Specifications label", "default": "Specifications:" },
     { "type": "text", "id": "specifications", "label": "Specifications", "info": "e.g. 4 products | Ships together" },
     { "type": "text", "id": "sold_out_text", "label": "Sold-out ribbon text", "default": "Sold out" },
+    { "type": "text", "id": "tip_cta_text", "label": "Hover popup call-to-action text", "default": "Click to view →" },
     { "type": "text", "id": "all_sold_out_text", "label": "All-sold-out message", "default": "All items in this pack are currently sold out." },
 
     { "type": "header", "content": "Buttons" },
