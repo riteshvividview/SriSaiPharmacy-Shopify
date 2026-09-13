@@ -302,6 +302,11 @@
     gap: 8px;
     opacity: 0;
     pointer-events: none;
+    /* left/top (set from JS) target where the dot itself should sit,
+       not this flex container's own top-left corner - shift back by
+       half the dot's size so the dot lands exactly on that point,
+       with the label flowing to the right of it. */
+    transform: translate3d(-11px, -11px, 0);
     transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
   }
 
@@ -434,8 +439,11 @@
   /* ---- Cursor-following info popup ----
      Positioned via JS to track the pointer inside the cell (left/top
      set on mousemove), not CSS centering - it needs to follow the
-     cursor, not sit in one fixed spot. Hidden by default and faded in
-     only while actively hovered. */
+     cursor, not sit in one fixed spot. Sits to the right of its
+     anchor point (not above it) so it never gets clipped/cramped
+     against the top of the viewport or the panel; on narrow screens
+     there isn't room to the right, so it flips to sit below instead.
+     Hidden by default and faded in only while actively hovered. */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
     top: 0;
@@ -451,9 +459,15 @@
     color: #fff;
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(-50%, -120%, 0);
+    transform: translate3d(16px, -50%, 0);
     transition: opacity 0.2s ease;
     white-space: normal;
+  }
+
+  @media (max-width: 520px) {
+    #fs-{{ section_id }} .fs__cell-tip {
+      transform: translate3d(-50%, 16px, 0);
+    }
   }
 
   #fs-{{ section_id }} .fs__cell-tip.is-visible {
@@ -943,15 +957,19 @@
     var ghostCursor = section.querySelector('[data-fs-ghost-cursor]');
     var ghostLabel = section.querySelector('[data-fs-ghost-label]');
     if (grid && ghostCursor && dropCells.length && !prefersReducedMotion) {
+      // First and third cells - the two left-column cards in the 2x2
+      // grid - so the cursor sits at each card's left edge and the
+      // popup opens to the right into open space, rather than over
+      // the neighbouring card.
       var demoCells = dropCells.filter(function (el) {
         var i = el.getAttribute('data-fs-cell-index');
-        return i === '0' || i === '1';
+        return i === '0' || i === '2';
       });
 
       function moveGhostTo(cellEl) {
         var gridRect = grid.getBoundingClientRect();
         var cellRect = cellEl.getBoundingClientRect();
-        var x = cellRect.left - gridRect.left + cellRect.width / 2;
+        var x = cellRect.left - gridRect.left;
         var y = cellRect.top - gridRect.top + cellRect.height / 2;
         ghostCursor.style.left = x + 'px';
         ghostCursor.style.top = y + 'px';
@@ -961,8 +979,8 @@
         cellEl.classList.add('is-ghost-hover');
         var tip = cellEl.querySelector('[data-fs-cell-tip]');
         if (tip) {
-          tip.style.left = '50%';
-          tip.style.top = '20%';
+          tip.style.left = '0';
+          tip.style.top = '50%';
           tip.classList.add('is-visible');
         }
       }
