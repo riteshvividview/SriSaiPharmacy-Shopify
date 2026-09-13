@@ -458,15 +458,13 @@
     letter-spacing: 0.4px;
   }
 
-  /* ---- Info popup, a floating card that follows the cursor ----
-     JS sets `left`/`top` on every mousemove (see registerCellEffects/
-     positionTip), but clamps the result so the card's fixed width/
-     height always stay fully inside its own cell - it tracks the
-     cursor without ever being able to spill into a neighbouring card
-     or get clipped near an edge, which is what actually went wrong
-     with the earlier cursor-following version (nothing clamped it).
-     Revealed by plain CSS :hover/`.is-ghost-hover` (a fixed-size box,
-     so this never fights the JS-driven left/top). */
+  /* ---- Info popup, a floating card that freely follows the cursor ----
+     JS sets `left`/`top` to the raw cursor position on every
+     mousemove (see registerCellEffects/positionTip) with no clamping
+     at all - it's free to extend past the card's own edges and over
+     neighbouring cards, exactly like the cursor itself isn't bounded
+     to one card. `.fs__grid-cell` is overflow:visible so nothing
+     clips it. Revealed by plain CSS :hover/`.is-ghost-hover`. */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
     left: 0;
@@ -475,7 +473,7 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
-    width: 172px;
+    max-width: 200px;
     box-sizing: border-box;
     padding: 12px 14px;
     border-radius: 14px;
@@ -484,14 +482,15 @@
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.85);
+    white-space: normal;
+    transform: translate3d(16px, -50%, 0) scale(0.85);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell:hover .fs__cell-tip,
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__cell-tip {
     opacity: 1;
-    transform: scale(1);
+    transform: translate3d(16px, -50%, 0) scale(1);
   }
 
   #fs-{{ section_id }} .fs__cell-tip-title {
@@ -834,22 +833,14 @@
     var cellState = new Map();
     var activeCells = [];
 
-    // Positions the tip so it follows (localX, localY) - a point
-    // relative to the cell's own top-left corner - while clamping the
-    // result so the tip's own fixed width/height always stay fully
-    // inside the cell. That clamp is what actually stops it spilling
-    // into a neighbouring card or getting clipped near an edge; the
-    // cursor-following itself was never the problem.
+    // Follows (localX, localY) - a point relative to the cell's own
+    // top-left corner - with no clamping: the tip is free to extend
+    // past the card's own edges (the cell is overflow:visible) rather
+    // than being confined inside it.
     function positionTip(cellEl, tip, localX, localY) {
       if (!tip) return;
-      var cellRect = cellEl.getBoundingClientRect();
-      var w = tip.offsetWidth;
-      var h = tip.offsetHeight;
-      var pad = 8;
-      var left = Math.max(pad, Math.min(cellRect.width - w - pad, localX - w / 2));
-      var top = Math.max(pad, Math.min(cellRect.height - h - pad, localY - h - 18));
-      tip.style.left = left + 'px';
-      tip.style.top = top + 'px';
+      tip.style.left = localX + 'px';
+      tip.style.top = localY + 'px';
     }
 
     function composeCellTransform(el) {
