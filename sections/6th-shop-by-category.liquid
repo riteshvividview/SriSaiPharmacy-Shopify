@@ -1319,13 +1319,24 @@
       });
     });
 
-    /* ---- Product row arrows: scroll the grid by roughly one card width ---- */
+    /* ---- Product row arrows: page to the next/previous card by its
+       actual measured position, not an assumed fixed step - so the
+       landing spot always matches a real card edge, one at a time,
+       regardless of padding/gap rounding. ---- */
     var grids = Array.prototype.slice.call(section.querySelectorAll('[data-stc-grid]'));
     grids.forEach(function (grid) {
       var wrap = grid.closest('.stc__grid-wrap');
       if (!wrap) return;
       var prevBtn = wrap.querySelector('[data-stc-arrow="prev"]');
       var nextBtn = wrap.querySelector('[data-stc-arrow="next"]');
+
+      function paddingLeft() {
+        return parseFloat(window.getComputedStyle(grid).paddingLeft) || 0;
+      }
+
+      function cardContentLeft(card) {
+        return card.getBoundingClientRect().left - grid.getBoundingClientRect().left + grid.scrollLeft;
+      }
 
       function updateArrows() {
         var maxScroll = grid.scrollWidth - grid.clientWidth;
@@ -1335,9 +1346,22 @@
       }
 
       function scrollByCard(direction) {
-        var firstCard = grid.querySelector('[data-stc-card]');
-        var step = firstCard ? firstCard.getBoundingClientRect().width + 22 : grid.clientWidth * 0.8;
-        grid.scrollBy({ left: direction * step, behavior: 'smooth' });
+        var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-stc-card]'));
+        if (!cards.length) return;
+        var current = grid.scrollLeft;
+        var pad = paddingLeft();
+        var target;
+
+        if (direction > 0) {
+          target = cards.filter(function (c) { return cardContentLeft(c) > current + pad + 4; })[0];
+          if (!target) target = cards[cards.length - 1];
+        } else {
+          var behind = cards.filter(function (c) { return cardContentLeft(c) < current + pad - 4; });
+          target = behind[behind.length - 1];
+          if (!target) target = cards[0];
+        }
+
+        grid.scrollTo({ left: cardContentLeft(target) - pad, behavior: 'smooth' });
       }
 
       if (prevBtn) prevBtn.addEventListener('click', function () { scrollByCard(-1); });
