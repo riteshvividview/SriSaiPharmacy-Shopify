@@ -1244,7 +1244,11 @@
         var newSize = refSize * (desiredSpan / measuredWidth);
         watermark.style.fontSize = newSize + 'px';
         var rect = watermark.getBoundingClientRect();
-        var targetX = -6;
+        /* After rotating, the box's screen-space thickness against the
+           phone is rect.height (its line-height), not rect.width - so
+           the gap has to be measured from that, not a flat offset. */
+        var gap = 4;
+        var targetX = -gap - rect.height / 2;
         var targetY = phoneHeight / 2;
         watermark.style.left = (targetX - rect.width / 2) + 'px';
         watermark.style.top = (targetY - rect.height / 2) + 'px';
