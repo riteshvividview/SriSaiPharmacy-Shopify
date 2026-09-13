@@ -1023,40 +1023,32 @@
         return id;
       }
 
-      // A different landing spot per card (as a fraction of its own
-      // width/height) rather than the same point every time, keyed by
-      // the card's own grid position so it stays consistent across
-      // demo runs regardless of which cards are enabled.
-      var GHOST_SPOTS = [
-        { x: 0.25, y: 0.32 },
-        { x: 0.7, y: 0.58 },
-        { x: 0.35, y: 0.7 },
-        { x: 0.68, y: 0.28 }
-      ];
-
-      function getGhostSpot(cellEl) {
-        var index = parseInt(cellEl.getAttribute('data-fs-cell-index'), 10) || 0;
-        return GHOST_SPOTS[index % GHOST_SPOTS.length];
+      // A fresh random landing spot every time the demo plays (kept
+      // well inset from the edges so the tip/cursor still read as
+      // "on the image"), rather than a fixed point per card. The same
+      // spot is used for both the cursor and the tooltip's anchor for
+      // a given card/run - computed once per step in
+      // runGhostDemoStep() and passed through to both.
+      function randomSpot() {
+        return { x: 0.18 + Math.random() * 0.64, y: 0.18 + Math.random() * 0.64 };
       }
 
-      function moveGhostTo(cellEl) {
+      function moveGhostTo(cellEl, spot) {
         var gridRect = grid.getBoundingClientRect();
         var cellRect = cellEl.getBoundingClientRect();
-        var spot = getGhostSpot(cellEl);
         var x = cellRect.left - gridRect.left + cellRect.width * spot.x;
         var y = cellRect.top - gridRect.top + cellRect.height * spot.y;
         ghostCursor.style.left = x + 'px';
         ghostCursor.style.top = y + 'px';
       }
 
-      function showCellPreview(cellEl) {
+      function showCellPreview(cellEl, spot) {
         cellEl.classList.add('is-ghost-hover');
         if (dimOthers) grid.classList.add('is-ghost-dimming');
         var cellRect = cellEl.getBoundingClientRect();
-        var spot = getGhostSpot(cellEl);
         var tip = cellEl.querySelector('.fs__cell-tip');
-        // Same relative point the ghost cursor itself sits at, so the
-        // card appears to open from right where the "cursor" is.
+        // Same spot the ghost cursor itself sits at, so the card
+        // appears to open from right where the "cursor" is.
         positionTip(cellEl, tip, cellRect.width * spot.x, cellRect.height * spot.y);
         // Hide the cursor dot itself the moment the card opens - left
         // visible, it sits exactly on top of the tooltip's anchor
@@ -1095,10 +1087,11 @@
           return;
         }
 
-        moveGhostTo(demoCells[index]);
+        var spot = randomSpot();
+        moveGhostTo(demoCells[index], spot);
         ghostCursor.classList.add('is-active');
 
-        ghostSetTimeout(function () { showCellPreview(demoCells[index]); }, 500);
+        ghostSetTimeout(function () { showCellPreview(demoCells[index], spot); }, 500);
 
         ghostSetTimeout(function () {
           hideCellPreview(demoCells[index]);
