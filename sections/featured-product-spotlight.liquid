@@ -73,18 +73,23 @@
     {%- else -%}
       <div class="fs__panel" data-reveal>
         <div class="fs__grid" data-fs-grid>
+          <span class="fs__ghost-cursor" data-fs-ghost-cursor aria-hidden="true">
+            <span class="fs__ghost-cursor-dot"></span>
+            <span class="fs__ghost-cursor-label" data-fs-ghost-label>Hover to explore</span>
+          </span>
           {%- for block in items limit: 4 -%}
             {%- assign item_product = block.settings.product -%}
-            <span
-              class="fs__grid-cell{% if forloop.first %} fs__grid-cell--primary{% endif %}{% if item_product == blank %} fs__grid-cell--empty{% endif %}"
-              data-fs-cell
-              data-fs-cell-drop
-              data-fs-cell-index="{{ forloop.index0 }}"
-              data-fs-magnetic
-              data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 34 }}"
-            >
-              {%- if item_product != blank -%}
-                {%- assign item_variant = item_product.selected_or_first_available_variant -%}
+            {%- if item_product != blank -%}
+              {%- assign item_variant = item_product.selected_or_first_available_variant -%}
+              <a
+                href="{{ item_product.url }}"
+                class="fs__grid-cell{% if forloop.first %} fs__grid-cell--primary{% endif %}"
+                data-fs-cell
+                data-fs-cell-drop
+                data-fs-cell-index="{{ forloop.index0 }}"
+                data-fs-magnetic
+                data-fs-parallax="{{ forloop.index0 | modulo: 2 | times: 2 | minus: 1 | times: 34 }}"
+              >
                 <span class="fs__grid-cell-media">
                   {%- if item_product.featured_image != blank -%}
                     <img
@@ -112,8 +117,10 @@
                     <span class="fs__cell-tip-reason">{{ block.settings.reason }}</span>
                   {%- endif -%}
                 </span>
-              {%- endif -%}
-            </span>
+              </a>
+            {%- else -%}
+              <span class="fs__grid-cell fs__grid-cell--empty"></span>
+            {%- endif -%}
           {%- endfor -%}
         </div>
 
@@ -270,18 +277,90 @@
 
   /* ---- 2x2 image grid: 4 different products ---- */
   #fs-{{ section_id }} .fs__grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     perspective: 1200px;
   }
 
+  /* ---- Ghost-cursor onboarding demo ----
+     A one-time visual walkthrough that plays when the grid first
+     scrolls into view: a small cursor-like dot glides to the first
+     two product images in turn and briefly triggers each one's own
+     hover state, teaching the interaction before the visitor has to
+     discover it themselves. Positioned/moved via JS (left/top), never
+     touching `transform` on the actual grid cells, so it can't
+     interfere with their magnetic/parallax transforms. */
+  #fs-{{ section_id }} .fs__ghost-cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1), top 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+  }
+
+  #fs-{{ section_id }} .fs__ghost-cursor.is-active {
+    opacity: 1;
+  }
+
+  #fs-{{ section_id }} .fs__ghost-cursor-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--fs-text);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--fs-text) 12%, transparent);
+    animation: fs-ghost-pulse 1.1s ease-in-out infinite;
+  }
+
+  #fs-{{ section_id }} .fs__ghost-cursor-label {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--fs-text);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate3d(-6px, 0, 0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  #fs-{{ section_id }} .fs__ghost-cursor-label.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @keyframes fs-ghost-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Ghost-triggered hover preview - a CSS-only nudge on the inner
+     media wrapper (never the cell itself, whose transform belongs to
+     the JS magnetic/parallax system), so the demo can never fight
+     real hover/scroll interactions for the same property. */
+  #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-media {
+    transform: scale(1.04);
+  }
+
   #fs-{{ section_id }} .fs__grid-cell {
     position: relative;
     display: block;
     aspect-ratio: 1 / 1;
-    cursor: default;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
     will-change: transform;
+  }
+
+  #fs-{{ section_id }} .fs__grid-cell--empty {
+    cursor: default;
   }
 
   /* The visible rounded/clipped card is this inner wrapper, not the
@@ -295,6 +374,7 @@
     overflow: hidden;
     background: var(--fs-card-bg);
     box-shadow: 0 16px 40px rgba(20, 20, 20, 0.08);
+    transition: transform 0.4s ease;
   }
 
   /* Drop-in entrance: each cell falls into place from above and
@@ -850,6 +930,92 @@
       window.addEventListener('scroll', onGridScroll, { passive: true });
       if (pageScroller) pageScroller.addEventListener('scroll', onGridScroll, { passive: true });
       window.addEventListener('resize', onGridScroll, { passive: true });
+    }
+
+    /* ---- Ghost-cursor onboarding demo ----
+       Plays once, the first time the grid scrolls into view: glides a
+       small cursor-like dot to the first two product images in turn
+       and briefly shows each one's own hover state (tooltip + a CSS-
+       only image scale), teaching visitors that these images are
+       hoverable before they'd otherwise have to discover it. Timed to
+       start only after the last cell's drop-in entrance has settled,
+       and skipped entirely under reduced motion. */
+    var ghostCursor = section.querySelector('[data-fs-ghost-cursor]');
+    var ghostLabel = section.querySelector('[data-fs-ghost-label]');
+    if (grid && ghostCursor && dropCells.length && !prefersReducedMotion) {
+      var demoCells = dropCells.filter(function (el) {
+        var i = el.getAttribute('data-fs-cell-index');
+        return i === '0' || i === '1';
+      });
+
+      function moveGhostTo(cellEl) {
+        var gridRect = grid.getBoundingClientRect();
+        var cellRect = cellEl.getBoundingClientRect();
+        var x = cellRect.left - gridRect.left + cellRect.width / 2;
+        var y = cellRect.top - gridRect.top + cellRect.height / 2;
+        ghostCursor.style.left = x + 'px';
+        ghostCursor.style.top = y + 'px';
+      }
+
+      function showCellPreview(cellEl) {
+        cellEl.classList.add('is-ghost-hover');
+        var tip = cellEl.querySelector('[data-fs-cell-tip]');
+        if (tip) {
+          tip.style.left = '50%';
+          tip.style.top = '20%';
+          tip.classList.add('is-visible');
+        }
+      }
+
+      function hideCellPreview(cellEl) {
+        cellEl.classList.remove('is-ghost-hover');
+        var tip = cellEl.querySelector('[data-fs-cell-tip]');
+        if (tip) tip.classList.remove('is-visible');
+      }
+
+      function runGhostDemo() {
+        if (demoCells.length === 0) return;
+
+        moveGhostTo(demoCells[0]);
+        ghostCursor.classList.add('is-active');
+
+        window.setTimeout(function () {
+          showCellPreview(demoCells[0]);
+          if (ghostLabel) ghostLabel.classList.add('is-visible');
+        }, 500);
+
+        window.setTimeout(function () {
+          hideCellPreview(demoCells[0]);
+          if (ghostLabel) ghostLabel.classList.remove('is-visible');
+          if (demoCells[1]) moveGhostTo(demoCells[1]);
+        }, 1500);
+
+        if (demoCells[1]) {
+          window.setTimeout(function () { showCellPreview(demoCells[1]); }, 2200);
+          window.setTimeout(function () { hideCellPreview(demoCells[1]); }, 3200);
+        }
+
+        window.setTimeout(function () {
+          ghostCursor.classList.remove('is-active');
+        }, demoCells[1] ? 3300 : 1600);
+      }
+
+      if ('IntersectionObserver' in window) {
+        var demoObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              demoObserver.disconnect();
+              // Give the staggered drop-in entrance (up to ~1.05s for
+              // the last cell) time to finish before layering the
+              // demo on top of it.
+              window.setTimeout(runGhostDemo, 1300);
+            });
+          },
+          { threshold: 0.4 }
+        );
+        demoObserver.observe(grid);
+      }
     }
 
     /* ---- Magnetic hover on the CTA buttons ---- */
