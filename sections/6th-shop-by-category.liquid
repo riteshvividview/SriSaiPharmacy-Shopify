@@ -687,13 +687,19 @@
     display: flex;
     gap: 22px;
     flex: 1;
-    justify-content: center;
-    justify-content: safe center;
+    justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
     padding: 30px 34px 40px;
+  }
+
+  /* Only centered once JS has confirmed the row has no overflow to hide -
+     avoids the unreliable CSS `safe center` keyword, whose flex support is
+     inconsistent and previously let an overflowing row clip its first card. */
+  #stc-{{ section_id }} .stc__grid.is-fitting {
+    justify-content: center;
   }
 
   #stc-{{ section_id }} .stc__grid::-webkit-scrollbar {
@@ -1098,6 +1104,31 @@
           panel.hidden = !isActive;
           if (isActive) {
             replayEntrance(panel);
+
+            /* Update this panel's own arrows synchronously right away
+               (not only via the async 'stc:panel-shown' event below) so
+               their disabled/is-fitting state is never left stale on a
+               timing race. */
+            gridControllers.forEach(function (gc) {
+              if (panel.contains(gc.grid)) gc.update();
+            });
+
+            /* Failsafe: cards are normally unlocked to opacity:1 by the
+               'animationend' listener below, but if that event is ever
+               missed (interrupted animation, rapid tab switching, a
+               reduced-motion edge case) force it after a delay comfortably
+               past the entrance animation's max delay + duration, so a
+               card can never stay stuck invisible. */
+            window.setTimeout(function () {
+              var cards = panel.querySelectorAll('[data-stc-card]');
+              cards.forEach(function (card) {
+                if (!card.classList.contains('is-settled')) {
+                  card.classList.add('is-settled');
+                  card.style.animation = 'none';
+                }
+              });
+            }, 700);
+
             window.requestAnimationFrame(function () {
               section.dispatchEvent(new CustomEvent('stc:panel-shown', { detail: { panel: panel } }));
             });
@@ -1144,12 +1175,93 @@
       );
     }
 
+    /* ---- Product cards: lock in the resting state after the entrance
+       animation finishes, so the CSS-only hover lift (.is-settled:hover)
+       becomes the sole owner of `transform` from then on - no JS
+       tracks the cursor for cards any more.
+       This (and the arrow wiring below) is deliberately placed before the
+       decorative phone-showcase code further down, and that code is
+       wrapped in its own try/catch, so a failure there can never prevent
+       this core tab/card/arrow functionality from initializing. ---- */
+    var allCards = Array.prototype.slice.call(section.querySelectorAll('[data-stc-card]'));
+    allCards.forEach(function (card) {
+      card.addEventListener('animationend', function () {
+        card.classList.add('is-settled');
+        card.style.animation = 'none';
+      });
+    });
+
+    /* ---- Product row arrows: page to the next/previous card by its
+       actual measured position, not an assumed fixed step - so the
+       landing spot always matches a real card edge, one at a time,
+       regardless of padding/gap rounding. Also toggles `is-fitting` on
+       the grid so it only centers its cards when they provably fit
+       without overflow (see the CSS comment on .stc__grid.is-fitting). ---- */
+    var grids = Array.prototype.slice.call(section.querySelectorAll('[data-stc-grid]'));
+    var gridControllers = [];
+    grids.forEach(function (grid) {
+      var wrap = grid.closest('.stc__grid-wrap');
+      if (!wrap) return;
+      var prevBtn = wrap.querySelector('[data-stc-arrow="prev"]');
+      var nextBtn = wrap.querySelector('[data-stc-arrow="next"]');
+
+      function paddingLeft() {
+        return parseFloat(window.getComputedStyle(grid).paddingLeft) || 0;
+      }
+
+      function cardContentLeft(card) {
+        return card.getBoundingClientRect().left - grid.getBoundingClientRect().left + grid.scrollLeft;
+      }
+
+      function updateArrows() {
+        var maxScroll = grid.scrollWidth - grid.clientWidth;
+        grid.classList.toggle('is-fitting', maxScroll <= 1);
+        if (prevBtn) prevBtn.disabled = grid.scrollLeft <= 4;
+        if (nextBtn) nextBtn.disabled = grid.scrollLeft >= maxScroll - 4;
+        if (wrap) wrap.classList.toggle('is-not-scrollable', maxScroll <= 4);
+      }
+
+      function scrollByCard(direction) {
+        var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-stc-card]'));
+        if (!cards.length) return;
+        var current = grid.scrollLeft;
+        var pad = paddingLeft();
+        var target;
+
+        if (direction > 0) {
+          target = cards.filter(function (c) { return cardContentLeft(c) > current + pad + 4; })[0];
+          if (!target) target = cards[cards.length - 1];
+        } else {
+          var behind = cards.filter(function (c) { return cardContentLeft(c) < current + pad - 4; });
+          target = behind[behind.length - 1];
+          if (!target) target = cards[0];
+        }
+
+        grid.scrollTo({ left: cardContentLeft(target) - pad, behavior: 'smooth' });
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', function () { scrollByCard(-1); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { scrollByCard(1); });
+      grid.addEventListener('scroll', updateArrows, { passive: true });
+      window.addEventListener('resize', updateArrows, { passive: true });
+      section.addEventListener('stc:panel-shown', function (e) {
+        if (e.detail && e.detail.panel && e.detail.panel.contains(grid)) updateArrows();
+      });
+      gridControllers.push({ grid: grid, update: updateArrows });
+      updateArrows();
+    });
+
     /* ---- Phone showcase: float + scroll parallax + cursor tilt ----
        Three separate nested wrappers, one concern each, so none of
        them ever fight over the same element's `transform`:
        .stc__phone-float (JS: bob + scroll parallax on translateY)
        -> .stc__phone-tilt (JS: cursor-driven rotateX/rotateY)
-       -> .stc__phone (CSS only: the fixed "jaunty angle" rotation). */
+       -> .stc__phone (CSS only: the fixed "jaunty angle" rotation).
+       This whole decorative block is wrapped in try/catch: it's pure
+       visual flair, and a failure in it must never be able to take down
+       the tab/card/arrow functionality above, which is core to using
+       the section. */
+    try {
     var stage = section.querySelector('[data-stc-showcase]');
 
     /* ---- Watermark: size it to the phone's own rendered height and
@@ -1307,73 +1419,10 @@
         window.requestAnimationFrame(chipTick);
       }
     }
-
-    /* ---- Product cards: lock in the resting state after the entrance
-       animation finishes, so the CSS-only hover lift (.is-settled:hover)
-       becomes the sole owner of `transform` from then on - no JS
-       tracks the cursor for cards any more. */
-    var allCards = Array.prototype.slice.call(section.querySelectorAll('[data-stc-card]'));
-    allCards.forEach(function (card) {
-      card.addEventListener('animationend', function () {
-        card.classList.add('is-settled');
-        card.style.animation = 'none';
-      });
-    });
-
-    /* ---- Product row arrows: page to the next/previous card by its
-       actual measured position, not an assumed fixed step - so the
-       landing spot always matches a real card edge, one at a time,
-       regardless of padding/gap rounding. ---- */
-    var grids = Array.prototype.slice.call(section.querySelectorAll('[data-stc-grid]'));
-    grids.forEach(function (grid) {
-      var wrap = grid.closest('.stc__grid-wrap');
-      if (!wrap) return;
-      var prevBtn = wrap.querySelector('[data-stc-arrow="prev"]');
-      var nextBtn = wrap.querySelector('[data-stc-arrow="next"]');
-
-      function paddingLeft() {
-        return parseFloat(window.getComputedStyle(grid).paddingLeft) || 0;
-      }
-
-      function cardContentLeft(card) {
-        return card.getBoundingClientRect().left - grid.getBoundingClientRect().left + grid.scrollLeft;
-      }
-
-      function updateArrows() {
-        var maxScroll = grid.scrollWidth - grid.clientWidth;
-        if (prevBtn) prevBtn.disabled = grid.scrollLeft <= 4;
-        if (nextBtn) nextBtn.disabled = grid.scrollLeft >= maxScroll - 4;
-        if (wrap) wrap.classList.toggle('is-not-scrollable', maxScroll <= 4);
-      }
-
-      function scrollByCard(direction) {
-        var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-stc-card]'));
-        if (!cards.length) return;
-        var current = grid.scrollLeft;
-        var pad = paddingLeft();
-        var target;
-
-        if (direction > 0) {
-          target = cards.filter(function (c) { return cardContentLeft(c) > current + pad + 4; })[0];
-          if (!target) target = cards[cards.length - 1];
-        } else {
-          var behind = cards.filter(function (c) { return cardContentLeft(c) < current + pad - 4; });
-          target = behind[behind.length - 1];
-          if (!target) target = cards[0];
-        }
-
-        grid.scrollTo({ left: cardContentLeft(target) - pad, behavior: 'smooth' });
-      }
-
-      if (prevBtn) prevBtn.addEventListener('click', function () { scrollByCard(-1); });
-      if (nextBtn) nextBtn.addEventListener('click', function () { scrollByCard(1); });
-      grid.addEventListener('scroll', updateArrows, { passive: true });
-      window.addEventListener('resize', updateArrows, { passive: true });
-      section.addEventListener('stc:panel-shown', function (e) {
-        if (e.detail && e.detail.panel && e.detail.panel.contains(grid)) updateArrows();
-      });
-      updateArrows();
-    });
+    } catch (e) {
+      /* Decorative phone showcase failed - core tab/card/arrow
+         functionality above is unaffected. */
+    }
   })();
 </script>
 
