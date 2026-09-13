@@ -73,9 +73,6 @@
             <span class="stc__stage-glow" aria-hidden="true"></span>
             <span class="stc__stage-ring stc__stage-ring--1" aria-hidden="true"></span>
             <span class="stc__stage-ring stc__stage-ring--2" aria-hidden="true"></span>
-            {%- if s.phone_caption != blank -%}
-              <span class="stc__phone-watermark" aria-hidden="true">{{ s.phone_caption }}</span>
-            {%- endif -%}
 
             {%- if has_phone_2 -%}
               <div class="stc__phone-float stc__phone-float--secondary" data-stc-phone-float="1">
@@ -97,8 +94,11 @@
             {%- endif -%}
 
             <div class="stc__phone-float stc__phone-float--primary" data-stc-phone-float="0">
+              {%- if s.phone_caption != blank -%}
+                <span class="stc__phone-watermark" data-stc-watermark aria-hidden="true">{{ s.phone_caption }}</span>
+              {%- endif -%}
               <div class="stc__phone-tilt" data-stc-phone-tilt>
-                <div class="stc__phone stc__phone--primary">
+                <div class="stc__phone stc__phone--primary" data-stc-phone-body>
                   <span class="stc__phone-notch" aria-hidden="true"></span>
                   <span class="stc__phone-screen">
                     {%- if s.phone_1_video != blank -%}
@@ -643,20 +643,19 @@
 
   #stc-{{ section_id }} .stc__phone-watermark {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
+    top: 0;
+    left: 0;
     z-index: 0;
     margin: 0;
     white-space: nowrap;
     font-family: 'Bebas Neue', 'Impact', sans-serif;
     font-weight: 400;
-    font-size: clamp(52px, 11vw, 110px);
+    font-size: 60px;
     letter-spacing: 2px;
     text-transform: uppercase;
     line-height: 1;
     color: var(--stc-accent);
-    opacity: 0.1;
+    opacity: 0.14;
     pointer-events: none;
     user-select: none;
   }
@@ -1219,6 +1218,45 @@
        -> .stc__phone-tilt (JS: cursor-driven rotateX/rotateY)
        -> .stc__phone (CSS only: the fixed "jaunty angle" rotation). */
     var stage = section.querySelector('[data-stc-showcase]');
+
+    /* ---- Watermark: size it to the phone's own rendered height and
+       hug its left edge. Lives inside the same float wrapper as the
+       phone, so it inherits that wrapper's bob/parallax transform and
+       moves together with the phone automatically - this script only
+       ever writes the watermark's own `transform` (the rotation),
+       never the wrapper's. */
+    var watermark = section.querySelector('[data-stc-watermark]');
+    var watermarkFloat = watermark ? watermark.closest('.stc__phone-float') : null;
+    var phoneBody = watermarkFloat ? watermarkFloat.querySelector('[data-stc-phone-body]') : null;
+    if (watermark && phoneBody) {
+      var sizeWatermarkRaf = null;
+      function sizeWatermark() {
+        var phoneHeight = phoneBody.getBoundingClientRect().height;
+        if (!phoneHeight) return;
+        var desiredSpan = phoneHeight * 0.92;
+        var refSize = 100;
+        watermark.style.transform = 'none';
+        watermark.style.left = '0px';
+        watermark.style.top = '0px';
+        watermark.style.fontSize = refSize + 'px';
+        var measuredWidth = watermark.getBoundingClientRect().width;
+        if (!measuredWidth) return;
+        var newSize = refSize * (desiredSpan / measuredWidth);
+        watermark.style.fontSize = newSize + 'px';
+        var rect = watermark.getBoundingClientRect();
+        var targetX = -6;
+        var targetY = phoneHeight / 2;
+        watermark.style.left = (targetX - rect.width / 2) + 'px';
+        watermark.style.top = (targetY - rect.height / 2) + 'px';
+        watermark.style.transform = 'rotate(-90deg)';
+      }
+      sizeWatermark();
+      window.addEventListener('resize', function () {
+        if (sizeWatermarkRaf) window.cancelAnimationFrame(sizeWatermarkRaf);
+        sizeWatermarkRaf = window.requestAnimationFrame(sizeWatermark);
+      }, { passive: true });
+    }
+
     if (stage && !prefersReducedMotion) {
       var floats = Array.prototype.slice.call(section.querySelectorAll('[data-stc-phone-float]'));
       var tilts = Array.prototype.slice.call(section.querySelectorAll('[data-stc-phone-tilt]'));
