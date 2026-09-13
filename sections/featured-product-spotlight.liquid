@@ -1006,12 +1006,10 @@
     var ghostCursor = section.querySelector('[data-fs-ghost-cursor]');
     if (grid && ghostCursor && dropCells.length && !prefersReducedMotion) {
       // Only cards the merchant left "Show in hover demo" checked
-      // (per-block schema setting), in the order they appear, capped
-      // to two - fully merchant-controlled rather than a hardcoded
-      // position.
-      var demoCells = dropCells
-        .filter(function (el) { return el.hasAttribute('data-fs-ghost-eligible'); })
-        .slice(0, 2);
+      // (per-block schema setting), in the order they appear - up to
+      // all 4, fully merchant-controlled rather than a hardcoded
+      // position or count.
+      var demoCells = dropCells.filter(function (el) { return el.hasAttribute('data-fs-ghost-eligible'); });
       var dimOthers = grid.getAttribute('data-fs-dim-others') === 'true';
 
       var ghostTimeouts = [];
@@ -1069,31 +1067,34 @@
         });
       }
 
-      function runGhostDemo() {
-        if (demoCells.length === 0 || ghostCancelled) return;
+      // Each step: glide to the card + brief settle (500ms), hold the
+      // preview open (1000ms), then move on - chained via real
+      // setTimeouts fired one after another rather than precomputed
+      // absolute delays, so this works the same whether there are 2,
+      // 3, or all 4 cards enabled.
+      function runGhostDemoStep(index) {
+        if (ghostCancelled) return;
 
-        moveGhostTo(demoCells[0]);
-        ghostCursor.classList.add('is-active');
-
-        ghostSetTimeout(function () { showCellPreview(demoCells[0]); }, 500);
-
-        ghostSetTimeout(function () {
-          hideCellPreview(demoCells[0]);
-          if (demoCells[1]) {
-            moveGhostTo(demoCells[1]);
-            ghostCursor.classList.add('is-active');
-          }
-        }, 1500);
-
-        if (demoCells[1]) {
-          ghostSetTimeout(function () { showCellPreview(demoCells[1]); }, 2200);
-          ghostSetTimeout(function () { hideCellPreview(demoCells[1]); }, 3200);
-        }
-
-        ghostSetTimeout(function () {
+        if (index >= demoCells.length) {
           ghostCursor.classList.remove('is-active');
           grid.classList.remove('is-ghost-dimming');
-        }, demoCells[1] ? 3300 : 1600);
+          return;
+        }
+
+        moveGhostTo(demoCells[index]);
+        ghostCursor.classList.add('is-active');
+
+        ghostSetTimeout(function () { showCellPreview(demoCells[index]); }, 500);
+
+        ghostSetTimeout(function () {
+          hideCellPreview(demoCells[index]);
+          runGhostDemoStep(index + 1);
+        }, 1500);
+      }
+
+      function runGhostDemo() {
+        if (demoCells.length === 0 || ghostCancelled) return;
+        runGhostDemoStep(0);
       }
 
       // Scoped to the grid itself (not the whole window/page) so
@@ -1301,8 +1302,8 @@
     { "type": "header", "content": "Image Hover & Walkthrough Demo" },
     { "type": "checkbox", "id": "enable_hover_tooltip", "label": "Show name/price popup on hover", "info": "Turns off the entire hover popup feature - the images will just show their subtle zoom with no info card.", "default": true },
     { "type": "checkbox", "id": "enable_ghost_cursor_demo", "label": "Show the one-time \"ghost cursor\" walkthrough", "info": "A small animated cursor that demonstrates hovering on page load, so first-time visitors discover the popup above. Pick which products it uses per product block below.", "default": true },
-    { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": false },
-    { "type": "range", "id": "ghost_dim_amount", "label": "Dim strength", "min": 10, "max": 90, "step": 5, "unit": "%", "info": "Lower = darker for the non-highlighted images.", "default": 45 },
+    { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": true },
+    { "type": "range", "id": "ghost_dim_amount", "label": "Dim strength", "min": 10, "max": 90, "step": 5, "unit": "%", "info": "Lower = darker for the non-highlighted images.", "default": 80 },
     { "type": "range", "id": "ghost_glow_intensity", "label": "Highlight glow strength", "min": 10, "max": 100, "step": 5, "unit": "%", "default": 85 },
 
     { "type": "header", "content": "Buttons" },
