@@ -344,27 +344,40 @@
     transform: scale(1.04);
   }
 
-  /* Ghost-cursor demo highlight: a soft colorful glow behind the card
-     (not a border/ring) plus every OTHER card dimming down, so the
-     one being demonstrated visually pops out from the rest - a
-     spotlight rather than an outline. Colors/amount come from schema
-     (accent/CTA colors, dim_amount). The glow sits on its own
-     ::before-like sibling behind the media (not a pseudo-element on
-     the media itself), so it can extend past the media's own
-     overflow:hidden edge. */
+  /* Ghost-cursor demo highlight: a vibrant, slowly-rotating multi-
+     color glow behind the card (a "Gemini-style" shimmer, not a flat
+     two-tone gradient or a border/ring) plus every OTHER card dimming
+     down, so the one being demonstrated visually pops out from the
+     rest - a spotlight rather than an outline. The glow sits on its
+     own sibling behind the media (not a pseudo-element on the media
+     itself), so it can extend past the media's own overflow:hidden
+     edge. Rotation animates the gradient's own angle via @property,
+     which degrades gracefully to a static (still colorful) gradient
+     on browsers that don't support animating it. */
   #fs-{{ section_id }} .fs__grid-cell-glow {
     position: absolute;
-    inset: -22px;
+    inset: -24px;
     z-index: -1;
-    border-radius: 26px;
-    background: radial-gradient(circle, var(--fs-cta), var(--fs-accent) 55%, transparent 78%);
-    filter: blur(20px);
+    border-radius: 28px;
+    background: conic-gradient(from var(--fs-glow-angle, 0deg), #4285f4, #9c27b0, #ff4d8d, #ff9800, #34a853, #4285f4);
+    filter: blur(22px) saturate(1.3);
     opacity: 0;
     transition: opacity 0.45s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-glow {
     opacity: var(--fs-glow-opacity, 0.6);
+    animation: fs-glow-spin 3.5s linear infinite;
+  }
+
+  @property --fs-glow-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @keyframes fs-glow-spin {
+    to { --fs-glow-angle: 360deg; }
   }
 
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__grid-cell-media {
