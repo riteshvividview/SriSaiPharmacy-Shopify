@@ -672,7 +672,7 @@
         "padding_block": 32,
         "sync_scroll_bg": true,
         "background_color": "#ffffff",
-        "card_color": "#f7f5f0",
+        "card_color": "#f2f6f1",
         "text_color": "#141414",
         "muted_color": "#6b6b6b",
         "accent_color": "#2e7d32",
