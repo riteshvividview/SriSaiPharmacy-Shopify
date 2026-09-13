@@ -458,41 +458,41 @@
     letter-spacing: 0.4px;
   }
 
-  /* ---- Info popup, as a caption bar contained within its own card ----
-     Anchored to the bottom of the card and exactly as wide as it,
-     rather than a floating box that follows the cursor - that
-     previous approach could spill into the neighbouring card (no
-     room for a wide box between two ~200px-wide cells) and got its
-     width squeezed inconsistently depending on content length. A
-     fixed-width bar that lives entirely inside its own card can never
-     overlap a sibling or get clipped by the viewport. Revealed by
+  /* ---- Info popup, a floating card centered over its own image ----
+     A raised, rounded-all-round card that pops up in place (scale +
+     fade) rather than a bar flush against the card's edge - but still
+     anchored to the CENTER of its own cell rather than following the
+     cursor, so its fixed width can never spill into a neighbouring
+     card or get clipped near a viewport/panel edge (both real
+     problems with the earlier cursor-following version). Revealed by
      plain CSS :hover (no JS needed for real hovering) and by
      `.is-ghost-hover` for the demo. */
   #fs-{{ section_id }} .fs__cell-tip {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 50%;
+    top: 50%;
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    width: 100%;
+    gap: 3px;
+    width: 82%;
+    max-width: 210px;
     box-sizing: border-box;
     padding: 12px 14px;
-    border-radius: 0 0 16px 16px;
-    background: rgba(20, 20, 20, 0.88);
+    border-radius: 14px;
+    background: rgba(20, 20, 20, 0.9);
     color: #fff;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(0, 100%, 0);
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    transform: translate3d(-50%, -50%, 0) scale(0.85);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
   }
 
   #fs-{{ section_id }} .fs__grid-cell:hover .fs__cell-tip,
   #fs-{{ section_id }} .fs__grid-cell.is-ghost-hover .fs__cell-tip {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
 
   #fs-{{ section_id }} .fs__cell-tip-title {
