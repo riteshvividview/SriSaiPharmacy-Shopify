@@ -344,22 +344,20 @@
   }
 
   /* Ghost-cursor demo highlight: a vibrant, slowly-rotating multi-
-     color glow behind the card (a "Gemini-style" shimmer, not a flat
-     two-tone gradient or a border/ring) plus every OTHER card dimming
-     down, so the one being demonstrated visually pops out from the
-     rest - a spotlight rather than an outline. The glow sits on its
-     own sibling behind the media (not a pseudo-element on the media
-     itself), so it can extend past the media's own overflow:hidden
-     edge. Rotation animates the gradient's own angle via @property,
-     which degrades gracefully to a static (still colorful) gradient
-     on browsers that don't support animating it. */
+     color glow right at the card's own edge (a thin "Gemini-style"
+     border-glow, not a big soft halo) - sits on its own sibling
+     behind the media (not a pseudo-element on the media itself), so
+     it can extend just past the media's own overflow:hidden edge.
+     Rotation animates the gradient's own angle via @property, which
+     degrades gracefully to a static (still colorful) gradient on
+     browsers that don't support animating it. */
   #fs-{{ section_id }} .fs__grid-cell-glow {
     position: absolute;
-    inset: -24px;
+    inset: -3px;
     z-index: -1;
-    border-radius: 28px;
+    border-radius: 18px;
     background: conic-gradient(from var(--fs-glow-angle, 0deg), #4285f4, #9c27b0, #ff4d8d, #ff9800, #34a853, #4285f4);
-    filter: blur(22px) saturate(1.3);
+    filter: blur(4px) saturate(1.3);
     opacity: 0;
     transition: opacity 0.45s ease;
   }
@@ -1048,6 +1046,10 @@
         // Same relative point the ghost cursor itself sits at, so the
         // card appears to open from right where the "cursor" is.
         positionTip(cellEl, tip, cellRect.width * 0.22, cellRect.height / 2);
+        // Hide the cursor dot itself the moment the card opens - left
+        // visible, it sits exactly on top of the tooltip's anchor
+        // point and covers the text.
+        ghostCursor.classList.remove('is-active');
       }
 
       function hideCellPreview(cellEl) {
@@ -1077,7 +1079,10 @@
 
         ghostSetTimeout(function () {
           hideCellPreview(demoCells[0]);
-          if (demoCells[1]) moveGhostTo(demoCells[1]);
+          if (demoCells[1]) {
+            moveGhostTo(demoCells[1]);
+            ghostCursor.classList.add('is-active');
+          }
         }, 1500);
 
         if (demoCells[1]) {
@@ -1296,9 +1301,9 @@
     { "type": "header", "content": "Image Hover & Walkthrough Demo" },
     { "type": "checkbox", "id": "enable_hover_tooltip", "label": "Show name/price popup on hover", "info": "Turns off the entire hover popup feature - the images will just show their subtle zoom with no info card.", "default": true },
     { "type": "checkbox", "id": "enable_ghost_cursor_demo", "label": "Show the one-time \"ghost cursor\" walkthrough", "info": "A small animated cursor that demonstrates hovering on page load, so first-time visitors discover the popup above. Pick which products it uses per product block below.", "default": true },
-    { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": true },
+    { "type": "checkbox", "id": "ghost_dim_other_cards", "label": "Dim the other images during the walkthrough", "default": false },
     { "type": "range", "id": "ghost_dim_amount", "label": "Dim strength", "min": 10, "max": 90, "step": 5, "unit": "%", "info": "Lower = darker for the non-highlighted images.", "default": 45 },
-    { "type": "range", "id": "ghost_glow_intensity", "label": "Highlight glow strength", "min": 10, "max": 100, "step": 5, "unit": "%", "default": 60 },
+    { "type": "range", "id": "ghost_glow_intensity", "label": "Highlight glow strength", "min": 10, "max": 100, "step": 5, "unit": "%", "default": 85 },
 
     { "type": "header", "content": "Buttons" },
     { "type": "text", "id": "add_to_cart_text", "label": "Add-to-cart button text", "default": "Add Pack to Cart" },
