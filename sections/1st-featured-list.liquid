@@ -147,6 +147,15 @@
                     style="object-position: {{ bs.image_focal_point | default: '50% 50%' }};"
                   >
                 {%- endif -%}
+                {%- if s.enable_hover_pour and s.hover_pour_image != blank -%}
+                  <img
+                    class="fc__pour"
+                    src="{{ s.hover_pour_image | image_url: width: 600 }}"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                  >
+                {%- endif -%}
               </div>
 
               <div class="fc__info">
@@ -381,6 +390,7 @@
   }
 
   #fc-{{ section_id }} .fc__image-wrap {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -399,6 +409,27 @@
 
   #fc-{{ section_id }} .fc__card:hover .fc__image {
     transform: scale(var(--fc-hover-zoom));
+  }
+
+  /* ---- Hover pour overlay: an animated WebP (real alpha transparency,
+     no GIF-style dithering/halos around soft edges) layered on top of
+     the product photo. It's always playing in the background - hover
+     only fades it in/out via opacity, which is what keeps the show/hide
+     smooth (no restart flicker from swapping the image src). ---- */
+  #fc-{{ section_id }} .fc__pour {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--fc-image-fit);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  #fc-{{ section_id }} .fc__card:hover .fc__pour {
+    opacity: 1;
   }
 
   #fc-{{ section_id }} .fc__info {
@@ -525,8 +556,13 @@
     #fc-{{ section_id }} .fc__card-link,
     #fc-{{ section_id }} .fc__image,
     #fc-{{ section_id }} .fc__view-all,
-    #fc-{{ section_id }} .fc__icon-btn {
+    #fc-{{ section_id }} .fc__icon-btn,
+    #fc-{{ section_id }} .fc__pour {
       transition: none !important;
+    }
+
+    #fc-{{ section_id }} .fc__pour {
+      display: none;
     }
   }
 </style>
@@ -754,6 +790,8 @@
     { "type": "range", "id": "image_padding", "label": "Image padding", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 10 },
     { "type": "range", "id": "hover_zoom", "label": "Hover zoom scale", "min": 1, "max": 1.3, "step": 0.1, "default": 1.1 },
     { "type": "range", "id": "hover_lift", "label": "Hover lift distance", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 6 },
+    { "type": "checkbox", "id": "enable_hover_pour", "label": "Enable hover pour animation", "default": false },
+    { "type": "image_picker", "id": "hover_pour_image", "label": "Hover pour animation", "info": "Upload an animated WebP with a transparent background (recommended - real alpha transparency, no dithering around soft edges like an animated GIF has). Overlays on top of every product image on hover, in this section only." },
 
     { "type": "header", "content": "Discount badge" },
     { "type": "color", "id": "badge_bg_color", "label": "Background color", "default": "#F1F1F1" },
