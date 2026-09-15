@@ -82,6 +82,15 @@
       {%- if s.heading != blank -%}<h1 class="amh__heading">{{ s.heading }}</h1>{%- endif -%}
     </div>
   </div>
+
+  {%- comment -%}
+    Reserves the "phase 1" scroll distance in real, normal document
+    flow (unlike the pin itself, this plain sibling isn't affected by
+    any pin/transform trickery) - see the JS below for the full
+    explanation of why this has to be a real element rather than
+    GSAP's own pinSpacing option.
+  {%- endcomment -%}
+  <div class="amh__phase-spacer" aria-hidden="true"></div>
 </section>
 
 <style>
@@ -106,6 +115,11 @@
     height: 100svh;
     min-height: 560px;
     overflow: hidden;
+  }
+
+  #amh-{{ section_id }} .amh__phase-spacer {
+    height: 100svh;
+    min-height: 560px;
   }
 
   #amh-{{ section_id }} .amh__image-wrap {
@@ -211,42 +225,50 @@
       var motifs = Array.prototype.slice.call(section.querySelectorAll('[data-amh-motif]'));
       if (!stage) return;
 
-      /* Two chained phases on the same pinned stage, not one:
-         Phase 1 ("top top" -> "+=100%", pinSpacing: true) - a normal
-         reserved-spacer pin. The reader can freely scroll through this
-         full viewport-height of distance and watch the scrub (image
-         settles, heading fades, motifs drift) with the hero fully
-         pinned and nothing from the next chapter visible yet.
-         Phase 2 (chained right where phase 1 ends, pinSpacing: false) -
-         only now does the hero stop reserving space, so the identify
-         triptych chapter (next in DOM flow) starts sliding up and
-         covering the still-pinned hero for this second stretch of
-         scroll. Using "bottom top" as phase 2's start (rather than a
-         literal scroll offset) means it always picks up exactly where
-         phase 1's spacer left off, however tall the stage actually
-         renders at a given viewport size. */
+      /* One continuous pin spanning both phases, not two chained
+         triggers (chaining a second trigger's "start" off the pinned
+         element's own "bottom" turned out unreliable - GSAP recalculates
+         a pinned element's box against its spacer, not its live
+         position, so a second trigger reading "bottom" off the same
+         element didn't pick up where the first left off).
+
+         Instead: pinSpacing is off for the WHOLE "+=200%" duration, but
+         .amh__phase-spacer (a plain sibling <div>, 100svh, unaffected by
+         any pin/transform trickery) sits right after .amh__stage in
+         normal document flow and reserves phase 1's distance by itself.
+         Concretely: stage's own natural height (100svh) + the spacer's
+         height (100svh) = the identity-triptych chapter's real document
+         position starts 200svh down. As the reader scrolls:
+         - 0 -> 100svh (phase 1): the triptych chapter hasn't been
+           scrolled far enough up yet to even reach the viewport, so
+           nothing of it is visible - the hero just sits pinned while
+           the scrub (below) plays out.
+         - 100svh -> 200svh (phase 2): the triptych chapter's top edge
+           is now close enough to slide up into view and progressively
+           covers the still-pinned hero.
+
+         The scrub timeline is split the same way: the real tweens
+         (image settle, heading fade) occupy the FIRST HALF of the
+         timeline's own duration, then a no-op placeholder tween
+         occupies the second half - since scrub maps timeline progress
+         0->1 across the entire "+=200%" range, this makes the visual
+         changes finish exactly at the phase 1/phase 2 boundary and then
+         hold their end state (rather than continuing to animate) while
+         phase 2's cover effect plays. */
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: stage,
           start: 'top top',
-          end: '+=100%',
+          end: '+=200%',
           scrub: true,
           pin: true,
-          pinSpacing: true,
-          id: 'amh-phase1-{{ section_id }}'
+          pinSpacing: false,
+          id: 'amh-pin-{{ section_id }}'
         }
       });
-      if (imageWrap) tl.fromTo(imageWrap, { scale: 1.15 }, { scale: 1, ease: 'none' }, 0);
-      if (headingWrap) tl.fromTo(headingWrap, { opacity: 1, y: 0 }, { opacity: 0, y: -60, ease: 'none' }, 0);
-
-      ScrollTrigger.create({
-        trigger: stage,
-        start: 'bottom top',
-        end: '+=100%',
-        pin: true,
-        pinSpacing: false,
-        id: 'amh-phase2-{{ section_id }}'
-      });
+      if (imageWrap) tl.fromTo(imageWrap, { scale: 1.15 }, { scale: 1, ease: 'none', duration: 1 }, 0);
+      if (headingWrap) tl.fromTo(headingWrap, { opacity: 1, y: 0 }, { opacity: 0, y: -60, ease: 'none', duration: 1 }, 0);
+      tl.to({}, { duration: 1 });
 
       motifs.forEach(function (el) {
         var amount = parseFloat(el.getAttribute('data-motif-scrub')) || 1;
