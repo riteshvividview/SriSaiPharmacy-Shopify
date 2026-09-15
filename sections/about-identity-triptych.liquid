@@ -217,17 +217,26 @@
       if (!cards.length || !grid) return;
 
       gsap.set(cards, { clearProps: 'opacity,transform' });
-      gsap.from(cards, {
-        opacity: 0,
-        y: 40,
-        stagger: 0.15,
-        duration: 0.7,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: grid,
-          start: 'top 75%'
+      /* fromTo, not from: the cards' own CSS sets a static opacity:0/
+         translateY(40px) as their base (pre-JS) state, so gsap.from()
+         would read that same opacity:0 as the "natural" end state it
+         animates back to - fading in from invisible to invisible. The
+         end state has to be given explicitly. */
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: grid,
+            start: 'top 75%'
+          }
         }
-      });
+      );
     }
 
     if (reducedMotion) {
