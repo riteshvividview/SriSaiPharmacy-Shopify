@@ -61,26 +61,39 @@
       </div>
     {%- endif -%}
 
+    {%- if s.showcase_bg_image != blank -%}
+      <div
+        class="stc__title-bg-wrap"
+        data-stc-parallax
+        data-parallax-amount="90"
+        data-parallax-phase="0"
+        aria-hidden="true"
+        style="
+          top: {{ s.bg_image_offset_top | default: -120 }}px;
+          {{ s.bg_image_side | default: 'right' }}: {{ s.bg_image_offset_x | default: 0 }}px;
+          width: {{ s.bg_image_width | default: 260 }}px;
+        "
+      >
+        <img
+          class="stc__title-bg"
+          src="{{ s.showcase_bg_image | image_url: width: 700 }}"
+          srcset="{{ s.showcase_bg_image | image_url: width: 400 }} 400w, {{ s.showcase_bg_image | image_url: width: 700 }} 700w"
+          alt=""
+          width="{{ s.showcase_bg_image.width }}"
+          height="{{ s.showcase_bg_image.height }}"
+          loading="lazy"
+          style="
+            --stc-bg-opacity: {{ s.showcase_bg_opacity | default: 35 | divided_by: 100.0 }};
+            transform: rotate({{ s.bg_image_rotation | default: -8 }}deg);
+          "
+        >
+      </div>
+    {%- endif -%}
+
     <div class="stc__layout{% unless s.show_phone_showcase %} stc__layout--no-phone{% endunless %}">
       {%- if s.show_phone_showcase -%}
         <div class="stc__showcase" data-stc-showcase>
           <div class="stc__phone-stage">
-            {%- if s.showcase_bg_image != blank -%}
-              <img
-                class="stc__showcase-bg"
-                data-stc-parallax
-                data-parallax-amount="90"
-                data-parallax-phase="0"
-                src="{{ s.showcase_bg_image | image_url: width: 900 }}"
-                srcset="{{ s.showcase_bg_image | image_url: width: 500 }} 500w, {{ s.showcase_bg_image | image_url: width: 900 }} 900w"
-                alt=""
-                width="{{ s.showcase_bg_image.width }}"
-                height="{{ s.showcase_bg_image.height }}"
-                loading="lazy"
-                style="--stc-bg-opacity: {{ s.showcase_bg_opacity | default: 35 | divided_by: 100.0 }};"
-              >
-            {%- endif -%}
-
             <span class="stc__ring-parallax" data-stc-parallax data-parallax-amount="20" data-parallax-phase="1">
               <span class="stc__stage-ring stc__stage-ring--1" aria-hidden="true"></span>
             </span>
@@ -386,20 +399,25 @@
     perspective: 1400px;
   }
 
-  #stc-{{ section_id }} .stc__showcase-bg {
+  /* Decorative image positioned beside the section heading, well above
+     the phone/card content - the wrapper carries the static schema
+     position (top/side/width via plain CSS offsets, not transform), so
+     it never competes with the JS-driven parallax translateY that also
+     lives on this same wrapper. The rotation is a separate static
+     transform on the child <img>, untouched by JS. */
+  #stc-{{ section_id }} .stc__title-bg-wrap {
     position: absolute;
-    top: -48px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: 92%;
-    max-width: 420px;
-    height: auto;
     z-index: 0;
-    opacity: var(--stc-bg-opacity, 0.35);
     pointer-events: none;
-    user-select: none;
     will-change: transform;
+  }
+
+  #stc-{{ section_id }} .stc__title-bg {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: var(--stc-bg-opacity, 0.35);
+    user-select: none;
   }
 
   /* Full-cover wrapper so the ring inside keeps positioning relative to
@@ -1035,7 +1053,8 @@
       gap: 0;
     }
 
-    #stc-{{ section_id }} .stc__showcase {
+    #stc-{{ section_id }} .stc__showcase,
+    #stc-{{ section_id }} .stc__title-bg-wrap {
       display: none;
     }
 
@@ -1593,12 +1612,23 @@
     { "type": "image_picker", "id": "phone_2_image", "label": "Phone 2 - fallback image", "info": "Used if no video is set above." },
     { "type": "text", "id": "phone_caption", "label": "Caption under the phones", "default": "Shop anywhere, anytime." },
     { "type": "color", "id": "phone_frame_color", "label": "Phone frame color", "default": "#141414" },
-    { "type": "image_picker", "id": "showcase_bg_image", "label": "Background image", "info": "A decorative image shown behind the phone, with its own parallax drift." },
-    { "type": "range", "id": "showcase_bg_opacity", "label": "Background image opacity", "min": 5, "max": 100, "step": 5, "unit": "%", "default": 35 },
     { "type": "checkbox", "id": "show_showcase_chips", "label": "Show floating badge chips", "default": true },
     { "type": "text", "id": "showcase_chip_1_text", "label": "Chip 1 text", "default": "100% Genuine" },
     { "type": "text", "id": "showcase_chip_2_text", "label": "Chip 2 text", "default": "Free Delivery" },
     { "type": "text", "id": "showcase_chip_3_text", "label": "Chip 3 text", "default": "4.8 (2,300+ reviews)" },
+
+    { "type": "header", "content": "Title Background Image" },
+    { "type": "paragraph", "content": "A decorative, rotated image placed beside the heading (desktop only), with its own scroll parallax drift." },
+    { "type": "image_picker", "id": "showcase_bg_image", "label": "Image" },
+    { "type": "select", "id": "bg_image_side", "label": "Position", "options": [
+      { "value": "right", "label": "Right of title" },
+      { "value": "left", "label": "Left of title" }
+    ], "default": "right" },
+    { "type": "range", "id": "bg_image_width", "label": "Width", "min": 100, "max": 500, "step": 10, "unit": "px", "default": 260 },
+    { "type": "range", "id": "bg_image_offset_top", "label": "Vertical offset", "min": -300, "max": 200, "step": 10, "unit": "px", "default": -120, "info": "Negative values move it further above the heading." },
+    { "type": "range", "id": "bg_image_offset_x", "label": "Horizontal offset", "min": -200, "max": 200, "step": 10, "unit": "px", "default": 0 },
+    { "type": "range", "id": "bg_image_rotation", "label": "Rotation", "min": -45, "max": 45, "step": 1, "unit": "°", "default": -8 },
+    { "type": "range", "id": "showcase_bg_opacity", "label": "Opacity", "min": 5, "max": 100, "step": 5, "unit": "%", "default": 35 },
 
     { "type": "header", "content": "Layout" },
     { "type": "range", "id": "columns_desktop", "label": "Columns (desktop)", "min": 2, "max": 5, "step": 1, "default": 4 },
