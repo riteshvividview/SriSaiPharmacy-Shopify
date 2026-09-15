@@ -888,6 +888,7 @@
 
   #stc-{{ section_id }} .stc__card-body {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 6px;
   }
@@ -901,6 +902,10 @@
   }
 
   #stc-{{ section_id }} .stc__card-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
     font-size: 14.5px;
     font-weight: 600;
     color: var(--stc-text);
@@ -911,7 +916,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 8px;
+    margin-top: auto;
+    padding-top: 8px;
   }
 
   #stc-{{ section_id }} .stc__card-price-now {
@@ -965,7 +971,11 @@
     transform: translateX(3px);
   }
 
-  /* ---- Tablet ---- */
+  /* ---- Tablet & below: the phone showcase (mockups, chips, glow rings,
+     watermark) is a lot of moving parts to keep legible at small sizes,
+     so it's hidden below desktop widths rather than fighting to shrink
+     it - the tab/card carousel becomes the full-width, single-column
+     focus instead. ---- */
   @media (max-width: 999px) {
     #stc-{{ section_id }} .stc__inner {
       padding: 0 24px;
@@ -973,19 +983,11 @@
 
     #stc-{{ section_id }} .stc__layout {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 0;
     }
 
     #stc-{{ section_id }} .stc__showcase {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #stc-{{ section_id }} .stc__phone-stage {
-      min-height: 400px;
-      width: 100%;
-      max-width: 380px;
+      display: none;
     }
 
     #stc-{{ section_id }} .stc__card {
@@ -1001,17 +1003,6 @@
 
     #stc-{{ section_id }} .stc__header {
       margin-bottom: 24px;
-    }
-
-    #stc-{{ section_id }} .stc__phone-stage {
-      min-height: 320px;
-      transform: scale(0.82);
-      transform-origin: top center;
-    }
-
-    #stc-{{ section_id }} .stc__chip {
-      font-size: 11px;
-      padding: 7px 11px;
     }
 
     #stc-{{ section_id }} .stc__tabbar-wrap {
