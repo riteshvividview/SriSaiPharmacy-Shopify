@@ -65,8 +65,28 @@
       {%- if s.show_phone_showcase -%}
         <div class="stc__showcase" data-stc-showcase>
           <div class="stc__phone-stage">
-            <span class="stc__stage-ring stc__stage-ring--1" aria-hidden="true"></span>
-            <span class="stc__stage-ring stc__stage-ring--2" aria-hidden="true"></span>
+            {%- if s.showcase_bg_image != blank -%}
+              <img
+                class="stc__showcase-bg"
+                data-stc-parallax
+                data-parallax-amount="90"
+                data-parallax-phase="0"
+                src="{{ s.showcase_bg_image | image_url: width: 900 }}"
+                srcset="{{ s.showcase_bg_image | image_url: width: 500 }} 500w, {{ s.showcase_bg_image | image_url: width: 900 }} 900w"
+                alt=""
+                width="{{ s.showcase_bg_image.width }}"
+                height="{{ s.showcase_bg_image.height }}"
+                loading="lazy"
+                style="--stc-bg-opacity: {{ s.showcase_bg_opacity | default: 35 | divided_by: 100.0 }};"
+              >
+            {%- endif -%}
+
+            <span class="stc__ring-parallax" data-stc-parallax data-parallax-amount="20" data-parallax-phase="1">
+              <span class="stc__stage-ring stc__stage-ring--1" aria-hidden="true"></span>
+            </span>
+            <span class="stc__ring-parallax" data-stc-parallax data-parallax-amount="34" data-parallax-phase="2">
+              <span class="stc__stage-ring stc__stage-ring--2" aria-hidden="true"></span>
+            </span>
 
             {%- if has_phone_2 -%}
               <div class="stc__phone-float stc__phone-float--secondary" data-stc-phone-float="1">
@@ -364,6 +384,35 @@
     min-height: 500px;
     padding: 30px 10px 60px 40px;
     perspective: 1400px;
+  }
+
+  #stc-{{ section_id }} .stc__showcase-bg {
+    position: absolute;
+    top: -48px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 92%;
+    max-width: 420px;
+    height: auto;
+    z-index: 0;
+    opacity: var(--stc-bg-opacity, 0.35);
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+  }
+
+  /* Full-cover wrapper so the ring inside keeps positioning relative to
+     the same box it always did (.stc__phone-stage) - JS only ever sets
+     `transform` on this wrapper (scroll-parallax translateY), while the
+     ring inside keeps its own CSS-only spin, so neither writer fights
+     the other for the same property on the same element. */
+  #stc-{{ section_id }} .stc__ring-parallax {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
   }
 
   #stc-{{ section_id }} .stc__stage-ring {
@@ -1380,7 +1429,22 @@
       var floats = Array.prototype.slice.call(section.querySelectorAll('[data-stc-phone-float]'));
       var tilts = Array.prototype.slice.call(section.querySelectorAll('[data-stc-phone-tilt]'));
 
-      if (floats.length) {
+      /* Shared by tick() (updates it every frame while the stage is in
+         view) and chipTick() (reads it) so the chips' scroll-parallax
+         stays in sync with everything else without a second scroll
+         measurement. */
+      var latestScrollProgress = 0.5;
+
+      /* Generic scroll-parallax layer: the new background image + the
+         two ring wrappers. Each carries its own amount/phase via data
+         attributes so they drift at different speeds/directions - and
+         each eases toward its target position every frame (a lerp,
+         not a direct 1:1 scroll mapping) for a smooth, floaty feel
+         instead of parallax that snaps rigidly to the scrollbar. */
+      var parallaxEls = Array.prototype.slice.call(section.querySelectorAll('[data-stc-parallax]'));
+      var parallaxState = parallaxEls.map(function () { return { cur: 0 }; });
+
+      if (floats.length || parallaxEls.length) {
         var rafId = null;
         var startTime = null;
 
@@ -1391,14 +1455,25 @@
           var vh = window.innerHeight || document.documentElement.clientHeight || 1;
           var progress = (vh - rect.top) / (vh + rect.height);
           progress = Math.max(0, Math.min(1, progress));
+          latestScrollProgress = progress;
 
           floats.forEach(function (el, i) {
-            var amp = i === 0 ? 8 : 12;
+            var amp = i === 0 ? 10 : 14;
             var speed = i === 0 ? 3.1 : 3.7;
-            var parAmount = i === 0 ? 26 : -34;
+            var parAmount = i === 0 ? 70 : -95;
             var floatY = Math.sin((t / speed) * Math.PI * 2 + i * 2) * amp;
             var parY = (progress - 0.5) * parAmount;
             el.style.transform = 'translate3d(0, ' + (floatY + parY).toFixed(1) + 'px, 0)';
+          });
+
+          parallaxEls.forEach(function (el, i) {
+            var amount = parseFloat(el.getAttribute('data-parallax-amount')) || 40;
+            var phase = parseFloat(el.getAttribute('data-parallax-phase')) || 0;
+            var sign = phase % 2 === 0 ? 1 : -1;
+            var target = (progress - 0.5) * amount * sign;
+            var st = parallaxState[i];
+            st.cur += (target - st.cur) * 0.07;
+            el.style.transform = 'translate3d(0, ' + st.cur.toFixed(1) + 'px, 0)';
           });
 
           rafId = window.requestAnimationFrame(tick);
@@ -1469,7 +1544,10 @@
         });
       }
 
-      /* ---- Floating glass chips: independent bob, own element, own transform ---- */
+      /* ---- Floating glass chips: independent bob + a share of the same
+         scroll-parallax (own element, own transform - still the sole
+         writer, just folding two motion sources into one calculation
+         instead of two competing writers). ---- */
       var chips = Array.prototype.slice.call(section.querySelectorAll('[data-stc-float-chip]'));
       if (chips.length) {
         var chipStart = null;
@@ -1479,8 +1557,10 @@
           chips.forEach(function (chip, i) {
             var amp = 6 + i * 2;
             var speed = 2.6 + i * 0.5;
-            var y = Math.sin((t / speed) * Math.PI * 2 + i) * amp;
-            chip.style.transform = 'translate3d(0, ' + y.toFixed(1) + 'px, 0)';
+            var bobY = Math.sin((t / speed) * Math.PI * 2 + i) * amp;
+            var parAmount = 24 + i * 12;
+            var parY = (latestScrollProgress - 0.5) * parAmount * (i % 2 === 0 ? 1 : -1);
+            chip.style.transform = 'translate3d(0, ' + (bobY + parY).toFixed(1) + 'px, 0)';
           });
           window.requestAnimationFrame(chipTick);
         }
@@ -1513,6 +1593,8 @@
     { "type": "image_picker", "id": "phone_2_image", "label": "Phone 2 - fallback image", "info": "Used if no video is set above." },
     { "type": "text", "id": "phone_caption", "label": "Caption under the phones", "default": "Shop anywhere, anytime." },
     { "type": "color", "id": "phone_frame_color", "label": "Phone frame color", "default": "#141414" },
+    { "type": "image_picker", "id": "showcase_bg_image", "label": "Background image", "info": "A decorative image shown behind the phone, with its own parallax drift." },
+    { "type": "range", "id": "showcase_bg_opacity", "label": "Background image opacity", "min": 5, "max": 100, "step": 5, "unit": "%", "default": 35 },
     { "type": "checkbox", "id": "show_showcase_chips", "label": "Show floating badge chips", "default": true },
     { "type": "text", "id": "showcase_chip_1_text", "label": "Chip 1 text", "default": "100% Genuine" },
     { "type": "text", "id": "showcase_chip_2_text", "label": "Chip 2 text", "default": "Free Delivery" },
