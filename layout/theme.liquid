@@ -49,19 +49,29 @@
     {{ content_for_header }}
 
     {%- comment -%}
-      About page only: GSAP + ScrollTrigger for the scroll-driven "chapter"
-      storytelling in sections/about-*.liquid. The library scripts are safe
-      to load here (they only define globals, no DOM dependency) - but the
-      scroller-detection bootstrap that USES them cannot run in <head>: it
-      needs `.page-wrapper` to exist first, and that element doesn't open
-      until <body> (see the matching bootstrap script placed right after
-      `<div class="page-wrapper">` below). Loading gsap.min.js this early
-      just means it's ready by the time that bootstrap and every chapter's
-      own inline <script> run during <body> parsing.
+      About page only: GSAP + ScrollTrigger (for the scroll-driven
+      "chapter" storytelling in sections/about-*.liquid) plus Lenis (for
+      real inertia-smoothed scrolling, so ScrollTrigger's scrub tracks an
+      already-smooth position instead of fighting native scroll-jump/
+      trembling). The library scripts are safe to load here (they only
+      define globals, no DOM dependency) - but the bootstrap that USES
+      them cannot run in <head>: it needs `.page-wrapper` to exist first,
+      and that element doesn't open until <body> (see the matching
+      bootstrap script placed right after `<div class="page-wrapper">`
+      below). Loading these here just means they're ready by the time
+      that bootstrap and every chapter's own inline <script> run during
+      <body> parsing.
+
+      This is a separate Lenis instance from the homepage's own Lenis
+      block further down (gated `template == 'index'`) - the two
+      templates are mutually exclusive so there's no double-loading risk,
+      and this one additionally wires into GSAP's ticker + ScrollTrigger,
+      which the homepage's instance has no reason to do.
     {%- endcomment -%}
     {% if template == 'page.about-us' %}
       <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
     {% endif %}
   </head>
 
@@ -72,25 +82,37 @@
 
     <div class="page-wrapper">
       {%- comment -%}
-        About page only: the GSAP ScrollTrigger scroller-detection
-        bootstrap. Placed here, immediately after `.page-wrapper` opens,
-        specifically because it MUST run after that element exists in the
-        DOM (querying it from <head> - where it's parsed before <body> even
+        About page only: the GSAP ScrollTrigger + Lenis bootstrap. Placed
+        here, immediately after `.page-wrapper` opens, specifically
+        because it MUST run after that element exists in the DOM
+        (querying it from <head> - where it's parsed before <body> even
         starts - previously returned null, silently breaking ScrollTrigger
-        for every chapter and, worse, appears to have broken native page
-        scrolling entirely since pinning against a null/wrong scroller
-        does not degrade gracefully). Every chapter's own inline <script>
-        runs later in document order (their sections render inside this
-        same page-wrapper, further down), so by the time any of them call
-        ScrollTrigger.create(), this default is already correctly set.
+        for every chapter and, worse, broke native page scrolling entirely
+        since pinning against a null/wrong scroller does not degrade
+        gracefully). Every chapter's own inline <script> runs later in
+        document order (their sections render inside this same
+        page-wrapper, further down), so by the time any of them call
+        ScrollTrigger.create(), the scroller default and Lenis are already
+        set up.
 
-        Same .page-wrapper vs window concern as Lenis - see
-        assets/scroll-container.js and the Lenis comment near </body>
-        below. ScrollTrigger can't have an existing instance's scroller
-        changed in place, so on breakpoint crossing every instance is
-        killed and every chapter's init function (pushed to
-        window.__aboutChapterInits by each chapter's own script) is
-        re-run against the new scroller.
+        Lenis is wired in per GSAP's own recommended integration: its raf
+        loop is driven by gsap.ticker (not a separate requestAnimationFrame
+        loop) so it never runs a frame out of step with ScrollTrigger's own
+        update cycle, `lenis.on('scroll', ScrollTrigger.update)` keeps
+        every scrub in this file's chapters tracking Lenis's already-
+        smoothed position instead of raw/jumpy native scroll, and
+        `gsap.ticker.lagSmoothing(0)` turns off GSAP's own frame-drop
+        compensation, which otherwise fights Lenis's own easing and is a
+        common source of a "trembling" scrub feel when the two run
+        together unconfigured.
+
+        Same .page-wrapper vs window concern as the homepage's own,
+        separate Lenis instance - see assets/scroll-container.js and the
+        Lenis comment near </body> below. Neither ScrollTrigger nor Lenis
+        can have an existing instance's scroller changed in place, so on
+        breakpoint crossing both are destroyed and recreated, and every
+        chapter's init function (pushed to window.__aboutChapterInits by
+        each chapter's own script) is re-run against the new scroller.
       {%- endcomment -%}
       {% if template == 'page.about-us' %}
         <script>
@@ -99,19 +121,58 @@
             gsap.registerPlugin(ScrollTrigger);
 
             var DESKTOP_QUERY = window.matchMedia('(min-width: 990px)');
+            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var lenisInstance = null;
 
             function currentScroller() {
               var wrapper = DESKTOP_QUERY.matches ? document.querySelector('.page-wrapper') : null;
               return wrapper || window;
             }
 
+            function createLenis() {
+              if (reducedMotion || typeof Lenis === 'undefined') return;
+              var wrapper = currentScroller();
+              var options = {
+                duration: 0.85,
+                easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+                smoothWheel: true,
+                syncTouch: false
+              };
+              if (wrapper !== window) {
+                // See the homepage Lenis block below for why this is
+                // forced off while Lenis owns the element's scrollTop.
+                wrapper.style.scrollBehavior = 'auto';
+                options.wrapper = wrapper;
+                options.content = wrapper;
+              }
+              lenisInstance = new Lenis(options);
+              lenisInstance.on('scroll', ScrollTrigger.update);
+            }
+
+            function destroyLenis() {
+              if (lenisInstance) {
+                lenisInstance.destroy();
+                lenisInstance = null;
+              }
+              var pageWrapper = document.querySelector('.page-wrapper');
+              if (pageWrapper) pageWrapper.style.scrollBehavior = '';
+            }
+
+            gsap.ticker.add(function (time) {
+              if (lenisInstance) lenisInstance.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
+
             ScrollTrigger.defaults({ scroller: currentScroller() });
+            createLenis();
 
             window.__aboutChapterInits = window.__aboutChapterInits || [];
 
             DESKTOP_QUERY.addEventListener('change', function () {
+              destroyLenis();
               ScrollTrigger.getAll().forEach(function (st) { st.kill(); });
               ScrollTrigger.defaults({ scroller: currentScroller() });
+              createLenis();
               window.__aboutChapterInits.forEach(function (fn) { fn(); });
               ScrollTrigger.refresh();
             });
