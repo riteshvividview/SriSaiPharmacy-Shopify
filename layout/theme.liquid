@@ -50,49 +50,18 @@
 
     {%- comment -%}
       About page only: GSAP + ScrollTrigger for the scroll-driven "chapter"
-      storytelling in sections/about-*.liquid. Loaded in <head> (unlike the
-      homepage's Lenis block, which sits at the end of <body>) on purpose:
-      each chapter section's own inline <script> calls ScrollTrigger.create()
-      while the <body> is still parsing, so the scroller default below MUST
-      already be set before that happens, not after.
-
-      Same .page-wrapper vs window concern as Lenis - see
-      assets/scroll-container.js and the Lenis comment near </body> below.
-      ScrollTrigger can't have an existing instance's scroller changed in
-      place, so on breakpoint crossing every instance is killed and every
-      chapter's init function (pushed to window.__aboutChapterInits by each
-      chapter's own script) is re-run against the new scroller.
+      storytelling in sections/about-*.liquid. The library scripts are safe
+      to load here (they only define globals, no DOM dependency) - but the
+      scroller-detection bootstrap that USES them cannot run in <head>: it
+      needs `.page-wrapper` to exist first, and that element doesn't open
+      until <body> (see the matching bootstrap script placed right after
+      `<div class="page-wrapper">` below). Loading gsap.min.js this early
+      just means it's ready by the time that bootstrap and every chapter's
+      own inline <script> run during <body> parsing.
     {%- endcomment -%}
     {% if template == 'page.about-us' %}
       <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
-      <script>
-        (function () {
-          if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-          gsap.registerPlugin(ScrollTrigger);
-
-          var DESKTOP_QUERY = window.matchMedia('(min-width: 990px)');
-
-          function currentScroller() {
-            return DESKTOP_QUERY.matches ? document.querySelector('.page-wrapper') : window;
-          }
-
-          ScrollTrigger.defaults({ scroller: currentScroller() });
-
-          window.__aboutChapterInits = window.__aboutChapterInits || [];
-
-          DESKTOP_QUERY.addEventListener('change', function () {
-            ScrollTrigger.getAll().forEach(function (st) { st.kill(); });
-            ScrollTrigger.defaults({ scroller: currentScroller() });
-            window.__aboutChapterInits.forEach(function (fn) { fn(); });
-            ScrollTrigger.refresh();
-          });
-
-          window.addEventListener('load', function () {
-            ScrollTrigger.refresh();
-          });
-        })();
-      </script>
     {% endif %}
   </head>
 
@@ -102,6 +71,58 @@
     {% render 'chat-drawer' %}
 
     <div class="page-wrapper">
+      {%- comment -%}
+        About page only: the GSAP ScrollTrigger scroller-detection
+        bootstrap. Placed here, immediately after `.page-wrapper` opens,
+        specifically because it MUST run after that element exists in the
+        DOM (querying it from <head> - where it's parsed before <body> even
+        starts - previously returned null, silently breaking ScrollTrigger
+        for every chapter and, worse, appears to have broken native page
+        scrolling entirely since pinning against a null/wrong scroller
+        does not degrade gracefully). Every chapter's own inline <script>
+        runs later in document order (their sections render inside this
+        same page-wrapper, further down), so by the time any of them call
+        ScrollTrigger.create(), this default is already correctly set.
+
+        Same .page-wrapper vs window concern as Lenis - see
+        assets/scroll-container.js and the Lenis comment near </body>
+        below. ScrollTrigger can't have an existing instance's scroller
+        changed in place, so on breakpoint crossing every instance is
+        killed and every chapter's init function (pushed to
+        window.__aboutChapterInits by each chapter's own script) is
+        re-run against the new scroller.
+      {%- endcomment -%}
+      {% if template == 'page.about-us' %}
+        <script>
+          (function () {
+            if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+            gsap.registerPlugin(ScrollTrigger);
+
+            var DESKTOP_QUERY = window.matchMedia('(min-width: 990px)');
+
+            function currentScroller() {
+              var wrapper = DESKTOP_QUERY.matches ? document.querySelector('.page-wrapper') : null;
+              return wrapper || window;
+            }
+
+            ScrollTrigger.defaults({ scroller: currentScroller() });
+
+            window.__aboutChapterInits = window.__aboutChapterInits || [];
+
+            DESKTOP_QUERY.addEventListener('change', function () {
+              ScrollTrigger.getAll().forEach(function (st) { st.kill(); });
+              ScrollTrigger.defaults({ scroller: currentScroller() });
+              window.__aboutChapterInits.forEach(function (fn) { fn(); });
+              ScrollTrigger.refresh();
+            });
+
+            window.addEventListener('load', function () {
+              ScrollTrigger.refresh();
+            });
+          })();
+        </script>
+      {% endif %}
+
       <div id="header-group">
         {% sections 'header-group' %}
       </div>
