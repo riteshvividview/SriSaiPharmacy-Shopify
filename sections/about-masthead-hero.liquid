@@ -211,6 +211,20 @@
       var motifs = Array.prototype.slice.call(section.querySelectorAll('[data-amh-motif]'));
       if (!stage) return;
 
+      /* Two chained phases on the same pinned stage, not one:
+         Phase 1 ("top top" -> "+=100%", pinSpacing: true) - a normal
+         reserved-spacer pin. The reader can freely scroll through this
+         full viewport-height of distance and watch the scrub (image
+         settles, heading fades, motifs drift) with the hero fully
+         pinned and nothing from the next chapter visible yet.
+         Phase 2 (chained right where phase 1 ends, pinSpacing: false) -
+         only now does the hero stop reserving space, so the identify
+         triptych chapter (next in DOM flow) starts sliding up and
+         covering the still-pinned hero for this second stretch of
+         scroll. Using "bottom top" as phase 2's start (rather than a
+         literal scroll offset) means it always picks up exactly where
+         phase 1's spacer left off, however tall the stage actually
+         renders at a given viewport size. */
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: stage,
@@ -218,20 +232,21 @@
           end: '+=100%',
           scrub: true,
           pin: true,
-          /* No spacer reserved for the pin duration - the next chapter
-             sits directly after this one in normal document flow, so as
-             soon as the reader scrolls past this section's own height it
-             slides straight up and over the still-pinned hero underneath,
-             covering it (its own opaque background does the covering;
-             no z-index juggling needed since it's simply later in DOM
-             order), instead of the usual "hero unpins, then the next
-             section's own space begins" handoff. */
-          pinSpacing: false,
-          id: 'amh-pin-{{ section_id }}'
+          pinSpacing: true,
+          id: 'amh-phase1-{{ section_id }}'
         }
       });
       if (imageWrap) tl.fromTo(imageWrap, { scale: 1.15 }, { scale: 1, ease: 'none' }, 0);
       if (headingWrap) tl.fromTo(headingWrap, { opacity: 1, y: 0 }, { opacity: 0, y: -60, ease: 'none' }, 0);
+
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'bottom top',
+        end: '+=100%',
+        pin: true,
+        pinSpacing: false,
+        id: 'amh-phase2-{{ section_id }}'
+      });
 
       motifs.forEach(function (el) {
         var amount = parseFloat(el.getAttribute('data-motif-scrub')) || 1;
