@@ -63,16 +63,24 @@
       <span class="amh__motif amh__motif--4" data-amh-motif data-motif-scrub="1.2">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><rect x="4" y="9" width="16" height="6" rx="3" stroke="currentColor" stroke-width="1.3"/><path d="M11 9v6" stroke="currentColor" stroke-width="1.3"/></svg>
       </span>
+      <span class="amh__motif amh__motif--5" data-amh-motif data-motif-scrub="0.8">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2c4 5 7 9 7 13a7 7 0 0 1-14 0c0-4 3-8 7-13Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="amh__motif amh__motif--6" data-amh-motif data-motif-scrub="1.5">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.3"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </span>
+      <span class="amh__motif amh__motif--7" data-amh-motif data-motif-scrub="2.1">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </span>
+      <span class="amh__motif amh__motif--8" data-amh-motif data-motif-scrub="0.65">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+      </span>
     </div>
 
     <div class="amh__heading-wrap" data-amh-heading>
       {%- if s.eyebrow != blank -%}<p class="amh__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
       {%- if s.heading != blank -%}<h1 class="amh__heading">{{ s.heading }}</h1>{%- endif -%}
     </div>
-  </div>
-
-  <div class="amh__scroll-cue" aria-hidden="true">
-    <svg width="16" height="26" viewBox="0 0 16 26" fill="none"><rect x="1" y="1" width="14" height="24" rx="7" stroke="currentColor" stroke-width="1.3"/><circle class="amh__scroll-dot" cx="8" cy="8" r="2" fill="currentColor"/></svg>
   </div>
 </section>
 
@@ -138,6 +146,10 @@
   #amh-{{ section_id }} .amh__motif--2 { top: 22%; right: 10%; }
   #amh-{{ section_id }} .amh__motif--3 { bottom: 30%; left: 14%; }
   #amh-{{ section_id }} .amh__motif--4 { bottom: 22%; right: 16%; }
+  #amh-{{ section_id }} .amh__motif--5 { top: 40%; left: 4%; }
+  #amh-{{ section_id }} .amh__motif--6 { top: 8%; right: 28%; }
+  #amh-{{ section_id }} .amh__motif--7 { bottom: 12%; left: 32%; }
+  #amh-{{ section_id }} .amh__motif--8 { top: 50%; right: 5%; }
 
   #amh-{{ section_id }} .amh__heading-wrap {
     position: absolute;
@@ -172,34 +184,15 @@
     text-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   }
 
-  #amh-{{ section_id }} .amh__scroll-cue {
-    position: absolute;
-    left: 50%;
-    bottom: 28px;
-    z-index: 3;
-    transform: translateX(-50%);
-    color: #ffffff;
-    opacity: 0.8;
-  }
-
-  #amh-{{ section_id }} .amh__scroll-dot {
-    animation: amh-scroll-dot 1.8s ease-in-out infinite;
-  }
-
-  @keyframes amh-scroll-dot {
-    0%, 100% { opacity: 1; transform: translateY(0); }
-    50% { opacity: 0.3; transform: translateY(9px); }
-  }
-
   @media (max-width: 749px) {
-    #amh-{{ section_id }} .amh__motif--1, #amh-{{ section_id }} .amh__motif--3 { display: none; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    #amh-{{ section_id }} .amh__scroll-dot {
-      animation: none;
+    #amh-{{ section_id }} .amh__motif--1,
+    #amh-{{ section_id }} .amh__motif--3,
+    #amh-{{ section_id }} .amh__motif--6,
+    #amh-{{ section_id }} .amh__motif--7 {
+      display: none;
     }
   }
+
 </style>
 
 <script>
