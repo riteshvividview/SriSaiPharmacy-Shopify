@@ -179,30 +179,31 @@
                   </button>
 
                   <div class="stc__grid" data-stc-grid>
-                    {%- assign products_offset = forloop.index0 | plus: 1 -%}
-                    {%- assign card_i = 0 -%}
-                    {%- for product_block in section.blocks offset: products_offset -%}
-                      {%- if product_block.type == 'product' -%}
-                        {%- assign pb = product_block.settings -%}
+                    {%- assign tab_limit = tb.product_limit | default: 8 -%}
+                    {%- if tb.collection != blank -%}
+                      {%- assign card_i = 0 -%}
+                      {%- for card_product in tb.collection.products limit: tab_limit -%}
+                        {%- assign card_i = card_i | plus: 1 -%}
                         <a
-                          href="{{ pb.link | default: '#' }}"
+                          href="{{ card_product.url }}"
                           class="stc__card"
                           data-stc-card
                           style="--stc-card-delay: {{ card_i | times: 60 }}ms;"
-                          {{ product_block.shopify_attributes }}
                         >
                           <span class="stc__card-inner">
-                            {%- if pb.enable_badge and pb.badge_text != blank -%}
-                              <span class="stc__badge">{{ pb.badge_text }}</span>
+                            {%- if card_product.compare_at_price > card_product.price -%}
+                              <span class="stc__badge">Sale</span>
+                            {%- elsif card_product.available == false -%}
+                              <span class="stc__badge stc__badge--muted">Sold Out</span>
                             {%- endif -%}
                             <span class="stc__card-image">
-                              {%- if pb.image != blank -%}
+                              {%- if card_product.featured_image != blank -%}
                                 <img
-                                  src="{{ pb.image | image_url: width: 500 }}"
-                                  srcset="{{ pb.image | image_url: width: 250 }} 250w, {{ pb.image | image_url: width: 500 }} 500w"
-                                  alt="{{ pb.alt_text | default: pb.title | escape }}"
-                                  width="{{ pb.image.width }}"
-                                  height="{{ pb.image.height }}"
+                                  src="{{ card_product.featured_image | image_url: width: 500 }}"
+                                  srcset="{{ card_product.featured_image | image_url: width: 250 }} 250w, {{ card_product.featured_image | image_url: width: 500 }} 500w"
+                                  alt="{{ card_product.featured_image.alt | default: card_product.title | escape }}"
+                                  width="{{ card_product.featured_image.width }}"
+                                  height="{{ card_product.featured_image.height }}"
                                   loading="lazy"
                                 >
                               {%- else -%}
@@ -215,22 +216,21 @@
                               </span>
                             </span>
                             <span class="stc__card-body">
-                              {%- if pb.vendor != blank -%}<span class="stc__card-vendor">{{ pb.vendor }}</span>{%- endif -%}
-                              <span class="stc__card-title">{{ pb.title }}</span>
+                              {%- if card_product.vendor != blank -%}<span class="stc__card-vendor">{{ card_product.vendor }}</span>{%- endif -%}
+                              <span class="stc__card-title">{{ card_product.title }}</span>
                               <span class="stc__card-price">
-                                <span class="stc__card-price-now">{{ pb.price }}</span>
-                                {%- if pb.compare_at_price != blank -%}
-                                  <span class="stc__card-price-compare">{{ pb.compare_at_price }}</span>
+                                <span class="stc__card-price-now">{{ card_product.price | money }}</span>
+                                {%- if card_product.compare_at_price > card_product.price -%}
+                                  <span class="stc__card-price-compare">{{ card_product.compare_at_price | money }}</span>
                                 {%- endif -%}
                               </span>
                             </span>
                           </span>
                         </a>
-                        {%- assign card_i = card_i | plus: 1 -%}
-                      {%- else -%}
-                        {%- break -%}
-                      {%- endif -%}
-                    {%- endfor -%}
+                      {%- endfor -%}
+                    {%- else -%}
+                      <p class="stc__empty">Select a collection for this tab in the theme editor to show products here.</p>
+                    {%- endif -%}
                   </div>
 
                   <button type="button" class="stc__arrow stc__arrow--next" data-stc-arrow="next" aria-label="Scroll right">
@@ -693,6 +693,13 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     padding: 30px 34px 40px;
+    cursor: grab;
+  }
+
+  #stc-{{ section_id }} .stc__grid.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
   }
 
   /* Only centered once JS has confirmed the row has no overflow to hide -
@@ -806,6 +813,20 @@
     box-shadow: 0 6px 14px color-mix(in srgb, var(--stc-cta) 45%, transparent);
   }
 
+  #stc-{{ section_id }} .stc__badge--muted {
+    background: #6b6b6b;
+    box-shadow: 0 6px 14px rgba(20, 20, 20, 0.25);
+  }
+
+  #stc-{{ section_id }} .stc__empty {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--stc-muted);
+  }
+
   #stc-{{ section_id }} .stc__card-image {
     position: relative;
     display: flex;
@@ -824,6 +845,9 @@
     object-fit: cover;
     display: block;
     transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
   }
 
   #stc-{{ section_id }} .stc__card:hover .stc__card-image img {
@@ -1221,23 +1245,36 @@
         if (wrap) wrap.classList.toggle('is-not-scrollable', maxScroll <= 4);
       }
 
+      /* Index-based paging: find whichever card is currently CLOSEST to
+         the scroll start, then step exactly +-1 card from there. This is
+         immune to scrollLeft being clamped short of an exact card edge
+         (e.g. the last reachable position landing "between" cards) -
+         the old threshold-scan approach could pick the same card again
+         on "prev" in that situation, making the button look dead. */
+      function currentCardIndex(cards, pad) {
+        var current = grid.scrollLeft;
+        var closestIndex = 0;
+        var closestDist = Infinity;
+        cards.forEach(function (c, i) {
+          var dist = Math.abs(cardContentLeft(c) - pad - current);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestIndex = i;
+          }
+        });
+        return closestIndex;
+      }
+
       function scrollByCard(direction) {
         var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-stc-card]'));
         if (!cards.length) return;
-        var current = grid.scrollLeft;
         var pad = paddingLeft();
-        var target;
-
-        if (direction > 0) {
-          target = cards.filter(function (c) { return cardContentLeft(c) > current + pad + 4; })[0];
-          if (!target) target = cards[cards.length - 1];
-        } else {
-          var behind = cards.filter(function (c) { return cardContentLeft(c) < current + pad - 4; });
-          target = behind[behind.length - 1];
-          if (!target) target = cards[0];
-        }
-
-        grid.scrollTo({ left: cardContentLeft(target) - pad, behavior: 'smooth' });
+        var index = currentCardIndex(cards, pad);
+        var targetIndex = Math.max(0, Math.min(cards.length - 1, index + direction));
+        var target = cards[targetIndex];
+        var maxScroll = grid.scrollWidth - grid.clientWidth;
+        var left = Math.max(0, Math.min(maxScroll, cardContentLeft(target) - pad));
+        grid.scrollTo({ left: left, behavior: 'smooth' });
       }
 
       if (prevBtn) prevBtn.addEventListener('click', function () { scrollByCard(-1); });
@@ -1249,6 +1286,46 @@
       });
       gridControllers.push({ grid: grid, update: updateArrows });
       updateArrows();
+
+      /* ---- Drag-to-scroll with mouse/pen (touch already scrolls the
+         row natively via overflow-x). A click on a card link is
+         suppressed only if the pointer actually moved, so a plain tap
+         still opens the product. ---- */
+      if (window.PointerEvent) {
+        var isDragging = false;
+        var dragStartX = 0;
+        var dragStartScroll = 0;
+        var dragMoved = false;
+
+        function suppressNextClick(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          grid.removeEventListener('click', suppressNextClick, true);
+        }
+
+        grid.addEventListener('pointerdown', function (e) {
+          if (e.pointerType === 'touch') return;
+          isDragging = true;
+          dragMoved = false;
+          dragStartX = e.clientX;
+          dragStartScroll = grid.scrollLeft;
+          grid.classList.add('is-dragging');
+        });
+
+        window.addEventListener('pointermove', function (e) {
+          if (!isDragging) return;
+          var dx = e.clientX - dragStartX;
+          if (Math.abs(dx) > 3) dragMoved = true;
+          grid.scrollLeft = dragStartScroll - dx;
+        });
+
+        window.addEventListener('pointerup', function () {
+          if (!isDragging) return;
+          isDragging = false;
+          grid.classList.remove('is-dragging');
+          if (dragMoved) grid.addEventListener('click', suppressNextClick, true);
+        });
+      }
     });
 
     /* ---- Phone showcase: float + scroll parallax + cursor tilt ----
@@ -1472,24 +1549,10 @@
       "name": "Category Tab",
       "settings": [
         { "type": "text", "id": "label", "label": "Tab label", "default": "Shop by Concern" },
+        { "type": "collection", "id": "collection", "label": "Collection", "info": "Products from this collection are shown in this tab." },
+        { "type": "range", "id": "product_limit", "label": "Number of products to show", "min": 2, "max": 12, "step": 1, "default": 4 },
         { "type": "text", "id": "view_all_text", "label": "\"View all\" button text", "default": "View all" },
         { "type": "url", "id": "view_all_link", "label": "\"View all\" link" }
-      ]
-    },
-    {
-      "type": "product",
-      "name": "Product",
-      "settings": [
-        { "type": "paragraph", "content": "Place this block directly below the Category Tab it belongs to." },
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "alt_text", "label": "Image alt text" },
-        { "type": "text", "id": "title", "label": "Title", "default": "Product Title" },
-        { "type": "text", "id": "vendor", "label": "Vendor" },
-        { "type": "text", "id": "price", "label": "Price", "default": "Rs. 499.00" },
-        { "type": "text", "id": "compare_at_price", "label": "Compare at price" },
-        { "type": "url", "id": "link", "label": "Product link" },
-        { "type": "checkbox", "id": "enable_badge", "label": "Enable badge", "default": false },
-        { "type": "text", "id": "badge_text", "label": "Badge text", "default": "New" }
       ]
     }
   ],
@@ -1498,29 +1561,10 @@
       "name": "Shop By Category",
       "blocks": [
         { "type": "tab", "settings": { "label": "Shop by Concern", "view_all_text": "View all concerns" } },
-        { "type": "product", "settings": { "title": "Digestive Care Combo", "price": "Rs. 549.00" } },
-        { "type": "product", "settings": { "title": "Immunity Booster Pack", "price": "Rs. 699.00" } },
-        { "type": "product", "settings": { "title": "Joint Relief Balm", "price": "Rs. 399.00" } },
-
         { "type": "tab", "settings": { "label": "Men's Health", "view_all_text": "View all" } },
-        { "type": "product", "settings": { "title": "Men's Daily Multivitamin", "price": "Rs. 599.00" } },
-        { "type": "product", "settings": { "title": "Energy & Stamina Support", "price": "Rs. 749.00" } },
-        { "type": "product", "settings": { "title": "Hair & Scalp Tonic", "price": "Rs. 449.00" } },
-
         { "type": "tab", "settings": { "label": "Women's Health", "view_all_text": "View all" } },
-        { "type": "product", "settings": { "title": "Women's Wellness Formula", "price": "Rs. 649.00" } },
-        { "type": "product", "settings": { "title": "Iron & Folic Acid Tablets", "price": "Rs. 299.00" } },
-        { "type": "product", "settings": { "title": "Skin Glow Supplement", "price": "Rs. 549.00" } },
-
         { "type": "tab", "settings": { "label": "Care & Wellness", "view_all_text": "View all" } },
-        { "type": "product", "settings": { "title": "Daily Personal Care Kit", "price": "Rs. 799.00" } },
-        { "type": "product", "settings": { "title": "Herbal Wellness Tea", "price": "Rs. 349.00" } },
-        { "type": "product", "settings": { "title": "Sleep & Calm Support", "price": "Rs. 499.00" } },
-
-        { "type": "tab", "settings": { "label": "Health Packs", "view_all_text": "View all packs" } },
-        { "type": "product", "settings": { "title": "Family Wellness Pack", "price": "Rs. 1,299.00", "compare_at_price": "Rs. 1,599.00", "enable_badge": true, "badge_text": "Save 19%" } },
-        { "type": "product", "settings": { "title": "Immunity Combo Pack", "price": "Rs. 899.00", "compare_at_price": "Rs. 1,099.00", "enable_badge": true, "badge_text": "Save 18%" } },
-        { "type": "product", "settings": { "title": "Complete Skin Care Kit", "price": "Rs. 999.00" } }
+        { "type": "tab", "settings": { "label": "Health Packs", "view_all_text": "View all packs" } }
       ]
     }
   ]

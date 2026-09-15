@@ -409,273 +409,59 @@
           "type": "tab",
           "settings": {
             "label": "Shop by Concern",
+            "collection": "",
+            "product_limit": 4,
             "view_all_text": "View all concerns",
             "view_all_link": "/collections/all"
-          }
-        },
-        "product_concern_1": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Digestive Care Combo",
-            "vendor": "",
-            "price": "Rs. 549.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_concern_2": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Immunity Booster Pack",
-            "vendor": "",
-            "price": "Rs. 699.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_concern_3": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Joint Relief Balm",
-            "vendor": "",
-            "price": "Rs. 399.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_concern_4": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Herbal Digestive Tonic",
-            "vendor": "",
-            "price": "Rs. 429.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
           }
         },
         "tab_mens": {
           "type": "tab",
           "settings": {
             "label": "Men's Health",
+            "collection": "",
+            "product_limit": 4,
             "view_all_text": "View all",
             "view_all_link": "/collections/mens-health"
-          }
-        },
-        "product_mens_1": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Men's Daily Multivitamin",
-            "vendor": "",
-            "price": "Rs. 599.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_mens_2": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Energy & Stamina Support",
-            "vendor": "",
-            "price": "Rs. 749.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_mens_3": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Hair & Scalp Tonic",
-            "vendor": "",
-            "price": "Rs. 449.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
           }
         },
         "tab_womens": {
           "type": "tab",
           "settings": {
             "label": "Women's Health",
+            "collection": "",
+            "product_limit": 4,
             "view_all_text": "View all",
             "view_all_link": "/collections/womens-health"
-          }
-        },
-        "product_womens_1": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Women's Wellness Formula",
-            "vendor": "",
-            "price": "Rs. 649.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_womens_2": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Iron & Folic Acid Tablets",
-            "vendor": "",
-            "price": "Rs. 299.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_womens_3": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Skin Glow Supplement",
-            "vendor": "",
-            "price": "Rs. 549.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
           }
         },
         "tab_wellness": {
           "type": "tab",
           "settings": {
             "label": "Care & Wellness",
+            "collection": "",
+            "product_limit": 4,
             "view_all_text": "View all",
             "view_all_link": "/collections/all"
-          }
-        },
-        "product_wellness_1": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Daily Personal Care Kit",
-            "vendor": "",
-            "price": "Rs. 799.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_wellness_2": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Herbal Wellness Tea",
-            "vendor": "",
-            "price": "Rs. 349.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
-          }
-        },
-        "product_wellness_3": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Sleep & Calm Support",
-            "vendor": "",
-            "price": "Rs. 499.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
           }
         },
         "tab_packs": {
           "type": "tab",
           "settings": {
             "label": "Health Packs",
+            "collection": "",
+            "product_limit": 4,
             "view_all_text": "View all packs",
             "view_all_link": "/collections/all"
-          }
-        },
-        "product_packs_1": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Family Wellness Pack",
-            "vendor": "",
-            "price": "Rs. 1,299.00",
-            "compare_at_price": "Rs. 1,599.00",
-            "link": "",
-            "enable_badge": true,
-            "badge_text": "Save 19%"
-          }
-        },
-        "product_packs_2": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Immunity Combo Pack",
-            "vendor": "",
-            "price": "Rs. 899.00",
-            "compare_at_price": "Rs. 1,099.00",
-            "link": "",
-            "enable_badge": true,
-            "badge_text": "Save 18%"
-          }
-        },
-        "product_packs_3": {
-          "type": "product",
-          "settings": {
-            "alt_text": "",
-            "title": "Complete Skin Care Kit",
-            "vendor": "",
-            "price": "Rs. 999.00",
-            "compare_at_price": "",
-            "link": "",
-            "enable_badge": false,
-            "badge_text": "New"
           }
         }
       },
       "block_order": [
         "tab_concern",
-        "product_concern_1",
-        "product_concern_2",
-        "product_concern_3",
-        "product_concern_4",
         "tab_mens",
-        "product_mens_1",
-        "product_mens_2",
-        "product_mens_3",
         "tab_womens",
-        "product_womens_1",
-        "product_womens_2",
-        "product_womens_3",
         "tab_wellness",
-        "product_wellness_1",
-        "product_wellness_2",
-        "product_wellness_3",
-        "tab_packs",
-        "product_packs_1",
-        "product_packs_2",
-        "product_packs_3"
+        "tab_packs"
       ],
       "name": "Shop By Category",
       "settings": {
