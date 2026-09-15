@@ -1,0 +1,112 @@
+{%- comment -%}
+  Section: About - CTA Divider
+  Chapter 5 of the "Our Story" page rebuild: a short breathing beat between
+  the quality chapter and the product carousel that follows. A single huge
+  Bebas Neue pull-quote line plus an animated scroll cue - deliberately the
+  one chapter with no GSAP dependency (plain CSS keyframes), since it
+  doesn't need scrubbed/pinned scroll choreography.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+-%}
+
+<section
+  class="acd"
+  id="acd-{{ section_id }}"
+  data-acd
+  data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"
+  style="
+    --acd-bg: {{ s.background_color | default: '#F2F6F1' }};
+    --acd-text: {{ s.text_color | default: '#141414' }};
+    --acd-accent: {{ s.accent_color | default: '#2E7D32' }};
+  "
+>
+  <div class="acd__inner">
+    {%- if s.quote != blank -%}
+      <p class="acd__quote">{{ s.quote }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="acd__cue" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<style>
+  #acd-{{ section_id }} {
+    position: relative;
+    background: var(--acd-bg);
+    color: var(--acd-text);
+    padding: 90px 20px 70px;
+    text-align: center;
+  }
+
+  #acd-{{ section_id }}.acd--transparent-bg {
+    background: transparent;
+  }
+
+  #acd-{{ section_id }} .acd__inner {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  #acd-{{ section_id }} .acd__quote {
+    margin: 0;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(26px, 4vw, 44px);
+    line-height: 1.15;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--acd-accent);
+  }
+
+  #acd-{{ section_id }} .acd__cue {
+    display: flex;
+    justify-content: center;
+    margin-top: 36px;
+    color: var(--acd-accent);
+    animation: acd-bounce 1.8s ease-in-out infinite;
+  }
+
+  @keyframes acd-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
+
+  @media (max-width: 749px) {
+    #acd-{{ section_id }} {
+      padding: 64px 20px 52px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #acd-{{ section_id }} .acd__cue {
+      animation: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "About - CTA Divider",
+  "tag": "section",
+  "class": "shopify-section--about-cta-divider",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "quote", "label": "Pull-quote line", "default": "We believe in what nature has built over time." },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background (also this chapter's scroll-color zone)", "default": "#F2F6F1" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" }
+  ],
+  "presets": [
+    { "name": "About - CTA Divider" }
+  ]
+}
+{% endschema %}

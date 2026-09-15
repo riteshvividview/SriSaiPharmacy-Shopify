@@ -1,0 +1,356 @@
+{%- comment -%}
+  Section: About - Quality Chapter
+  Chapter 4 of the "Our Story" page rebuild: "Rooted In Tradition, Backed
+  By Research" - the Testing & Safety / Quality You Can Trust points,
+  presented as two offset "lab card" panels with a GSAP scrub-driven
+  opposite-direction vertical drift (one card eases up, the other down)
+  for a subtle diagonal composition, plus a large low-opacity background
+  watermark word. Emerges the shared background from the previous dark
+  chapter back to a light tint that matches the product carousel that
+  follows this page's chapters.
+{%- endcomment -%}
+
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap' | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+  assign cards = section.blocks
+-%}
+
+<section
+  class="aqc"
+  id="aqc-{{ section_id }}"
+  data-aqc
+  data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"
+  style="
+    --aqc-bg: {{ s.background_color | default: '#F2F6F1' }};
+    --aqc-text: {{ s.text_color | default: '#141414' }};
+    --aqc-muted: {{ s.muted_color | default: '#5B5B5B' }};
+    --aqc-accent: {{ s.accent_color | default: '#2E7D32' }};
+  "
+>
+  {%- if s.bg_word != blank -%}
+    <p class="aqc__watermark" aria-hidden="true">{{ s.bg_word }}</p>
+  {%- endif -%}
+
+  <div class="aqc__inner">
+    <div class="aqc__header">
+      {%- if s.eyebrow != blank -%}<p class="aqc__eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="aqc__heading">{{ s.heading }}</h2>{%- endif -%}
+    </div>
+
+    <div class="aqc__media" data-aqc-media>
+      {%- if s.image != blank -%}
+        <img
+          class="aqc__media-image"
+          src="{{ s.image | image_url: width: 1000 }}"
+          srcset="
+            {{ s.image | image_url: width: 500 }} 500w,
+            {{ s.image | image_url: width: 800 }} 800w,
+            {{ s.image | image_url: width: 1000 }} 1000w
+          "
+          sizes="(max-width: 899px) 100vw, 520px"
+          alt="{{ s.image_alt | default: s.heading | escape }}"
+          width="{{ s.image.width }}"
+          height="{{ s.image.height }}"
+          loading="lazy"
+        >
+      {%- endif -%}
+    </div>
+
+    {%- if cards.size > 0 -%}
+      <div class="aqc__cards" data-aqc-cards>
+        {%- for card in cards -%}
+          {%- assign cs = card.settings -%}
+          <div class="aqc__card aqc__card--{{ forloop.index }}" data-aqc-card {{ card.shopify_attributes }}>
+            <span class="aqc__card-icon" aria-hidden="true">
+              {%- if forloop.index == 1 -%}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {%- else -%}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="18" cy="7" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="18" r="2.4" stroke="currentColor" stroke-width="1.4"/><path d="M8 7l7 0M8 8l3 8M17 9l-4 7" stroke="currentColor" stroke-width="1.2"/></svg>
+              {%- endif -%}
+            </span>
+            {%- if cs.label != blank -%}<p class="aqc__card-label">{{ cs.label }}</p>{%- endif -%}
+            {%- if cs.content != blank -%}<div class="aqc__card-content">{{ cs.content }}</div>{%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  #aqc-{{ section_id }} {
+    position: relative;
+    background: var(--aqc-bg);
+    color: var(--aqc-text);
+    font-family: 'Poppins', sans-serif;
+    padding: 110px 20px;
+    overflow: hidden;
+  }
+
+  #aqc-{{ section_id }}.aqc--transparent-bg {
+    background: transparent;
+  }
+
+  #aqc-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #aqc-{{ section_id }} .aqc__watermark {
+    position: absolute;
+    inset: auto 0 -0.12em 0;
+    z-index: 0;
+    margin: 0;
+    text-align: center;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-size: clamp(80px, 16vw, 220px);
+    line-height: 1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--aqc-accent);
+    opacity: 0.05;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  #aqc-{{ section_id }} .aqc__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    grid-template-areas: "header header" "media cards";
+    gap: 24px 64px;
+    align-items: start;
+  }
+
+  #aqc-{{ section_id }} .aqc__header {
+    grid-area: header;
+    max-width: 620px;
+    margin-bottom: 40px;
+  }
+
+  #aqc-{{ section_id }} .aqc__eyebrow {
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--aqc-accent);
+  }
+
+  #aqc-{{ section_id }} .aqc__heading {
+    margin: 0;
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(30px, 4.5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  #aqc-{{ section_id }} .aqc__media {
+    grid-area: media;
+    aspect-ratio: 4 / 5;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(20, 20, 20, 0.05);
+    box-shadow: 0 24px 50px rgba(20, 20, 20, 0.1);
+  }
+
+  #aqc-{{ section_id }} .aqc__media-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: perspective(1000px) rotateX(var(--aqc-tilt-x, 0deg)) rotateY(var(--aqc-tilt-y, 0deg)) scale(1.04);
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  #aqc-{{ section_id }} .aqc__cards {
+    grid-area: cards;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  #aqc-{{ section_id }} .aqc__card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px 30px;
+    box-shadow: 0 14px 34px rgba(20, 20, 20, 0.07);
+    will-change: transform;
+  }
+
+  #aqc-{{ section_id }} .aqc__card--2 {
+    margin-left: 32px;
+  }
+
+  #aqc-{{ section_id }} .aqc__card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--aqc-accent) 14%, transparent);
+    color: var(--aqc-accent);
+    margin-bottom: 16px;
+  }
+
+  #aqc-{{ section_id }} .aqc__card-label {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  #aqc-{{ section_id }} .aqc__card-content {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--aqc-muted);
+  }
+
+  #aqc-{{ section_id }} .aqc__card-content p {
+    margin: 0;
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 899px) {
+    #aqc-{{ section_id }} .aqc__inner {
+      grid-template-columns: 1fr;
+      grid-template-areas: "header" "media" "cards";
+      max-width: 560px;
+    }
+
+    #aqc-{{ section_id }} .aqc__card--2 {
+      margin-left: 0;
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 749px) {
+    #aqc-{{ section_id }} {
+      padding: 72px 20px;
+    }
+
+    #aqc-{{ section_id }} .aqc__card {
+      padding: 22px 22px;
+    }
+  }
+
+  @media (hover: none) {
+    #aqc-{{ section_id }} .aqc__media-image {
+      transform: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #aqc-{{ section_id }} .aqc__card {
+      transform: none !important;
+    }
+
+    #aqc-{{ section_id }} .aqc__media-image {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var section = document.getElementById('aqc-{{ section_id }}');
+    if (!section) return;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function initAqc() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+      var cards = Array.prototype.slice.call(section.querySelectorAll('[data-aqc-card]'));
+      var wrap = section.querySelector('[data-aqc-cards]');
+      if (!cards.length || !wrap) return;
+
+      cards.forEach(function (card, i) {
+        var direction = i % 2 === 0 ? -1 : 1;
+        gsap.to(card, {
+          y: 34 * direction,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrap,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true
+          }
+        });
+      });
+    }
+
+    if (!reducedMotion) {
+      window.__aboutChapterInits = window.__aboutChapterInits || [];
+      window.__aboutChapterInits.push(initAqc);
+      initAqc();
+    }
+
+    /* ---- Cursor-tilt on the lab image (fine-pointer only) ---- */
+    if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var media = section.querySelector('[data-aqc-media]');
+      if (media) {
+        media.addEventListener('mousemove', function (e) {
+          var rect = media.getBoundingClientRect();
+          var px = (e.clientX - rect.left) / rect.width - 0.5;
+          var py = (e.clientY - rect.top) / rect.height - 0.5;
+          section.style.setProperty('--aqc-tilt-x', (py * -6).toFixed(2) + 'deg');
+          section.style.setProperty('--aqc-tilt-y', (px * 6).toFixed(2) + 'deg');
+        });
+        media.addEventListener('mouseleave', function () {
+          section.style.setProperty('--aqc-tilt-x', '0deg');
+          section.style.setProperty('--aqc-tilt-y', '0deg');
+        });
+      }
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "About - Quality Chapter",
+  "tag": "section",
+  "class": "shopify-section--about-quality-chapter",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Quality & Care" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Rooted In Tradition, Backed By Research" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "bg_word", "label": "Background watermark word", "default": "CARE" },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background (also this chapter's scroll-color zone)", "default": "#F2F6F1" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Lab Card",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Testing & Safety" },
+        { "type": "richtext", "id": "content", "label": "Content" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About - Quality Chapter",
+      "blocks": [
+        { "type": "point", "settings": { "label": "Testing & Safety" } },
+        { "type": "point", "settings": { "label": "Quality You Can Trust" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

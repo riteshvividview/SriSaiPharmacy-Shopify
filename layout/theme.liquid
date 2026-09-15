@@ -47,6 +47,53 @@
     {% endif %}
 
     {{ content_for_header }}
+
+    {%- comment -%}
+      About page only: GSAP + ScrollTrigger for the scroll-driven "chapter"
+      storytelling in sections/about-*.liquid. Loaded in <head> (unlike the
+      homepage's Lenis block, which sits at the end of <body>) on purpose:
+      each chapter section's own inline <script> calls ScrollTrigger.create()
+      while the <body> is still parsing, so the scroller default below MUST
+      already be set before that happens, not after.
+
+      Same .page-wrapper vs window concern as Lenis - see
+      assets/scroll-container.js and the Lenis comment near </body> below.
+      ScrollTrigger can't have an existing instance's scroller changed in
+      place, so on breakpoint crossing every instance is killed and every
+      chapter's init function (pushed to window.__aboutChapterInits by each
+      chapter's own script) is re-run against the new scroller.
+    {%- endcomment -%}
+    {% if template == 'page.about-us' %}
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+      <script>
+        (function () {
+          if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+          gsap.registerPlugin(ScrollTrigger);
+
+          var DESKTOP_QUERY = window.matchMedia('(min-width: 990px)');
+
+          function currentScroller() {
+            return DESKTOP_QUERY.matches ? document.querySelector('.page-wrapper') : window;
+          }
+
+          ScrollTrigger.defaults({ scroller: currentScroller() });
+
+          window.__aboutChapterInits = window.__aboutChapterInits || [];
+
+          DESKTOP_QUERY.addEventListener('change', function () {
+            ScrollTrigger.getAll().forEach(function (st) { st.kill(); });
+            ScrollTrigger.defaults({ scroller: currentScroller() });
+            window.__aboutChapterInits.forEach(function (fn) { fn(); });
+            ScrollTrigger.refresh();
+          });
+
+          window.addEventListener('load', function () {
+            ScrollTrigger.refresh();
+          });
+        })();
+      </script>
+    {% endif %}
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">

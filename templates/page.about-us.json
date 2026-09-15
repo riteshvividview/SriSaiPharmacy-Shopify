@@ -1,12 +1,34 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
-    "about_story_founding": {
-      "type": "about-story-block",
-      "name": "Our Story",
+    "about_masthead": {
+      "type": "about-masthead-hero",
+      "name": "About - Masthead Hero",
+      "settings": {
+        "eyebrow": "Since 1971",
+        "heading": "Our Quest Was Pure From The Beginning",
+        "image": "shopify://shop_images/pharmacys-consultation-area-where-pharmacist-is-providing-health-advice-patient.jpg",
+        "image_alt": "Sri Sai Pharmaceuticals - rooted in Ayurveda",
+        "background_color": "#ffffff",
+        "text_color": "#141414",
+        "accent_color": "#2e7d32"
+      }
+    },
+    "about_identity": {
+      "type": "about-identity-triptych",
       "blocks": {
         "point_who": {
           "type": "point",
           "settings": {
+            "icon": "who",
             "label": "Who We Are",
             "content": "<p>Sri Sai Pharmaceuticals is a trusted neighbourhood pharmacy rooted in Ayurveda and traditional herbal knowledge, dedicated to genuine medicines and wellness products that support the health of our customers, our environment and our community.</p>"
           }
@@ -14,6 +36,7 @@
         "point_mission": {
           "type": "point",
           "settings": {
+            "icon": "mission",
             "label": "Our Mission",
             "content": "<p>In 1971, Dr. Sai Kumar took a leap of faith in traditional Ayurveda to create high-quality herbal products. Since then, our mission has stayed the same: combine time-tested herbal wisdom with careful, honest care for every customer who walks through our doors.</p>"
           }
@@ -21,31 +44,59 @@
         "point_vision": {
           "type": "point",
           "settings": {
+            "icon": "vision",
             "label": "Our Vision",
             "content": "<p>We believe in what nature has built over time. We work to inspire more love for plants and respect for nature, and to improve the health, happiness and harmony of our community and all its people.</p>"
           }
         }
       },
-      "block_order": ["point_who", "point_mission", "point_vision"],
+      "block_order": [
+        "point_who",
+        "point_mission",
+        "point_vision"
+      ],
+      "name": "About - Identity Triptych",
       "settings": {
-        "eyebrow": "Since 1971",
-        "heading": "Our Quest Was Pure From The Beginning",
-        "image_alt": "Sri Sai Pharmaceuticals - rooted in Ayurveda",
-        "image_position": "left",
-        "frame_style": "accent-offset",
-        "frame_color": "#2E7D32",
-        "bg_word": "",
-        "background_color": "#FFFFFF",
+        "background_color": "#ffffff",
         "text_color": "#141414",
-        "muted_color": "#5B5B5B",
-        "accent_color": "#2E7D32",
-        "padding_top": 100,
-        "padding_bottom": 80
+        "muted_color": "#5b5b5b",
+        "accent_color": "#2e7d32",
+        "next_zone_color": "#123321"
       }
     },
-    "about_story_commitment": {
-      "type": "about-story-block",
-      "name": "Commitment To Health",
+    "about_founder": {
+      "type": "about-founder-spotlight",
+      "blocks": {
+        "point_founder_1": {
+          "type": "paragraph",
+          "settings": {
+            "content": "<p>In 1971, Dr. Sai Kumar desperately searched for a way to improve health after relying on conventional options without success. That search led him to traditional Ayurveda - and to the founding of Sri Sai Pharmaceuticals.</p>"
+          }
+        },
+        "point_founder_2": {
+          "type": "paragraph",
+          "settings": {
+            "content": "<p>Since then, Sri Sai Pharmaceuticals has been at the forefront of the herbal health industry - educating doctors, consumers and retailers on the effectiveness and safety of herbal medicines, and constantly striving to promote better health through the power of nature.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "point_founder_1",
+        "point_founder_2"
+      ],
+      "name": "About - Founder Spotlight",
+      "settings": {
+        "eyebrow": "Our Journey",
+        "heading": "Meet The Founder",
+        "image": "shopify://shop_images/man-white-lab-coat-stands-front-shelf-medicine-bottles.jpg",
+        "image_alt": "Dr. Sai Kumar, Founder of Sri Sai Pharmaceuticals",
+        "background_color": "#123321",
+        "text_color": "#f2f6f1",
+        "accent_color": "#6fcf97"
+      }
+    },
+    "about_quality": {
+      "type": "about-quality-chapter",
       "blocks": {
         "point_testing": {
           "type": "point",
@@ -62,62 +113,35 @@
           }
         }
       },
-      "block_order": ["point_testing", "point_quality"],
+      "block_order": [
+        "point_testing",
+        "point_quality"
+      ],
+      "name": "About - Quality Chapter",
       "settings": {
         "eyebrow": "Quality & Care",
         "heading": "Rooted In Tradition, Backed By Research",
+        "image": "shopify://shop_images/b.webp",
         "image_alt": "Herbal research and quality testing",
-        "image_position": "right",
-        "frame_style": "accent-offset",
-        "frame_color": "#2E7D32",
         "bg_word": "CARE",
-        "background_color": "#F2F6F1",
+        "background_color": "#f2f6f1",
         "text_color": "#141414",
-        "muted_color": "#5B5B5B",
-        "accent_color": "#2E7D32",
-        "padding_top": 90,
-        "padding_bottom": 90
+        "muted_color": "#5b5b5b",
+        "accent_color": "#2e7d32"
       }
     },
-    "about_story_founder": {
-      "type": "about-story-block",
-      "name": "Meet The Founder",
-      "blocks": {
-        "point_founder_1": {
-          "type": "point",
-          "settings": {
-            "label": "",
-            "content": "<p>In 1971, Dr. Sai Kumar desperately searched for a way to improve health after relying on conventional options without success. That search led him to traditional Ayurveda - and to the founding of Sri Sai Pharmaceuticals.</p>"
-          }
-        },
-        "point_founder_2": {
-          "type": "point",
-          "settings": {
-            "label": "",
-            "content": "<p>Since then, Sri Sai Pharmaceuticals has been at the forefront of the herbal health industry - educating doctors, consumers and retailers on the effectiveness and safety of herbal medicines, and constantly striving to promote better health through the power of nature.</p>"
-          }
-        }
-      },
-      "block_order": ["point_founder_1", "point_founder_2"],
+    "about_cta": {
+      "type": "about-cta-divider",
+      "name": "About - CTA Divider",
       "settings": {
-        "eyebrow": "Our Journey",
-        "heading": "Meet The Founder",
-        "image_alt": "Dr. Sai Kumar, Founder of Sri Sai Pharmaceuticals",
-        "image_position": "left",
-        "frame_style": "accent-offset",
-        "frame_color": "#2E7D32",
-        "bg_word": "",
-        "background_color": "#FFFFFF",
+        "quote": "We believe in what nature has built over time.",
+        "background_color": "#f2f6f1",
         "text_color": "#141414",
-        "muted_color": "#5B5B5B",
-        "accent_color": "#2E7D32",
-        "padding_top": 90,
-        "padding_bottom": 110
+        "accent_color": "#2e7d32"
       }
     },
     "about_featured_products": {
       "type": "1st-featured-list",
-      "name": "Wellness Essentials",
       "blocks": {
         "product_X6XFAr": {
           "type": "product",
@@ -194,9 +218,10 @@
         "product_7kFHGd",
         "product_jaqHXR"
       ],
+      "name": "Wellness Essentials",
       "settings": {
         "heading": "Our Wellness Essentials",
-        "section_bg": "#F2F6F1",
+        "section_bg": "#f2f6f1",
         "sync_scroll_bg": true,
         "container_width": 1300,
         "content_width": 700,
@@ -239,7 +264,7 @@
         "badge_padding": 8,
         "icon_style": "bag",
         "icon_bg_color": "#5d7356",
-        "icon_bg_hover_color": "#3D8B40",
+        "icon_bg_hover_color": "#3d8b40",
         "icon_color": "#ffffff",
         "icon_size": 36,
         "icon_radius": 18,
@@ -252,9 +277,11 @@
     }
   },
   "order": [
-    "about_story_founding",
-    "about_story_commitment",
-    "about_story_founder",
+    "about_masthead",
+    "about_identity",
+    "about_founder",
+    "about_quality",
+    "about_cta",
     "about_featured_products"
   ]
 }
