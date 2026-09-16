@@ -61,7 +61,7 @@
         "text_color": "#141414",
         "muted_color": "#5b5b5b",
         "accent_color": "#2e7d32",
-        "next_zone_color": "#123321"
+        "next_zone_color": "#ffffff"
       }
     },
     "about_founder": {
@@ -90,9 +90,9 @@
         "heading": "Meet The Founder",
         "image": "shopify://shop_images/man-white-lab-coat-stands-front-shelf-medicine-bottles.jpg",
         "image_alt": "Dr. Sai Kumar, Founder of Sri Sai Pharmaceuticals",
-        "background_color": "#123321",
-        "text_color": "#f2f6f1",
-        "accent_color": "#6fcf97"
+        "background_color": "#ffffff",
+        "text_color": "#141414",
+        "accent_color": "#2e7d32"
       }
     },
     "about_quality": {

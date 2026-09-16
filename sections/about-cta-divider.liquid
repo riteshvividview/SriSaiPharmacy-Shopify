@@ -20,7 +20,6 @@
   data-acd
   data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"
   style="
-    --acd-bg: {{ s.background_color | default: '#F2F6F1' }};
     --acd-text: {{ s.text_color | default: '#141414' }};
     --acd-accent: {{ s.accent_color | default: '#2E7D32' }};
   "
@@ -40,14 +39,10 @@
   #acd-{{ section_id }} {
     position: relative;
     overflow-x: clip;
-    background: var(--acd-bg);
+    background: transparent;
     color: var(--acd-text);
     padding: 90px 20px 70px;
     text-align: center;
-  }
-
-  #acd-{{ section_id }}.acd--transparent-bg {
-    background: transparent;
   }
 
   #acd-{{ section_id }} .acd__inner {
@@ -102,7 +97,7 @@
     { "type": "text", "id": "quote", "label": "Pull-quote line", "default": "We believe in what nature has built over time." },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "background_color", "label": "Background (also this chapter's scroll-color zone)", "default": "#F2F6F1" },
+    { "type": "color", "id": "background_color", "label": "Scroll-color zone", "info": "This chapter paints no background of its own - it hands off to the shared whole-page background layer. Keep this matching the other chapters' zone colors so the page reads as one continuous surface.", "default": "#F2F6F1" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" }
   ],

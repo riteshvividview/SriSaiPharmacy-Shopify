@@ -60,7 +60,7 @@
     {%- endif -%}
   </div>
 
-  <span class="ait__zone-marker" aria-hidden="true" data-scroll-bg-zone="{{ s.next_zone_color | default: '#123321' }}"></span>
+  <span class="ait__zone-marker" aria-hidden="true" data-scroll-bg-zone="{{ s.next_zone_color | default: '#FFFFFF' }}"></span>
 </section>
 
 <style>
@@ -269,7 +269,7 @@
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
     { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" },
-    { "type": "color", "id": "next_zone_color", "label": "Hand-off color to the next (dark) chapter", "info": "The shared background starts fading to this color as the reader nears the bottom of this section, so the transition into the next chapter feels anticipated rather than abrupt.", "default": "#123321" }
+    { "type": "color", "id": "next_zone_color", "label": "Hand-off color to the next chapter", "info": "The shared background starts fading to this color as the reader nears the bottom of this section, so the transition into the next chapter feels anticipated rather than abrupt. Keep this matching the other chapters' zone colors so the page reads as one continuous surface.", "default": "#FFFFFF" }
   ],
   "blocks": [
     {

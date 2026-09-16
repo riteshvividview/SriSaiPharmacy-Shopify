@@ -24,7 +24,6 @@
   data-aqc
   data-scroll-bg-zone="{{ s.background_color | default: '#F2F6F1' }}"
   style="
-    --aqc-bg: {{ s.background_color | default: '#F2F6F1' }};
     --aqc-text: {{ s.text_color | default: '#141414' }};
     --aqc-muted: {{ s.muted_color | default: '#5B5B5B' }};
     --aqc-accent: {{ s.accent_color | default: '#2E7D32' }};
@@ -83,15 +82,11 @@
 <style>
   #aqc-{{ section_id }} {
     position: relative;
-    background: var(--aqc-bg);
+    background: transparent;
     color: var(--aqc-text);
     font-family: 'Poppins', sans-serif;
     padding: 110px 20px;
     overflow: hidden;
-  }
-
-  #aqc-{{ section_id }}.aqc--transparent-bg {
-    background: transparent;
   }
 
   #aqc-{{ section_id }} * {
@@ -328,7 +323,7 @@
     { "type": "text", "id": "bg_word", "label": "Background watermark word", "default": "CARE" },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "background_color", "label": "Background (also this chapter's scroll-color zone)", "default": "#F2F6F1" },
+    { "type": "color", "id": "background_color", "label": "Scroll-color zone", "info": "This chapter paints no background of its own - it hands off to the shared whole-page background layer. Keep this matching the other chapters' zone colors so the page reads as one continuous surface.", "default": "#F2F6F1" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
     { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" }
