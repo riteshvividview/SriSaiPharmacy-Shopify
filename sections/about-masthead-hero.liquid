@@ -1,11 +1,15 @@
 {%- comment -%}
   Section: About - Masthead Hero
   Chapter 1 of the "Our Story" page rebuild: full-bleed image with a huge
-  Bebas Neue heading overlapping its lower edge, pinned and scrubbed via
-  GSAP ScrollTrigger as the page scrolls past (image slowly settles from a
-  slight zoom, heading drifts up and fades), with a handful of floating
-  Ayurvedic line-art motifs (leaf / herbal sprig / mortar & pestle) each
-  drifting at its own scrub speed for a layered parallax depth effect.
+  Bebas Neue heading overlapping its lower edge, held in place via plain
+  CSS `position: sticky` (not a GSAP pin - see the .amh__hold comment
+  below for why) while GSAP ScrollTrigger scrubs it (image slowly settles
+  from a slight zoom, heading drifts up and fades), with a handful of
+  floating Ayurvedic line-art motifs (leaf / herbal sprig / mortar &
+  pestle) each drifting at its own scrub speed for a layered parallax
+  depth effect. The next chapter then slides up and covers this one while
+  it's still held in place - see about-identity-triptych.liquid's
+  negative margin-top for that half of the effect.
   Also hosts the single, page-wide "scroll background morph" controller
   (copied verbatim from about-story-block.liquid) - since this is first in
   document order among the new About page chapters, it's the one that
@@ -30,6 +34,21 @@
     --amh-accent: {{ s.accent_color | default: '#2E7D32' }};
   "
 >
+  {%- comment -%}
+    .amh__hold's height determines how long the sticky stage below stays
+    held in the viewport: (stage's own 100svh) + (100svh "phase 1" - pure
+    scrub, next chapter not visible yet) + (100svh "phase 2" - the next
+    chapter, pulled up 100svh early via its own negative margin-top,
+    slides over this still-held stage) = 300svh total. Plain CSS
+    `position: sticky` (not a GSAP pin) handles the "stay in place" part
+    natively, using the browser's real layout engine against this
+    theme's actual scroll container (.page-wrapper on desktop) - this
+    sidesteps GSAP's pinSpacing spacer-height math entirely, which is
+    what produced a stray visible strip / a missing cover effect in
+    earlier attempts at this. GSAP is only used below for the scrub
+    animations, not for holding the stage in place.
+  {%- endcomment -%}
+  <div class="amh__hold">
   <div class="amh__stage" data-amh-stage>
     <div class="amh__image-wrap" data-amh-image-wrap>
       {%- if s.image != blank -%}
@@ -82,15 +101,7 @@
       {%- if s.heading != blank -%}<h1 class="amh__heading">{{ s.heading }}</h1>{%- endif -%}
     </div>
   </div>
-
-  {%- comment -%}
-    Reserves the "phase 1" scroll distance in real, normal document
-    flow (unlike the pin itself, this plain sibling isn't affected by
-    any pin/transform trickery) - see the JS below for the full
-    explanation of why this has to be a real element rather than
-    GSAP's own pinSpacing option.
-  {%- endcomment -%}
-  <div class="amh__phase-spacer" aria-hidden="true"></div>
+  </div>
 </section>
 
 <style>
@@ -110,25 +121,19 @@
     box-sizing: border-box;
   }
 
-  #amh-{{ section_id }} .amh__stage {
+  #amh-{{ section_id }} .amh__hold {
     position: relative;
+    height: 300svh;
+    min-height: 1680px;
+  }
+
+  #amh-{{ section_id }} .amh__stage {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     height: 100svh;
     min-height: 560px;
     overflow: hidden;
-  }
-
-  /* 200svh, not 100svh: once the pin activates (pinSpacing: false),
-     .amh__stage stops contributing ANY height to the document - not
-     just the extra scroll distance, but its own natural height too.
-     So this spacer alone has to cover both "replace the hero's own
-     vanished height" and "phase 1's hold distance", or the next
-     chapter's real document position ends up too high, and it starts
-     sliding into view (partially covering the still-pinned hero)
-     before phase 1 has actually finished - the stray visible strip
-     that was reported. */
-  #amh-{{ section_id }} .amh__phase-spacer {
-    height: 200svh;
-    min-height: 1120px;
   }
 
   #amh-{{ section_id }} .amh__image-wrap {
@@ -228,56 +233,32 @@
     function initAmh() {
       if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
+      var hold = section.querySelector('.amh__hold');
       var stage = section.querySelector('[data-amh-stage]');
       var imageWrap = section.querySelector('[data-amh-image-wrap]');
       var headingWrap = section.querySelector('[data-amh-heading]');
       var motifs = Array.prototype.slice.call(section.querySelectorAll('[data-amh-motif]'));
-      if (!stage) return;
+      if (!hold || !stage) return;
 
-      /* One continuous pin spanning both phases, not two chained
-         triggers (chaining a second trigger's "start" off the pinned
-         element's own "bottom" turned out unreliable - GSAP recalculates
-         a pinned element's box against its spacer, not its live
-         position, so a second trigger reading "bottom" off the same
-         element didn't pick up where the first left off).
-
-         Instead: pinSpacing is off for the WHOLE "+=200%" duration, but
-         .amh__phase-spacer (a plain sibling <div>, 100svh, unaffected by
-         any pin/transform trickery) sits right after .amh__stage in
-         normal document flow and reserves phase 1's distance by itself.
-         Concretely: stage's own natural height (100svh) + the spacer's
-         height (100svh) = the identity-triptych chapter's real document
-         position starts 200svh down. As the reader scrolls:
-         - 0 -> 100svh (phase 1): the triptych chapter hasn't been
-           scrolled far enough up yet to even reach the viewport, so
-           nothing of it is visible - the hero just sits pinned while
-           the scrub (below) plays out.
-         - 100svh -> 200svh (phase 2): the triptych chapter's top edge
-           is now close enough to slide up into view and progressively
-           covers the still-pinned hero.
-
-         The scrub timeline is split the same way: the real tweens
-         (image settle, heading fade) occupy the FIRST HALF of the
-         timeline's own duration, then a no-op placeholder tween
-         occupies the second half - since scrub maps timeline progress
-         0->1 across the entire "+=200%" range, this makes the visual
-         changes finish exactly at the phase 1/phase 2 boundary and then
-         hold their end state (rather than continuing to animate) while
-         phase 2's cover effect plays. */
+      /* No GSAP pin here - .amh__stage is held via plain CSS
+         `position: sticky` (see the .amh__hold markup comment above for
+         why), so GSAP's only job for this chapter is the scrub itself.
+         Tied to just the first 100% of .amh__hold's scroll range - the
+         "phase 1" distance - independent of how long .amh__hold keeps
+         the stage held overall (300svh total; sticky and the next
+         chapter's negative margin-top handle "phase 2"'s cover effect
+         entirely on their own, with no GSAP involvement). */
       var tl = gsap.timeline({
         scrollTrigger: {
-          trigger: stage,
+          trigger: hold,
           start: 'top top',
-          end: '+=200%',
+          end: '+=100%',
           scrub: true,
-          pin: true,
-          pinSpacing: false,
-          id: 'amh-pin-{{ section_id }}'
+          id: 'amh-scrub-{{ section_id }}'
         }
       });
-      if (imageWrap) tl.fromTo(imageWrap, { scale: 1.15 }, { scale: 1, ease: 'none', duration: 1 }, 0);
-      if (headingWrap) tl.fromTo(headingWrap, { opacity: 1, y: 0 }, { opacity: 0, y: -60, ease: 'none', duration: 1 }, 0);
-      tl.to({}, { duration: 1 });
+      if (imageWrap) tl.fromTo(imageWrap, { scale: 1.15 }, { scale: 1, ease: 'none' }, 0);
+      if (headingWrap) tl.fromTo(headingWrap, { opacity: 1, y: 0 }, { opacity: 0, y: -60, ease: 'none' }, 0);
 
       motifs.forEach(function (el) {
         var amount = parseFloat(el.getAttribute('data-motif-scrub')) || 1;
@@ -285,7 +266,7 @@
           y: -130 * amount,
           ease: 'none',
           scrollTrigger: {
-            trigger: stage,
+            trigger: hold,
             start: 'top top',
             end: '+=100%',
             scrub: amount

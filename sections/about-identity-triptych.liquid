@@ -7,6 +7,19 @@
   the end of the section carries its own data-scroll-bg-zone so the shared
   background layer begins darkening in anticipation of the next (dark)
   chapter before this section's own boundary is reached.
+
+  Pulled up 100svh early via a negative margin-top: the masthead hero
+  above holds itself in place (via CSS position: sticky) for 300svh of
+  scroll - 100svh of pure scrub, then 200svh where this section is meant
+  to progressively cover it. Without the negative margin, this section
+  would only reach the viewport once the hero's hold naturally ends (no
+  overlap at all, just a plain handoff); pulling it up means it starts
+  sliding into view - and visually covering the still-held hero
+  underneath, since it's later in DOM order and paints on top - 100svh
+  before that natural handoff point, exactly matching the hero's "phase
+  2". Needs its own z-index since position: sticky establishes a
+  stacking context for the hero's stage that a plain DOM-order paint
+  priority can't be assumed to beat.
 {%- endcomment -%}
 
 {{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap' | stylesheet_tag }}
@@ -66,6 +79,8 @@
 <style>
   #ait-{{ section_id }} {
     position: relative;
+    z-index: 2;
+    margin-top: -100svh;
     overflow-x: clip;
     background: var(--ait-bg);
     color: var(--ait-text);
