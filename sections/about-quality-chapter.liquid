@@ -30,7 +30,7 @@
   "
 >
   {%- if s.bg_word != blank -%}
-    <p class="aqc__watermark" aria-hidden="true">{{ s.bg_word }}</p>
+    <p class="aqc__watermark" data-aqc-watermark aria-hidden="true">{{ s.bg_word }}</p>
   {%- endif -%}
 
   <div class="aqc__inner">
@@ -281,6 +281,21 @@
           }
         });
       });
+
+      /* ---- Watermark drifts right as the section scrolls past ---- */
+      var watermark = section.querySelector('[data-aqc-watermark]');
+      if (watermark) {
+        gsap.to(watermark, {
+          x: '18%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true
+          }
+        });
+      }
     }
 
     if (!reducedMotion) {
