@@ -81,6 +81,18 @@
     position: relative;
     z-index: 2;
     margin-top: -100svh;
+    /* Has to be at least a full viewport tall, not just tall enough for
+       its own content: as this section's top slides up from the bottom
+       of the viewport to the top (the "cover" effect - see the negative
+       margin-top comment above), it needs to still be covering the
+       ENTIRE viewport by the time that slide finishes. If its own
+       height is shorter than the viewport, its bottom edge scrolls past
+       the top before the slide completes, opening a gap that exposes
+       whatever's behind (the hero) and pulls the next chapter up too
+       early - exactly the "stray strip + gap" bug that was reported. */
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
     overflow-x: clip;
     background: var(--ait-bg);
     color: var(--ait-text);
@@ -97,6 +109,7 @@
   }
 
   #ait-{{ section_id }} .ait__inner {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
   }
