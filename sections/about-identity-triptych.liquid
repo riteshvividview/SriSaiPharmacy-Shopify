@@ -42,6 +42,76 @@
     --ait-accent: {{ s.accent_color | default: '#2E7D32' }};
   "
 >
+  {%- if s.show_bg_decor and s.bg_decor_image_a != blank -%}
+    {%- liquid
+      assign decor_count = s.bg_decor_count | default: 20
+      assign grid_cols = decor_count
+      if grid_cols > 8
+        assign grid_cols = 8
+      endif
+      if grid_cols < 1
+        assign grid_cols = 1
+      endif
+      assign grid_rows = decor_count | minus: 1 | divided_by: grid_cols | plus: 1
+      assign cell_w = 100.0 | divided_by: grid_cols
+      assign cell_h = 100.0 | divided_by: grid_rows
+    -%}
+    <div class="ait__bg-decor" aria-hidden="true" style="--ait-decor-opacity: {{ s.bg_decor_opacity | default: 60 | divided_by: 100.0 }};">
+      {%- for i in (0..decor_count) -%}
+        {%- if i == decor_count -%}{%- break -%}{%- endif -%}
+        {%- liquid
+          assign col = i | modulo: grid_cols
+          assign row = i | divided_by: grid_cols
+          assign cell_center_x = col | times: cell_w | plus: cell_w | divided_by: 2.0
+          assign cell_center_y = row | times: cell_h | plus: cell_h | divided_by: 2.0
+
+          assign jitter_raw_x = i | times: 13 | modulo: 5 | minus: 2
+          assign jitter_raw_y = i | times: 7 | modulo: 5 | minus: 2
+          assign jitter_x = jitter_raw_x | times: cell_w | divided_by: 10.0
+          assign jitter_y = jitter_raw_y | times: cell_h | divided_by: 10.0
+
+          assign top = cell_center_y | plus: jitter_y
+          assign left = cell_center_x | plus: jitter_x
+
+          assign size_variance = i | modulo: 5 | times: 8
+          assign size = s.bg_decor_size | default: 90 | minus: 20 | plus: size_variance
+
+          assign rotate = i | times: 29 | modulo: 360
+          assign flip = i | modulo: 3
+          assign speed_raw = i | modulo: 6 | times: 4 | plus: 12
+          assign speed = speed_raw | divided_by: 100.0
+
+          assign dir_x = i | modulo: 4 | minus: 2
+          assign dir_y = i | modulo: 2
+
+          assign decor_parity = i | modulo: 2
+          if decor_parity == 0
+            assign decor_img = s.bg_decor_image_a
+          else
+            assign decor_img = s.bg_decor_image_b
+          endif
+          if decor_img == blank
+            assign decor_img = s.bg_decor_image_a | default: s.bg_decor_image_b
+          endif
+        -%}
+        {%- if decor_img != blank -%}
+          <span
+            class="ait__decor-item"
+            data-decor-item
+            data-speed="{{ speed }}"
+            data-rotate="{{ rotate }}"
+            data-flip="{{ flip }}"
+            data-dir-x="{{ dir_x }}"
+            data-dir-y="{{ dir_y }}"
+            style="top: {{ top }}%; left: {{ left }}%; width: {{ size }}px; transform: translate(-50%, -50%) rotate({{ rotate }}deg){% if flip == 0 %} scaleX(-1){% endif %};"
+          >
+            <img src="{{ decor_img | image_url: width: 200 }}" width="200" height="{{ 200 | divided_by: decor_img.aspect_ratio | default: 200 }}" alt="" loading="lazy">
+          </span>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
   <div class="ait__inner">
     {%- if s.eyebrow != blank or s.heading != blank -%}
       <div class="ait__header">
@@ -109,9 +179,46 @@
   }
 
   #ait-{{ section_id }} .ait__inner {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+  }
+
+  #ait-{{ section_id }} .ait__bg-decor {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  #ait-{{ section_id }} .ait__decor-item {
+    position: absolute;
+    opacity: var(--ait-decor-opacity, 0.6);
+  }
+
+  #ait-{{ section_id }} .ait__decor-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 749px) {
+    #ait-{{ section_id }} .ait__decor-item:nth-child(n + 15) {
+      display: none;
+    }
+
+    #ait-{{ section_id }} .ait__decor-item {
+      width: 40px !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #ait-{{ section_id }} .ait__bg-decor {
+      display: none;
+    }
   }
 
   #ait-{{ section_id }} .ait__header {
@@ -239,6 +346,69 @@
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    var decorList = Array.prototype.slice.call(section.querySelectorAll('[data-decor-item]')).map(function (el) {
+      return {
+        el: el,
+        speed: parseFloat(el.getAttribute('data-speed')) || 0.2,
+        rotate: parseFloat(el.getAttribute('data-rotate')) || 0,
+        flip: el.getAttribute('data-flip') === '0',
+        dirX: parseFloat(el.getAttribute('data-dir-x')) || 0,
+        dirY: el.getAttribute('data-dir-y') === '1' ? -1 : 1
+      };
+    });
+    var decorRaf = null;
+    var decorObserver = null;
+
+    function getDecorProgress() {
+      var rect = section.getBoundingClientRect();
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var total = rect.height + vh;
+      var passed = vh - rect.top;
+      var progress = passed / total;
+      if (progress < 0) progress = 0;
+      if (progress > 1) progress = 1;
+      return progress;
+    }
+
+    function updateDecor() {
+      var progress = getDecorProgress();
+      decorList.forEach(function (item) {
+        var y = (progress - 0.5) * -40 * item.speed * item.dirY;
+        var x = (progress - 0.5) * 24 * item.speed * item.dirX;
+        var transform = 'translate(-50%, -50%) translate3d(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px, 0) rotate(' + item.rotate + 'deg)';
+        if (item.flip) transform += ' scaleX(-1)';
+        item.el.style.transform = transform;
+      });
+      decorRaf = requestAnimationFrame(updateDecor);
+    }
+
+    function startDecorLoop() {
+      if (decorRaf) return;
+      decorRaf = requestAnimationFrame(updateDecor);
+    }
+
+    function stopDecorLoop() {
+      if (decorRaf) cancelAnimationFrame(decorRaf);
+      decorRaf = null;
+    }
+
+    if (decorList.length && !reducedMotion) {
+      if ('IntersectionObserver' in window) {
+        decorObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              startDecorLoop();
+            } else {
+              stopDecorLoop();
+            }
+          });
+        });
+        decorObserver.observe(section);
+      } else {
+        startDecorLoop();
+      }
+    }
+
     function initAit() {
       if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
       var cards = Array.prototype.slice.call(section.querySelectorAll('[data-ait-card]'));
@@ -297,7 +467,15 @@
     { "type": "color", "id": "text_color", "label": "Text", "default": "#141414" },
     { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#5B5B5B" },
     { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" },
-    { "type": "color", "id": "next_zone_color", "label": "Hand-off color to the next chapter", "info": "The shared background starts fading to this color as the reader nears the bottom of this section, so the transition into the next chapter feels anticipated rather than abrupt. Keep this matching the other chapters' zone colors so the page reads as one continuous surface.", "default": "#FFFFFF" }
+    { "type": "color", "id": "next_zone_color", "label": "Hand-off color to the next chapter", "info": "The shared background starts fading to this color as the reader nears the bottom of this section, so the transition into the next chapter feels anticipated rather than abrupt. Keep this matching the other chapters' zone colors so the page reads as one continuous surface.", "default": "#FFFFFF" },
+
+    { "type": "header", "content": "Background decoration" },
+    { "type": "checkbox", "id": "show_bg_decor", "label": "Show scattered background images", "default": true },
+    { "type": "image_picker", "id": "bg_decor_image_a", "label": "Decoration image A" },
+    { "type": "image_picker", "id": "bg_decor_image_b", "label": "Decoration image B" },
+    { "type": "range", "id": "bg_decor_count", "label": "Number of images", "min": 4, "max": 46, "step": 2, "default": 20 },
+    { "type": "range", "id": "bg_decor_size", "label": "Base image size", "min": 40, "max": 300, "step": 5, "unit": "px", "default": 90 },
+    { "type": "range", "id": "bg_decor_opacity", "label": "Decoration opacity", "min": 1, "max": 100, "step": 1, "unit": "%", "default": 60 }
   ],
   "blocks": [
     {
