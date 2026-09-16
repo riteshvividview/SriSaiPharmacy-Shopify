@@ -51,7 +51,9 @@
   <div class="amh__hold">
   <div class="amh__stage" data-amh-stage>
     <div class="amh__image-wrap" data-amh-image-wrap>
-      {%- if s.image != blank -%}
+      {%- if s.video != blank -%}
+        {{ s.video | video_tag: image_size: '1600x', autoplay: true, loop: true, muted: true, controls: false, class: 'amh__image' }}
+      {%- elsif s.image != blank -%}
         <img
           class="amh__image"
           src="{{ s.image | image_url: width: 1600 }}"
@@ -328,7 +330,8 @@
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Since 1971" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Our Quest Was Pure From The Beginning" },
-    { "type": "image_picker", "id": "image", "label": "Full-bleed image" },
+    { "type": "video", "id": "video", "label": "Full-bleed video", "info": "Plays muted and on loop. Used instead of the image below when set." },
+    { "type": "image_picker", "id": "image", "label": "Full-bleed image", "info": "Used if no video is set above." },
     { "type": "text", "id": "image_alt", "label": "Image alt text" },
 
     { "type": "header", "content": "Colors" },
