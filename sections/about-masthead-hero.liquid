@@ -131,10 +131,19 @@
 
   #amh-{{ section_id }} .amh__stage {
     position: sticky;
-    top: 0;
+    /* The site header can become position:fixed (overlays content
+       instead of pushing it down), so top:0 would stick this right at
+       the very top of the viewport - behind/under the header - rather
+       than below it. --header-height and --header-group-height are
+       already set globally on <body> by this theme's own header-height
+       script in layout/theme.liquid (the latter covers extra elements
+       in the header stack, like the announcement bar) - summing both
+       sticks this flush against the actual bottom edge of whatever is
+       currently pinned above it, tracking height changes automatically. */
+    top: calc(var(--header-height, 0px) + var(--header-group-height, 0px));
     z-index: 1;
-    height: 100svh;
-    min-height: 560px;
+    height: calc(100svh - var(--header-height, 0px) - var(--header-group-height, 0px));
+    min-height: 480px;
     overflow: hidden;
   }
 
