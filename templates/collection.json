@@ -3,13 +3,57 @@
     "collection_banner": {
       "type": "collection-banner",
       "name": "Collection Banner",
+      "blocks": {
+        "badge_1": {
+          "type": "badge",
+          "settings": { "icon": "leaf", "text": "Pure Ayurvedic Formulations" }
+        },
+        "badge_2": {
+          "type": "badge",
+          "settings": { "icon": "shield", "text": "Trusted by Generations" }
+        },
+        "feature_1": {
+          "type": "feature",
+          "settings": { "icon": "leaf", "text": "100% Ayurvedic" }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": { "icon": "shield", "text": "Safe & Trusted" }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": { "icon": "mortar", "text": "Time-Tested Formulations" }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": { "icon": "heart", "text": "Supports Wellness" }
+        },
+        "feature_5": {
+          "type": "feature",
+          "settings": { "icon": "sun", "text": "For a Healthier Tomorrow" }
+        }
+      },
+      "block_order": [
+        "badge_1",
+        "badge_2",
+        "feature_1",
+        "feature_2",
+        "feature_3",
+        "feature_4",
+        "feature_5"
+      ],
       "settings": {
-        "eyebrow": "Collection",
-        "watermark": "",
-        "panel_color": "#16311B",
-        "panel_text_color": "#FFFFFF",
-        "accent_color": "#F58220",
-        "frame_color": "#2E7D32"
+        "eyebrow": "Our Collection",
+        "script_text": "Natural Strength Natural You",
+        "tagline": "Good Health, Greater Tomorrows",
+        "button_text": "Explore Collection",
+        "accent_color": "#2E7D32",
+        "background_color": "#F7F4EE",
+        "text_color": "#16311B",
+        "muted_color": "#4C5A4E",
+        "accent_light_color": "#6FA96F",
+        "button_bg": "#16311B",
+        "button_text_color": "#FFFFFF"
       }
     },
     "collection_grid": {

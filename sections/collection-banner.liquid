@@ -1,20 +1,25 @@
 {%- comment -%}
   Section: Collection - Banner
-  Premium replacement for the default plain collection title/description.
-  Split layout (colored content panel + framed image) rather than a
-  full-bleed overlay banner, for a different, more editorial feel than
-  the other hero-style banners already on the site. Image drifts with a
-  light parallax and the content panel has a watermark word, both reused
-  from about-story-block.liquid's proven pattern; text reveals in
-  staggered on scroll-into-view. No pin/sticky effect - removed after
-  feedback that it felt janky rather than premium.
+  Full-width, full-bleed premium hero banner for collection pages: large
+  two-tone heading + CTA on the left, a hero product visual on the right
+  with floating interactive badge chips and a vertical script accent,
+  a soft radial glow/ring backdrop behind the visual, and a bottom
+  tagline + icon feature strip. Everything schema-driven (blocks for
+  badges/features) so this reads well across different collections, not
+  just one. Interactive layer: staggered scroll-reveal, scroll-linked
+  parallax on the hero visual, independent float+parallax on each badge
+  chip, cursor-tilt on the visual (fine-pointer only), and a smooth-
+  scroll CTA that glides to the product grid below when no explicit
+  link is set - all gated behind prefers-reduced-motion.
 {%- endcomment -%}
 
-{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
+{{ 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@400;500;600;700;800&display=swap' | stylesheet_tag }}
 
 {%- liquid
   assign section_id = section.id
   assign s = section.settings
+  assign badges = section.blocks | where: 'type', 'badge'
+  assign features = section.blocks | where: 'type', 'feature'
 -%}
 
 <section
@@ -22,55 +27,137 @@
   id="cb-{{ section_id }}"
   data-cb
   style="
-    --cb-panel-bg: {{ s.panel_color | default: '#16311B' }};
-    --cb-panel-text: {{ s.panel_text_color | default: '#FFFFFF' }};
-    --cb-accent: {{ s.accent_color | default: '#F58220' }};
-    --cb-frame: {{ s.frame_color | default: '#2E7D32' }};
+    --cb-bg: {{ s.background_color | default: '#F7F4EE' }};
+    --cb-text: {{ s.text_color | default: '#16311B' }};
+    --cb-muted: {{ s.muted_color | default: '#4C5A4E' }};
+    --cb-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --cb-accent-light: {{ s.accent_light_color | default: '#6FA96F' }};
+    --cb-cta-bg: {{ s.button_bg | default: '#16311B' }};
+    --cb-cta-text: {{ s.button_text_color | default: '#FFFFFF' }};
   "
 >
-  <div class="cb__container">
-    <div class="cb__panel" data-reveal data-reveal-side="left">
-      <p class="cb__watermark" aria-hidden="true">{{ s.watermark | default: collection.title | truncate: 12, '' }}</p>
-      <div class="cb__panel-inner">
-        <nav class="cb__breadcrumb">
-          <a href="{{ routes.root_url }}">Home</a>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{{ collection.title }}</span>
-        </nav>
-        <p class="cb__eyebrow">{{ s.eyebrow | default: 'Collection' }}</p>
-        <h1 class="cb__heading">{{ collection.title }}</h1>
-        {%- if collection.description != blank -%}
-          <p class="cb__description">{{ collection.description | strip_html | truncate: 190 }}</p>
-        {%- endif -%}
-        <p class="cb__count">{{ collection.products_count | default: collection.products.size }} products</p>
-      </div>
+  <div class="cb__bg" aria-hidden="true">
+    <span class="cb__glow cb__glow--1"></span>
+    <span class="cb__glow cb__glow--2"></span>
+  </div>
+
+  <div class="cb__inner">
+    <div class="cb__content" data-reveal data-reveal-side="left">
+      <p class="cb__eyebrow">
+        <span class="cb__eyebrow-line" aria-hidden="true"></span>
+        {{ s.eyebrow | default: 'Our Collection' }}
+        <svg class="cb__eyebrow-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3c4 2 7 6 7 10a7 7 0 0 1-14 0c0-4 3-8 7-10Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 7v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </p>
+
+      <h1 class="cb__heading">{{ s.heading | default: collection.title }}</h1>
+
+      {%- assign sub = s.subheading -%}
+      {%- if sub == blank and collection.description != blank -%}
+        {%- assign sub = collection.description | strip_html | truncate: 140 -%}
+      {%- endif -%}
+      {%- if sub != blank -%}
+        <p class="cb__subheading">{{ sub }}</p>
+      {%- endif -%}
+
+      {%- if s.button_text != blank -%}
+        <a href="{{ s.button_link | default: '#' }}" class="cb__cta" data-cb-cta{% if s.button_link == blank %} data-cb-cta-autoscroll{% endif %}>
+          {{ s.button_text }}
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      {%- endif -%}
+
+      <p class="cb__count">{{ collection.products_count | default: collection.products.size }} products</p>
     </div>
 
-    <div class="cb__media" data-reveal data-reveal-side="right">
-      <div class="cb__media-inner">
-        <div class="cb__media-frame" aria-hidden="true"></div>
-        <div class="cb__media-image" data-cb-parallax-wrap>
-          {%- if collection.image != blank -%}
-            <span class="cb__media-image-scroll" data-cb-parallax>
+    <div class="cb__visual" data-reveal data-reveal-side="right">
+      <span class="cb__ring cb__ring--1" aria-hidden="true"></span>
+      <span class="cb__ring cb__ring--2" aria-hidden="true"></span>
+
+      <div class="cb__visual-frame" data-cb-tilt>
+        <div class="cb__visual-image-wrap" data-cb-parallax-wrap>
+          {%- assign hero_img = s.hero_image | default: collection.image -%}
+          {%- if hero_img != blank -%}
+            <span class="cb__visual-image-scroll" data-cb-parallax>
               <img
-                src="{{ collection.image | image_url: width: 1200 }}"
-                srcset="{{ collection.image | image_url: width: 600 }} 600w, {{ collection.image | image_url: width: 900 }} 900w, {{ collection.image | image_url: width: 1200 }} 1200w"
-                sizes="(max-width: 899px) 100vw, 560px"
-                alt="{{ collection.image.alt | default: collection.title | escape }}"
-                width="{{ collection.image.width }}"
-                height="{{ collection.image.height }}"
+                src="{{ hero_img | image_url: width: 1400 }}"
+                srcset="{{ hero_img | image_url: width: 700 }} 700w, {{ hero_img | image_url: width: 1100 }} 1100w, {{ hero_img | image_url: width: 1400 }} 1400w"
+                sizes="(max-width: 899px) 100vw, 60vw"
+                alt="{{ hero_img.alt | default: collection.title | escape }}"
+                width="{{ hero_img.width }}"
+                height="{{ hero_img.height }}"
                 loading="eager"
               >
             </span>
           {%- else -%}
-            <span class="cb__media-placeholder" aria-hidden="true">
-              <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="cb__visual-placeholder" aria-hidden="true">
+              <svg width="72" height="72" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
             </span>
           {%- endif -%}
         </div>
       </div>
+
+      {%- if badges.size > 0 -%}
+        {%- for block in badges -%}
+          {%- assign bs = block.settings -%}
+          <div class="cb__badge cb__badge--{{ forloop.index }}" data-cb-float="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+            <span class="cb__badge-icon" aria-hidden="true">
+              {%- case bs.icon -%}
+                {%- when 'shield' -%}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                {%- when 'heart' -%}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.35-9.5-8.5C1 8 2.5 5 5.8 5 8 5 10 6.5 12 9c2-2.5 4-4 6.2-4 3.3 0 4.8 3 3.3 6.5C19 15.65 12 20 12 20Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                {%- when 'star' -%}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6L12 3Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                {%- else -%}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3c4 2 7 6 7 10a7 7 0 0 1-14 0c0-4 3-8 7-10Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 7v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              {%- endcase -%}
+            </span>
+            <span class="cb__badge-text">{{ bs.text }}</span>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if s.script_text != blank -%}
+        <p class="cb__script" data-cb-float="{{ badges.size }}">{{ s.script_text }}</p>
+      {%- endif -%}
     </div>
   </div>
+
+  {%- if s.tagline != blank or features.size > 0 -%}
+    <div class="cb__footer" data-reveal data-reveal-side="up">
+      {%- if s.tagline != blank -%}
+        <p class="cb__tagline">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3c4 2 7 6 7 10a7 7 0 0 1-14 0c0-4 3-8 7-10Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 7v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          {{ s.tagline }}
+        </p>
+      {%- endif -%}
+
+      {%- if features.size > 0 -%}
+        <div class="cb__features">
+          {%- for block in features -%}
+            {%- assign fs = block.settings -%}
+            <div class="cb__feature" {{ block.shopify_attributes }}>
+              <span class="cb__feature-icon" aria-hidden="true">
+                {%- case fs.icon -%}
+                  {%- when 'shield' -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                  {%- when 'mortar' -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 10c0 6 2.5 10 6 10s6-4 6-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="12" cy="10" rx="8" ry="2.4" stroke="currentColor" stroke-width="1.3"/><path d="M15.5 5.5 18 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  {%- when 'heart' -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.35-9.5-8.5C1 8 2.5 5 5.8 5 8 5 10 6.5 12 9c2-2.5 4-4 6.2-4 3.3 0 4.8 3 3.3 6.5C19 15.65 12 20 12 20Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                  {%- when 'sun' -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                  {%- else -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3c4 2 7 6 7 10a7 7 0 0 1-14 0c0-4 3-8 7-10Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 7v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                {%- endcase -%}
+              </span>
+              <span class="cb__feature-text">{{ fs.text }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
 </section>
 
 {%- comment -%} ---------------- CSS ---------------- {%- endcomment -%}
@@ -78,215 +165,438 @@
   #cb-{{ section_id }} {
     position: relative;
     font-family: 'Poppins', sans-serif;
-    padding: 56px 20px;
-    overflow: hidden;
+    background: var(--cb-bg);
+    color: var(--cb-text);
+    padding: 72px 0 48px;
+    overflow-x: clip;
   }
 
   #cb-{{ section_id }} * {
     box-sizing: border-box;
   }
 
-  #cb-{{ section_id }} .cb__container {
-    max-width: 1300px;
-    margin: 0 auto;
-    display: flex;
-    align-items: stretch;
-    border-radius: 26px;
+  /* ---- Background glow ---- */
+  #cb-{{ section_id }} .cb__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     overflow: hidden;
-    box-shadow: 0 30px 60px rgba(20, 20, 20, 0.1);
+    pointer-events: none;
   }
 
+  #cb-{{ section_id }} .cb__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+  }
+
+  #cb-{{ section_id }} .cb__glow--1 {
+    top: -10%;
+    left: -6%;
+    width: 46vw;
+    height: 46vw;
+    background: radial-gradient(circle, var(--cb-accent-light), transparent 70%);
+    opacity: 0.18;
+  }
+
+  #cb-{{ section_id }} .cb__glow--2 {
+    bottom: -18%;
+    right: -8%;
+    width: 40vw;
+    height: 40vw;
+    background: radial-gradient(circle, var(--cb-accent), transparent 70%);
+    opacity: 0.14;
+  }
+
+  /* ---- Reveal ---- */
   #cb-{{ section_id }} [data-reveal] {
     opacity: 0;
-    transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
-  #cb-{{ section_id }} [data-reveal-side="left"] {
-    transform: translate3d(-24px, 0, 0);
-  }
-
-  #cb-{{ section_id }} [data-reveal-side="right"] {
-    transform: translate3d(24px, 0, 0);
-  }
+  #cb-{{ section_id }} [data-reveal-side="left"] { transform: translate3d(-32px, 0, 0); }
+  #cb-{{ section_id }} [data-reveal-side="right"] { transform: translate3d(32px, 0, 0); }
+  #cb-{{ section_id }} [data-reveal-side="up"] { transform: translate3d(0, 24px, 0); }
 
   #cb-{{ section_id }} [data-reveal].is-visible {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
 
-  /* ---- Content panel ---- */
-  #cb-{{ section_id }} .cb__panel {
-    position: relative;
-    flex: 0 0 44%;
-    overflow: hidden;
-    isolation: isolate;
-    background: var(--cb-panel-bg);
-    color: var(--cb-panel-text);
-    display: flex;
-  }
-
-  #cb-{{ section_id }} .cb__watermark {
-    position: absolute;
-    inset: auto 0 -0.15em -0.05em;
-    z-index: 0;
-    margin: 0;
-    font-family: 'Bebas Neue', 'Impact', sans-serif;
-    font-size: clamp(60px, 9vw, 120px);
-    line-height: 1;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0.06;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  #cb-{{ section_id }} .cb__panel-inner {
+  /* ---- Layout ---- */
+  #cb-{{ section_id }} .cb__inner {
     position: relative;
     z-index: 1;
-    padding: 48px 44px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.68fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
   }
 
-  #cb-{{ section_id }} .cb__breadcrumb {
+  /* ---- Content ---- */
+  #cb-{{ section_id }} .cb__eyebrow {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 22px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  #cb-{{ section_id }} .cb__breadcrumb a {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  #cb-{{ section_id }} .cb__breadcrumb a:hover {
-    color: #fff;
-  }
-
-  #cb-{{ section_id }} .cb__eyebrow {
-    margin: 0 0 10px;
+    gap: 10px;
+    margin: 0 0 20px;
     font-weight: 600;
     font-size: 12.5px;
-    letter-spacing: 1.8px;
+    letter-spacing: 2.4px;
     text-transform: uppercase;
+    color: var(--cb-muted);
+  }
+
+  #cb-{{ section_id }} .cb__eyebrow-line {
+    width: 34px;
+    height: 1px;
+    background: var(--cb-muted);
+    flex-shrink: 0;
+  }
+
+  #cb-{{ section_id }} .cb__eyebrow-icon {
     color: var(--cb-accent);
+    flex-shrink: 0;
   }
 
   #cb-{{ section_id }} .cb__heading {
-    margin: 0 0 16px;
-    font-family: 'Bebas Neue', 'Impact', sans-serif;
-    font-weight: 400;
-    font-size: clamp(34px, 4.5vw, 52px);
-    line-height: 1.02;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
+    margin: 0 0 20px;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: clamp(38px, 5.4vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+    color: var(--cb-text);
   }
 
-  #cb-{{ section_id }} .cb__description {
-    max-width: 440px;
-    margin: 0 0 22px;
-    font-size: 14.5px;
-    line-height: 1.75;
-    color: rgba(255, 255, 255, 0.8);
+  #cb-{{ section_id }} .cb__subheading {
+    max-width: 420px;
+    margin: 0 0 32px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    line-height: 1.7;
+    color: var(--cb-muted);
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+
+  #cb-{{ section_id }} .cb__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 16px 30px;
+    border-radius: 999px;
+    background: var(--cb-cta-bg);
+    color: var(--cb-cta-text);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.35s ease;
+    box-shadow: 0 14px 30px color-mix(in srgb, var(--cb-cta-bg) 35%, transparent);
+  }
+
+  #cb-{{ section_id }} .cb__cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px color-mix(in srgb, var(--cb-cta-bg) 45%, transparent);
+  }
+
+  #cb-{{ section_id }} .cb__cta svg {
+    transition: transform 0.3s ease;
+  }
+
+  #cb-{{ section_id }} .cb__cta:hover svg {
+    transform: translateX(4px);
   }
 
   #cb-{{ section_id }} .cb__count {
-    display: inline-flex;
-    align-self: flex-start;
+    display: block;
     margin: 0;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.4px;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    color: var(--cb-muted);
+    opacity: 0.75;
   }
 
-  /* ---- Media ---- */
-  #cb-{{ section_id }} .cb__media {
-    flex: 1;
-    min-width: 0;
-  }
-
-  #cb-{{ section_id }} .cb__media-inner {
+  /* ---- Visual ---- */
+  #cb-{{ section_id }} .cb__visual {
     position: relative;
-    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 420px;
   }
 
-  #cb-{{ section_id }} .cb__media-frame {
+  #cb-{{ section_id }} .cb__ring {
     position: absolute;
-    inset: 20px 20px -20px -20px;
-    background: var(--cb-frame);
-    opacity: 0.16;
-    z-index: 0;
+    top: 50%;
+    left: 50%;
+    border: 1.5px dashed color-mix(in srgb, var(--cb-accent) 40%, transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
   }
 
-  #cb-{{ section_id }} .cb__media-image {
+  #cb-{{ section_id }} .cb__ring--1 {
+    width: 78%;
+    aspect-ratio: 1 / 1;
+    animation: cb-ring-spin 40s linear infinite;
+  }
+
+  #cb-{{ section_id }} .cb__ring--2 {
+    width: 92%;
+    aspect-ratio: 1 / 1;
+    border-color: color-mix(in srgb, var(--cb-accent-light) 45%, transparent);
+    animation: cb-ring-spin 55s linear infinite reverse;
+  }
+
+  @keyframes cb-ring-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  #cb-{{ section_id }} .cb__visual-frame {
     position: relative;
     z-index: 1;
-    height: 100%;
-    min-height: 320px;
-    overflow: hidden;
-    background: #f0f3f0;
+    width: 84%;
+    will-change: transform;
   }
 
-  #cb-{{ section_id }} .cb__media-image-scroll {
+  #cb-{{ section_id }} .cb__visual-image-wrap {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 28px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--cb-accent) 6%, #fff);
+    box-shadow: 0 40px 80px rgba(20, 20, 20, 0.14);
+  }
+
+  #cb-{{ section_id }} .cb__visual-image-scroll {
     position: absolute;
     inset: -14% 0;
     height: 128%;
     display: block;
   }
 
-  #cb-{{ section_id }} .cb__media-image img {
+  #cb-{{ section_id }} .cb__visual-image-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  #cb-{{ section_id }} .cb__media-placeholder {
+  #cb-{{ section_id }} .cb__visual-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
     height: 100%;
-    color: var(--cb-frame);
+    color: var(--cb-accent);
     opacity: 0.5;
   }
 
-  /* ---- Tablet / Mobile ---- */
-  @media (max-width: 899px) {
-    #cb-{{ section_id }} .cb__container {
-      flex-direction: column;
-      border-radius: 22px;
+  /* ---- Floating badges ---- */
+  #cb-{{ section_id }} .cb__badge {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 168px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 16px 34px rgba(20, 20, 20, 0.12);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--cb-text);
+    will-change: transform;
+  }
+
+  #cb-{{ section_id }} .cb__badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--cb-accent) 14%, transparent);
+    color: var(--cb-accent);
+  }
+
+  #cb-{{ section_id }} .cb__badge--1 { top: 4%; left: 2%; }
+  #cb-{{ section_id }} .cb__badge--2 { top: 8%; right: 0%; }
+  #cb-{{ section_id }} .cb__badge--3 { bottom: 10%; left: -2%; }
+  #cb-{{ section_id }} .cb__badge--4 { bottom: 4%; right: 4%; }
+
+  #cb-{{ section_id }} .cb__script {
+    position: absolute;
+    z-index: 2;
+    right: -2%;
+    top: 42%;
+    margin: 0;
+    max-width: 140px;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1.3;
+    color: var(--cb-accent);
+    text-align: right;
+    will-change: transform;
+  }
+
+  /* ---- Footer ---- */
+  #cb-{{ section_id }} .cb__footer {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 56px auto 0;
+    padding: 32px 48px 0;
+    border-top: 1px solid color-mix(in srgb, var(--cb-text) 10%, transparent);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  #cb-{{ section_id }} .cb__tagline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--cb-muted);
+  }
+
+  #cb-{{ section_id }} .cb__tagline svg {
+    color: var(--cb-accent);
+    flex-shrink: 0;
+  }
+
+  #cb-{{ section_id }} .cb__features {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 28px;
+  }
+
+  #cb-{{ section_id }} .cb__feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #cb-{{ section_id }} .cb__feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--cb-accent) 35%, transparent);
+    color: var(--cb-accent);
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  }
+
+  #cb-{{ section_id }} .cb__feature:hover .cb__feature-icon {
+    background: var(--cb-accent);
+    color: #fff;
+    transform: scale(1.08);
+  }
+
+  #cb-{{ section_id }} .cb__feature-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--cb-text);
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 1099px) {
+    #cb-{{ section_id }} .cb__inner {
+      grid-template-columns: 1fr;
+      gap: 56px;
+      text-align: center;
     }
 
-    #cb-{{ section_id }} .cb__panel {
-      flex: 0 0 auto;
+    #cb-{{ section_id }} .cb__eyebrow,
+    #cb-{{ section_id }} .cb__cta {
+      justify-content: center;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    #cb-{{ section_id }} .cb__media-image {
-      min-height: 260px;
+    #cb-{{ section_id }} .cb__subheading {
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    #cb-{{ section_id }} .cb__media-frame {
-      inset: 14px 14px -14px -14px;
+    #cb-{{ section_id }} .cb__visual {
+      min-height: 360px;
+    }
+
+    #cb-{{ section_id }} .cb__footer {
+      justify-content: center;
+      text-align: center;
     }
   }
 
   @media (max-width: 749px) {
     #cb-{{ section_id }} {
-      padding: 40px 16px;
+      padding: 56px 0 40px;
     }
 
-    #cb-{{ section_id }} .cb__panel-inner {
-      padding: 34px 26px;
+    #cb-{{ section_id }} .cb__inner {
+      padding: 0 20px;
+    }
+
+    #cb-{{ section_id }} .cb__footer {
+      padding: 28px 20px 0;
+    }
+
+    #cb-{{ section_id }} .cb__badge {
+      max-width: 130px;
+      padding: 10px 14px;
+      font-size: 10px;
+    }
+
+    #cb-{{ section_id }} .cb__badge-icon {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+    }
+
+    #cb-{{ section_id }} .cb__script {
+      display: none;
+    }
+
+    #cb-{{ section_id }} .cb__features {
+      gap: 18px;
+      justify-content: center;
+    }
+  }
+
+  @media (hover: none) {
+    #cb-{{ section_id }} .cb__visual-frame {
+      transform: none !important;
     }
   }
 
@@ -295,6 +605,11 @@
       transition: none !important;
       transform: none !important;
       opacity: 1 !important;
+    }
+
+    #cb-{{ section_id }} .cb__ring,
+    #cb-{{ section_id }} .cb__glow {
+      animation: none !important;
     }
   }
 </style>
@@ -305,6 +620,7 @@
     var section = document.getElementById('cb-{{ section_id }}');
     if (!section) return;
 
+    /* ---- Scroll reveal ---- */
     var revealTargets = Array.prototype.slice.call(section.querySelectorAll('[data-reveal]'));
     if (revealTargets.length) {
       if ('IntersectionObserver' in window) {
@@ -325,25 +641,67 @@
       }
     }
 
+    /* ---- Smooth-scroll CTA (only when no explicit link was set) ---- */
+    var autoScrollCta = section.querySelector('[data-cb-cta-autoscroll]');
+    if (autoScrollCta) {
+      autoScrollCta.addEventListener('click', function (e) {
+        var next = section.nextElementSibling;
+        if (!next) return;
+        e.preventDefault();
+        next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    /* ---- Parallax on the hero visual ---- */
     var wrap = section.querySelector('[data-cb-parallax-wrap]');
     var media = section.querySelector('[data-cb-parallax]');
-    if (!wrap || !media) return;
-
-    var ticking = false;
+    var parallaxTicking = false;
     function updateParallax() {
-      ticking = false;
+      parallaxTicking = false;
+      if (!wrap || !media) return;
       var rect = wrap.getBoundingClientRect();
       var vh = window.innerHeight || document.documentElement.clientHeight;
       if (rect.bottom < 0 || rect.top > vh) return;
       var progress = (vh - rect.top) / (vh + rect.height);
-      var offset = (progress - 0.5) * 40;
+      var offset = (progress - 0.5) * 46;
       media.style.transform = 'translate3d(0, ' + offset.toFixed(1) + 'px, 0)';
     }
+
+    /* ---- Floating badges + script text: independent bob + a share of
+       the same scroll progress, each at a slightly different phase. ---- */
+    var floaters = Array.prototype.slice.call(section.querySelectorAll('[data-cb-float]'));
+    var floatStart = null;
+    var latestProgress = 0.5;
+
+    function onFrame(now) {
+      if (floatStart === null) floatStart = now;
+      var t = (now - floatStart) / 1000;
+
+      if (wrap) {
+        var rect = wrap.getBoundingClientRect();
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        var progress = (vh - rect.top) / (vh + rect.height);
+        latestProgress = Math.max(0, Math.min(1, progress));
+      }
+
+      floaters.forEach(function (el, i) {
+        var amp = 5 + (i % 3) * 2;
+        var speed = 2.4 + i * 0.4;
+        var bobY = Math.sin((t / speed) * Math.PI * 2 + i) * amp;
+        var parY = (latestProgress - 0.5) * (18 + i * 6) * (i % 2 === 0 ? 1 : -1);
+        el.style.transform = 'translate3d(0, ' + (bobY + parY).toFixed(1) + 'px, 0)';
+      });
+
+      window.requestAnimationFrame(onFrame);
+    }
+    if (floaters.length) window.requestAnimationFrame(onFrame);
+
+    var scrollTicking = false;
     function onScroll() {
-      if (ticking) return;
-      ticking = true;
+      if (scrollTicking) return;
+      scrollTicking = true;
       window.requestAnimationFrame(updateParallax);
     }
     var pageScroller = document.querySelector('.page-wrapper');
@@ -351,6 +709,24 @@
     if (pageScroller) pageScroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     updateParallax();
+
+    /* ---- Cursor-tilt on the visual frame (fine-pointer only) ---- */
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var tiltTarget = section.querySelector('[data-cb-tilt]');
+      var visual = section.querySelector('.cb__visual');
+      if (tiltTarget && visual) {
+        visual.addEventListener('mousemove', function (e) {
+          var rect = visual.getBoundingClientRect();
+          var px = (e.clientX - rect.left) / rect.width - 0.5;
+          var py = (e.clientY - rect.top) / rect.height - 0.5;
+          tiltTarget.style.transform = 'perspective(1000px) rotateX(' + (py * -6).toFixed(2) + 'deg) rotateY(' + (px * 6).toFixed(2) + 'deg)';
+        });
+        visual.addEventListener('mouseleave', function () {
+          tiltTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+        });
+        tiltTarget.style.transition = 'transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1)';
+      }
+    }
   })();
 </script>
 
@@ -360,17 +736,80 @@
   "tag": "section",
   "settings": [
     { "type": "header", "content": "Content" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Collection" },
-    { "type": "text", "id": "watermark", "label": "Background watermark word", "info": "Defaults to the collection's own title if left blank." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Our Collection" },
+    { "type": "text", "id": "heading", "label": "Heading override", "info": "Defaults to the collection's own title if left blank." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "info": "Defaults to the collection's own description if left blank." },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Explore Collection" },
+    { "type": "url", "id": "button_link", "label": "Button link", "info": "Leave blank to smoothly scroll down to the product grid instead." },
+    { "type": "text", "id": "script_text", "label": "Vertical script accent", "default": "Natural Strength Natural You" },
+    { "type": "text", "id": "tagline", "label": "Footer tagline", "default": "Good Health, Greater Tomorrows" },
+
+    { "type": "header", "content": "Hero visual" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image", "info": "Defaults to the collection's own image if left blank." },
 
     { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "panel_color", "label": "Panel background", "default": "#16311B" },
-    { "type": "color", "id": "panel_text_color", "label": "Panel text", "default": "#FFFFFF" },
-    { "type": "color", "id": "accent_color", "label": "Accent (eyebrow)", "default": "#F58220" },
-    { "type": "color", "id": "frame_color", "label": "Image frame panel", "default": "#2E7D32" }
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#F7F4EE" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#16311B" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#4C5A4E" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#2E7D32" },
+    { "type": "color", "id": "accent_light_color", "label": "Accent (light)", "default": "#6FA96F" },
+    { "type": "color", "id": "button_bg", "label": "Button background", "default": "#16311B" },
+    { "type": "color", "id": "button_text_color", "label": "Button text", "default": "#FFFFFF" }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Floating Badge",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "leaf"
+        },
+        { "type": "text", "id": "text", "label": "Text", "default": "Pure Ayurvedic Formulations" }
+      ]
+    },
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "mortar", "label": "Mortar & pestle" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "sun", "label": "Sun" }
+          ],
+          "default": "leaf"
+        },
+        { "type": "text", "id": "text", "label": "Text", "default": "100% Ayurvedic" }
+      ]
+    }
   ],
   "presets": [
-    { "name": "Collection - Banner" }
+    {
+      "name": "Collection - Banner",
+      "blocks": [
+        { "type": "badge", "settings": { "icon": "leaf", "text": "Pure Ayurvedic Formulations" } },
+        { "type": "badge", "settings": { "icon": "shield", "text": "Trusted by Generations" } },
+        { "type": "feature", "settings": { "icon": "leaf", "text": "100% Ayurvedic" } },
+        { "type": "feature", "settings": { "icon": "shield", "text": "Safe & Trusted" } },
+        { "type": "feature", "settings": { "icon": "mortar", "text": "Time-Tested Formulations" } },
+        { "type": "feature", "settings": { "icon": "heart", "text": "Supports Wellness" } },
+        { "type": "feature", "settings": { "icon": "sun", "text": "For a Healthier Tomorrow" } }
+      ]
+    }
   ]
 }
 {% endschema %}
