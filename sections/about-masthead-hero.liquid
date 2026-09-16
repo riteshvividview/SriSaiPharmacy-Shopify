@@ -117,9 +117,18 @@
     overflow: hidden;
   }
 
+  /* 200svh, not 100svh: once the pin activates (pinSpacing: false),
+     .amh__stage stops contributing ANY height to the document - not
+     just the extra scroll distance, but its own natural height too.
+     So this spacer alone has to cover both "replace the hero's own
+     vanished height" and "phase 1's hold distance", or the next
+     chapter's real document position ends up too high, and it starts
+     sliding into view (partially covering the still-pinned hero)
+     before phase 1 has actually finished - the stray visible strip
+     that was reported. */
   #amh-{{ section_id }} .amh__phase-spacer {
-    height: 100svh;
-    min-height: 560px;
+    height: 200svh;
+    min-height: 1120px;
   }
 
   #amh-{{ section_id }} .amh__image-wrap {
