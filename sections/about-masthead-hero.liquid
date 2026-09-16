@@ -32,6 +32,7 @@
     --amh-bg: {{ s.background_color | default: '#FFFFFF' }};
     --amh-text: {{ s.text_color | default: '#141414' }};
     --amh-accent: {{ s.accent_color | default: '#2E7D32' }};
+    --amh-sticky-offset: {{ s.sticky_offset | default: 110 }}px;
   "
 >
   {%- comment -%}
@@ -134,15 +135,14 @@
     /* The site header can become position:fixed (overlays content
        instead of pushing it down), so top:0 would stick this right at
        the very top of the viewport - behind/under the header - rather
-       than below it. --header-height and --header-group-height are
-       already set globally on <body> by this theme's own header-height
-       script in layout/theme.liquid (the latter covers extra elements
-       in the header stack, like the announcement bar) - summing both
-       sticks this flush against the actual bottom edge of whatever is
-       currently pinned above it, tracking height changes automatically. */
-    top: calc(var(--header-height, 0px) + var(--header-group-height, 0px));
+       than below it. Relying on this theme's --header-height /
+       --header-group-height variables didn't track correctly here, so
+       this is a plain, directly-editable pixel offset instead - simpler
+       and more predictable, and adjustable from the theme editor
+       without a code change. */
+    top: var(--amh-sticky-offset);
     z-index: 1;
-    height: calc(100svh - var(--header-height, 0px) - var(--header-group-height, 0px));
+    height: calc(100svh - var(--amh-sticky-offset));
     min-height: 480px;
     overflow: hidden;
   }
@@ -342,6 +342,9 @@
     { "type": "video", "id": "video", "label": "Full-bleed video", "info": "Plays muted and on loop. Used instead of the image below when set." },
     { "type": "image_picker", "id": "image", "label": "Full-bleed image", "info": "Used if no video is set above." },
     { "type": "text", "id": "image_alt", "label": "Image alt text" },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "sticky_offset", "label": "Gap below the header", "info": "How far down from the top of the screen this section sticks - increase if it's still tucking under the site header.", "min": 0, "max": 220, "step": 5, "unit": "px", "default": 110 },
 
     { "type": "header", "content": "Colors" },
     { "type": "color", "id": "background_color", "label": "Background (also this chapter's scroll-color zone)", "default": "#FFFFFF" },
