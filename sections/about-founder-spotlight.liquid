@@ -48,7 +48,6 @@
             alt="{{ s.image_alt | default: s.heading | escape }}"
             width="{{ s.image.width }}"
             height="{{ s.image.height }}"
-            loading="lazy"
           >
         {%- else -%}
           <div class="afs__media-placeholder" aria-hidden="true">
