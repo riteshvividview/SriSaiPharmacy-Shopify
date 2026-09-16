@@ -160,15 +160,12 @@
     display: block;
   }
 
-  /* Video specifically shows its full frame (contain) rather than
-     cropping to fill (cover), while still occupying the full width/
-     height of the stage - any letterboxing shows the stage's own dark
-     background (.amh__stage has no explicit bg, so this sits on
-     whatever .amh__scrim/section background shows through) instead of
-     stretching or cropping the footage. */
+  /* Cropped to fill (cover, matching the image), but anchored to the
+     top of the frame rather than the default center - keeps the top
+     of the footage (where the subject's face/upper body tends to be)
+     visible instead of a center-crop cutting into it. */
   #amh-{{ section_id }} video.amh__image {
-    object-fit: contain;
-    background: #0c0c0c;
+    object-position: top;
   }
 
   #amh-{{ section_id }} .amh__scrim {
